@@ -3,6 +3,11 @@
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
 |#
 
+#|
+  Unused. Previously grovelled CUevent and size_t from cuda.h.
+  Types are hardcoded in type.lisp; this file is not loaded.
+|#
+
 (pkg-config-cflags "cuda" :optional t)
 (in-package :cl-cuda.driver-api)
 

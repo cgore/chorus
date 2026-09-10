@@ -55,15 +55,21 @@
 (defcufun (cu-device-get-count "cuDeviceGetCount") cu-result
   (count (:pointer :int)))
 
-;; cuDeviceComputeCapability
+;; cuDeviceComputeCapability (deprecated; kept for compatibility)
 (defcufun (cu-device-compute-capability "cuDeviceComputeCapability") cu-result
   (major (:pointer :int))
   (minor (:pointer :int))
   (dev cu-device))
 
-;; cuDeviceGetName
+;; cuDeviceGetAttribute
+(defcufun (cu-device-get-attribute "cuDeviceGetAttribute") cu-result
+  (value (:pointer :int))
+  (attrib :int)
+  (dev cu-device))
+
+;; cuDeviceGetName — output buffer, not a CFFI :string
 (defcufun (cu-device-get-name "cuDeviceGetName") cu-result
-  (name :string)
+  (name :pointer)
   (len :int)
   (dev cu-device))
 
@@ -80,8 +86,9 @@
 ;; cuCtxSynchronize
 (defcufun (cu-ctx-synchronize "cuCtxSynchronize") cu-result)
 
-;; cuDeviceTotalMem
-(defcufun (cu-device-total-mem "cuDeviceTotalMem") cu-result
+;; cuDeviceTotalMem — must use the _v2 symbol; #define aliases do not
+;; apply when the driver is loaded dynamically.
+(defcufun (cu-device-total-mem "cuDeviceTotalMem_v2") cu-result
   (bytes (:pointer size-t))
   (dev :int))
 
@@ -95,7 +102,7 @@
   (dptr cu-device-ptr))
 
 ;; cuMemHostRegister
-(defcufun (cu-mem-host-register "cuMemHostRegister") cu-result
+(defcufun (cu-mem-host-register "cuMemHostRegister_v2") cu-result
   (p :pointer)
   (byte-size size-t)
   (flags :unsigned-int))
@@ -196,7 +203,7 @@
   (flags :unsigned-int))
 
 ;; cuStreamDestroy
-(defcufun (cu-stream-destroy "cuStreamDestroy") cu-result
+(defcufun (cu-stream-destroy "cuStreamDestroy_v2") cu-result
   (hstream cu-stream))
 
 ;; cuStreamQuery
@@ -226,4 +233,4 @@
     (error "~A failed with driver API error No. ~A.~%~A"
            name return-code (get-error-string return-code)))
   (when *show-messages*
-    (format t "Invoking ~A succeded.~%" name)))
+    (format t "Invoking ~A succeeded.~%" name)))

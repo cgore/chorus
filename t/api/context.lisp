@@ -6,7 +6,9 @@
 (in-package :cl-user)
 (defpackage cl-cuda-test.api.context
   (:use :cl :prove
-        :cl-cuda.api.context))
+        :cl-cuda.api.context)
+  (:import-from :cffi :null-pointer-p)
+  (:import-from :cl-cuda.api.nvcc :*nvcc-options* :arch-option-p))
 (in-package :cl-cuda-test.api.context)
 
 (plan nil)
@@ -43,3 +45,39 @@
   (is-error (cl-cuda.api.context::append-arch nil :foo)
             type-error
             "Invalid device ID."))
+
+(subtest "device-compute-capability"
+  (cl-cuda.driver-api:cu-init 0)
+  (multiple-value-bind (major minor)
+      (device-compute-capability 0)
+    (ok (integerp major) "major is an integer")
+    (ok (integerp minor) "minor is an integer")
+    (ok (>= major 1) "compute capability is at least 1.x")
+    (ok (<= 0 minor 9) "minor is a single digit")
+    (is (cl-cuda.api.nvcc:nvcc-arch-option major minor)
+        (cl-cuda.api.context::get-nvcc-arch 0)
+        "arch option matches compute capability")))
+
+(subtest "with-cuda bindings"
+  (with-cuda (0)
+    (ok (integerp *cuda-device*) "*cuda-device* is bound")
+    (ok *cuda-context* "*cuda-context* is bound")
+    (is (get-cuda-device 0) *cuda-device*)
+    (ok (arch-option-p *nvcc-options*)
+        "with-cuda inserts an nvcc architecture")
+    (ok (search "-arch=sm_" (first *nvcc-options*))
+        "architecture is sm_XY form")
+    (ok (null-pointer-p *cuda-stream*)
+        "default *cuda-stream* is the null stream")
+    (synchronize-context))
+  (ok (null (cl-cuda.api.kernel-manager:kernel-manager-module-handle
+             cl-cuda.api.kernel-manager:*kernel-manager*))
+      "kernel module is unloaded when with-cuda exits"))
+
+(subtest "with-cuda preserves user -arch"
+  (let ((cl-cuda.api.nvcc:*nvcc-options* '("-arch=sm_120")))
+    (with-cuda (0)
+      (is cl-cuda.api.nvcc:*nvcc-options* '("-arch=sm_120")
+          "explicit -arch is not rewritten"))))
+
+(finalize)

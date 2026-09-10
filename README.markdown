@@ -2,11 +2,11 @@
 
 Cl-cuda is a library to use NVIDIA CUDA in Common Lisp programs. It provides not only FFI binding to CUDA driver API but the kernel description language with which users can define CUDA kernel functions in S-expression. The kernel description language also provides facilities to define kernel macros and kernel symbol macros in addition to kernel functions. Cl-cuda's kernel macro and kernel symbol macro offer powerful abstraction that CUDA C itself does not have and provide enormous advantage in resource-limited GPU programming.
 
-Kernel functions defined with the kernel description language can be launched as almost same as ordinal Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by cl-cuda. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](https://github.com/takagi/cl-cuda/blob/master/README.markdown#kernel-manager) section.
+Kernel functions defined with the kernel description language can be launched as almost same as ordinary Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by cl-cuda. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](#kernel-manager) section.
 
 Memory management is also one of the most important things in GPU programming. Cl-cuda provides memory block data structure which abstract host memory and device memory. With memory block, users do not need to manage host memory and device memory individually for themselves. It lightens their burden on memory management, prevents bugs and keeps code simple. Besides memory block that provides high level abstraction on host and device memory, cl-cuda also offers low level interfaces to handle CFFI pointers and CUDA device pointers directly. With these primitive interfaces, users can choose to gain more flexible memory control than using memory block if needed.
 
-Cl-cuda is verified on several environments. For detail, see [Verification environments](https://github.com/takagi/cl-cuda/blob/master/README.markdown#verification-environments) section.
+Cl-cuda is verified on Windows and Linux with modern CUDA. For detail, see [Verification environments](#verification-environments) section.
 
 ## Example
 
@@ -14,9 +14,9 @@ Following code is a part of vector addition example using cl-cuda based on CUDA 
 
 You can define `vec-add-kernel` kernel function using `defkernel` macro. In the definition, `aref` is to refer values stored in an array. `set` is to store values into an array. `block-dim-x`, `block-idx-x` and `thread-idx-x` have their counterparts in CUDA C's built-in variables and are used to specify the array index to be operated in each CUDA thread.
 
-Once the kernel function is defined, you can launch it as if it is an ordinal Common Lisp function except that it requires to be in a CUDA context and followed by `:gird-dim` and `:block-dim` keyword parameters which specify the dimensions of grid and block. To keep a CUDA context, you can use `with-cuda` macro which has responsibility on initializing CUDA and managing a CUDA context. `with-memory-blocks` manages memory blocks which abstract host memory area and device memory area, then `sync-memory-block` copies data stored in a memory block between host and device.
+Once the kernel function is defined, you can launch it as if it is an ordinary Common Lisp function except that it requires to be in a CUDA context and followed by `:grid-dim` and `:block-dim` keyword parameters which specify the dimensions of grid and block. To keep a CUDA context, you can use `with-cuda` macro which has responsibility on initializing CUDA and managing a CUDA context. `with-cuda` also selects the nvcc `-arch=sm_XY` option from the device's compute capability. `with-memory-blocks` manages memory blocks which abstract host memory area and device memory area, then `sync-memory-block` copies data stored in a memory block between host and device.
 
-For the whole code, please see [examples/vector-add.lisp](https://github.com/takagi/cl-cuda/tree/master/examples/vector-add.lisp).
+For the whole code, please see [examples/vector-add.lisp](examples/vector-add.lisp).
 
     (defkernel vec-add-kernel (void ((a float*) (b float*) (c float*) (n int)))
       (let ((i (+ (* block-dim-x block-idx-x) thread-idx-x)))
@@ -45,75 +45,99 @@ For the whole code, please see [examples/vector-add.lisp](https://github.com/tak
 
 ## Installation
 
-You can install cl-cuda via quicklisp.
+You can install cl-cuda via Quicklisp once this system is on the local-projects path (or otherwise visible to ASDF):
 
     > (ql:quickload :cl-cuda)
 
-You may encounter the following error, please install CFFI explicitly `(ql:quickload :cffi)` before loading cl-cuda. Just once is enough.
+To run the test suite from a checkout:
 
-    Component CFFI-GROVEL not found
-       [Condition of type ASDF/FIND-SYSTEM:MISSING-COMPONENT]
+    > (asdf:test-system :cl-cuda)
 
+or, with SBCL:
+
+    sbcl --load ~/quicklisp/setup.lisp --load t/run.lisp
+
+`t/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `cl-cuda-test` (tests run at load time).
 
 ## Requirements
 
 Cl-cuda requires following:
 
 * NVIDIA CUDA-enabled GPU
-* CUDA Toolkit, CUDA Drivers and CUDA SDK need to be installed
+* CUDA driver (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, CUDA framework on macOS)
+* CUDA Toolkit (`nvcc`) to compile kernels to PTX
+* On Windows, Visual Studio with the C++ workload (`cl.exe`) so `nvcc` has a host compiler
+
+RTX 50-series (Blackwell, compute capability 12.0) needs CUDA Toolkit 12.8 or later. CUDA 13.x is recommended.
+
+With CUDA 13, `nvcc` can target Turing and newer (`sm_75` and above): RTX 20-, 30-, 40-, and 50-series, plus matching professional/datacenter parts (T4, A100, Ada, Hopper, Blackwell). Maxwell, Pascal, and Volta cannot be compiled with CUDA 13.
+
+Windows and Linux are supported. A Darwin FFI spec remains for the CUDA framework, but current CUDA on macOS has not been re-verified. Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
 
 ## Verification environments
 
-Cl-cuda is verified to work in following environments:
+### Current
+
+Verified on this configuration; the full test suite passes:
+
+* Windows 11 x86_64
+* GeForce RTX 5090 (Blackwell, sm_120)
+* NVIDIA driver 610.88, CUDA 13.3
+* Visual Studio 2022 Community (MSVC)
+* SBCL 2.6.8 64-bit
+
+Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-newer GPUs with a matching toolkit are expected to work the same way. They have not all been re-run here.
+
+### Historical (2011–2016)
+
+The following were reported against CUDA 4–8 and pre-Turing GPUs. They are left for provenance. They are **not** expected to work with the current code and CUDA 13: the driver FFI is 64-bit, grovel/`cuda.h` is no longer used at load time, and CUDA 13 cannot offline-compile architectures before `sm_75`.
 
 #### Environment 1
 * Mac OS X 10.6.8 (MacBookPro)
 * GeForce 9400M
 * CUDA 4
 * SBCL 1.0.55 32-bit
-* All tests pass, all examples work
+* Reported at the time: all tests pass, all examples work
 
-#### Environment2
+#### Environment 2
 * Amazon Linux x86_64 (Amazon EC2)
 * Tesla M2050
 * CUDA 4
 * SBCL 1.1.7 64-bit
-* All tests pass, all examples which are verified work (others not tried yet)
-* `(setf *nvcc-options* (list "-arch=sm_20" "-m32"))` needed
+* Reported at the time: all tests pass, verified examples work
+* `(setf *nvcc-options* (list "-arch=sm_20" "-m32"))` was needed
 
-#### Environment3 (Thanks to Viktor Cerovski)
+#### Environment 3 (Thanks to Viktor Cerovski)
 * Linux 3.5.0-32-generic Ubuntu SMP x86_64
-* GeFroce 9800 GT
+* GeForce 9800 GT
 * CUDA 5
 * SBCL 1.1.7 64-bit
-* All tests pass, all examples work
+* Reported at the time: all tests pass, all examples work
 
-#### Environment4 (Thanks to wvxvw)
-* Fedra18 x86_64
+#### Environment 4 (Thanks to wvxvw)
+* Fedora 18 x86_64
 * GeForce GTX 560M
 * CUDA 5.5
 * SBCL 1.1.2-1.fc18
-* `vector-add` example works (didn't try the rest yet)
-
-Further information: 
-* `(setf *nvcc-options* (list "-arch=sm_20" "-m32"))` needed
-* using video drivers from `rpmfusion` instead of the ones in `cuda` package
+* Reported at the time: `vector-add` example works
+* `(setf *nvcc-options* (list "-arch=sm_20" "-m32"))` was needed
+* video drivers from `rpmfusion` instead of the ones in the `cuda` package
 * see issue [#1](https://github.com/takagi/cl-cuda/issues/1#issuecomment-22813518)
 
-#### Environment5 (Thanks to Atabey Kaygun)
+#### Environment 5 (Thanks to Atabey Kaygun)
 * Linux 3.11-2-686-pae SMP Debian 3.11.8-1 (2013-11-13) i686 GNU/Linux
 * NVIDIA Corporation GK106 GeForce GTX 660
 * CUDA 5.5
 * SBCL 1.1.12
-* All tests pass, all examples work
+* Reported at the time: all tests pass, all examples work
 
-#### Environment6 (Thanks to @gos-k)
+#### Environment 6 (Thanks to @gos-k)
 * Ubuntu 16.04.1 LTS
 * GeForce GTX 1080
 * CUDA Version 8.0.27
 * Driver Version 367.35
-* CCL Version 1.11-r16635  (LinuxX8664)
-* All tests pass, all examples work
+* CCL Version 1.11-r16635 (LinuxX8664)
+* Reported at the time: all tests pass, all examples work
 
 ## API
 
@@ -123,7 +147,7 @@ Here explain some APIs commonly used.
 
     WITH-CUDA (dev-id) &body body
 
-Initializes CUDA and keeps a CUDA context during `body`. `dev-id` is passed to `get-cuda-device` function and the device handler returned is passed to `create-cuda-context` function to create a CUDA context in the expanded form. The results of `get-cuda-device` and `create-cuda-context` functions are bound to `*cuda-device*` and `*cuda-context*` special variables respectively. The kernel manager unloads before `with-cuda` exits.
+Initializes CUDA and keeps a CUDA context during `body`. `dev-id` is passed to `get-cuda-device` function and the device handler returned is passed to `create-cuda-context` function to create a CUDA context in the expanded form. The results of `get-cuda-device` and `create-cuda-context` functions are bound to `*cuda-device*` and `*cuda-context*` special variables respectively. Unless `*nvcc-options*` already contains an architecture flag, `with-cuda` prepends `-arch=sm_XY` from the device's compute capability (`cuDeviceGetAttribute`). The kernel manager unloads before `with-cuda` exits.
 
 ### [Function] synchronize-context
 
@@ -164,38 +188,60 @@ Accesses `memory-block`'s element specified by `index`. Note that the accessed m
 
 ### [Macro] defglobal
 
-    DEFGLOBAL name type &optional expression qualifiers
+    DEFGLOBAL name expression &optional qualifiers
 
-Defines a global variable. `name` is a symbol which is the name of the variable. `type` is the type of the variable. Optional `expression` is an expression which initializes the variable. Optional `qualifiers` is one of or a list of keywords: `:device`, `:constant`, `:shared`, `:managed` and `:restrict`, which are corresponding to CUDA C's `__device__`, `__constant__`, `__shared__`, `__managed__` and `__restrict__` variable qualifiers. If not given, `:device` is used.
+Defines a global variable. `name` is a symbol which is the name of the variable. `expression` initializes it; the type is inferred from that value. Optional `qualifiers` is one of or a list of keywords: `:device`, `:constant`, `:shared`, `:managed` and `:restrict`, which are corresponding to CUDA C's `__device__`, `__constant__`, `__shared__`, `__managed__` and `__restrict__` variable qualifiers. If not given, `:device` is used.
 
-    (defglobal pi float 3.14159 :constant)
+    (defglobal pi 3.14159 :constant)
 
 ### [Accessor] global-ref
 
-Accesses a global variable's value on device from host with automatically copying its value from/to device.
+    GLOBAL-REF name type &optional manager
 
-    (defglobal x :device int 0)
-    (global-ref x)                 ; => 0
-    (setf (global-ref x) 42)
-    (global-ref x)                 ; => 42
+Accesses a global variable's value on device from host with automatically copying its value from/to device. `type` is the Lisp/CUDA type of the global (for example `int` or `float`).
+
+    (defglobal x 0)
+    (global-ref 'x 'int)                 ; => 0
+    (setf (global-ref 'x 'int) 42)
+    (global-ref 'x 'int)                 ; => 42
 
 ### [Special Variable] \*tmp-path\*
 
-Specifies the temporary directory in which cl-cuda generates files such as `.cu` file and `.ptx` file. The default is `"/tmp/"`.
+Specifies the temporary directory in which cl-cuda generates files such as `.cu` file and `.ptx` file. The default is `nil`, which uses the OS temporary directory (`UIOP:TEMPORARY-DIRECTORY`).
 
-    (setf *tmp-path* "/path/to/tmp/")
+    (setf *tmp-path* "/path/to/tmp/")   ; Unix
+    (setf *tmp-path* #P"C:/Temp/cl-cuda/")
 
 ### [Special Variable] \*nvcc-options\*
 
-Specifies additional command line options passed to `nvcc` command that cl-cuda calls internally. The default is `nil`. If `-arch=sm_XX` option is not specified here, it is automatically inserted with `cuDeviceComputeCapability` driver API.
+Specifies additional command line options passed to `nvcc` command that cl-cuda calls internally. The default is `nil`. If no architecture option is present (`-arch=…`, `--gpu-architecture`, or `-gencode`), `with-cuda` inserts `-arch=sm_XY` from the device. Compiles that happen outside `with-cuda` fall back to `-arch=native` (CUDA 11.6+).
 
-    (setf *nvcc-options* (list "-arch=sm_20" "-m32"))
+    (setf *nvcc-options* (list "-arch=sm_120"))
 
 ### [Special Variable] \*nvcc-binary\*
 
-Specifies the path to `nvcc` command so that cl-cuda can call internally. The default is just `nvcc`.
+Specifies the path to `nvcc` so that cl-cuda can call it internally. The default is `nil`, which auto-detects `nvcc` on `PATH` and in standard CUDA Toolkit locations. The strings `"nvcc"` and `"nvcc.exe"` also mean auto-detect.
 
-    (setf *nvcc-binary* "/path/to/nvcc")
+    (setf *nvcc-binary* "/usr/local/cuda/bin/nvcc")
+    (setf *nvcc-binary* #P"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3/bin/nvcc.exe")
+
+### [Function] find-nvcc
+
+    FIND-NVCC => pathname or nil
+
+Returns the absolute path of `nvcc`, or `nil` if it cannot be found.
+
+### [Function] nvcc-available-p
+
+    NVCC-AVAILABLE-P => generalized boolean
+
+True when `find-nvcc` locates a compiler.
+
+### [Function] nvcc-arch-option
+
+    NVCC-ARCH-OPTION major minor => string
+
+Formats an nvcc architecture flag from a compute capability. `(nvcc-arch-option 12 0)` is `"-arch=sm_120"`.
 
 ### [Special Variable] \*show-messages\*
 
@@ -205,7 +251,7 @@ Specifies whether to let cl-cuda show operational messages or not. The default i
 
 ### [Special Variable] \*sdk-not-found\*
 
-Readonly. The value is `t` if cl-cuda could not find CUDA SDK or at least it failed to load `libcuda` for some reason, otherwise `nil`.
+Readonly. The value is `t` if cl-cuda failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, the CUDA framework on macOS), otherwise `nil`. This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
 
     *sdk-not-found*    ; => nil
 
@@ -294,7 +340,7 @@ Compiled:
 
     DO ({(var init-form step-form)}*) (test-form) statement*
 
-`do` iterates over a group of `statement`s while `test-form` holds. `do` accepts an arbitrary number of iteration `var`s and their initial values are supplied by `init-form`s. `step-form`s supply how the `var`s should be updated on succeeding iterations through the loop.
+`do` iterates over a group of `statement`s until `test-form` holds (the same convention as Common Lisp `do`). `do` accepts an arbitrary number of iteration `var`s and their initial values are supplied by `init-form`s. `step-form`s supply how the `var`s should be updated on succeeding iterations through the loop.
 
 Example:
 
@@ -339,7 +385,7 @@ Compiled:
 Example:
 
     (set x 1.0)
-    (set (float4-x y 1.0)
+    (set (float4-x y) 1.0)
     (set (aref z 0) 1.0)
 
 Compiled:
@@ -386,7 +432,7 @@ The following figure illustrates cl-cuda's overall architecture.
                        +---------------------------------+-----------+-----------+
                        | defkernel                       | memory    | context   |
            cl-cuda.api +---------------------------------+           |           |
-                       | kernel-manager                  |           |           |
+                       | kernel-manager / nvcc           |           |           |
                        +---------------------------------+-----------+-----------+
                        +----------------------------+----------------------------+
           cl-cuda.lang | Kernel description lang.   | the Compiler               |
@@ -404,7 +450,7 @@ Cl-cuda consists of three subpackages: `api`, `lang` and `driver-api`.
 
 `lang` subpackage provides the kernel description language. It provides the language's syntax, type, built-in functions and the compiler to CUDA C. `api` subpackage calls this compiler.
 
-`api` subpackage provides API for cl-cuda users. It further consists of `context`, `memory`, `kernel-manager` and `defkernel` subpackages. `context` subpackage has responsibility on initializing CUDA and managing CUDA contexts. `memory` subpackage offers memory management, providing high level API for memory block data structure and low level API for handling host memory and device memory directly. `kernel-manager` subpackage manages the entire process from compiling the kernel description language to loading/unloading obtained kernel module autonomously. Since it is wrapped by `defkernel` subpackage which provides the interface to define kernel functions, cl-cuda's users usually do not need to use it for themselves.
+`api` subpackage provides API for cl-cuda users. It further consists of `context`, `memory`, `nvcc`, `kernel-manager` and `defkernel` subpackages. `context` subpackage has responsibility on initializing CUDA and managing CUDA contexts. `memory` subpackage offers memory management, providing high level API for memory block data structure and low level API for handling host memory and device memory directly. `nvcc` locates the CUDA toolkit compiler and invokes it. `kernel-manager` subpackage manages the entire process from compiling the kernel description language to loading/unloading obtained kernel module autonomously. Since it is wrapped by `defkernel` subpackage which provides the interface to define kernel functions, cl-cuda's users usually do not need to use it for themselves.
 
 ## Kernel manager
 
@@ -417,7 +463,7 @@ To begin with, the kernel manager has four states.
     III module-loaded state
     IV  function-loaded state
 
-The initial state is its entry point. The compiled state is a state where kernel functions defined with the kernel descrpition language have been compiled into a CUDA kernel module (.ptx file). The obtained kernel module has been loaded in the module-loaded state. In the function-loaded state, each kernel function in the kernel module has been loaded.
+The initial state is its entry point. The compiled state is a state where kernel functions defined with the kernel description language have been compiled into a CUDA kernel module (.ptx file). The obtained kernel module has been loaded in the module-loaded state. In the function-loaded state, each kernel function in the kernel module has been loaded.
 
 Following illustrates the kernel manager's state transfer.
 
@@ -436,17 +482,17 @@ In the module-loaded state and function-loaded state, `kernel-manager-unload` fu
 
 The kernel manager is stored in `*kernel-manager*` special variable when cl-cuda is loaded and keeps alive during the Common Lisp process. Usually, you do not need to manage it explicitly.
 
-## How cl-cuda works when CUDA SDK is not installed
+## How cl-cuda works when the CUDA driver is not installed
 
-This section is for cl-cuda users who develop an application or a library which has alternative sub system other than cl-cuda and may run on environments CUDA SDK is not installed.
+This section is for cl-cuda users who develop an application or a library which has an alternative subsystem other than cl-cuda and may run on machines without an NVIDIA driver.
 
 **Compile and load time**
-Cl-cuda is compiled and loaded without causing any conditions on environments CUDA SDK is not installed. Since cl-cuda API 's symbols are interned, user programs can use them normally.
+Cl-cuda is compiled and loaded without signaling if the CUDA driver library cannot be loaded. API symbols are still interned, so user programs can refer to them.
 
 **Run time**
-At the time cl-cuda's API is called, an error that tells CUDA SDK is not found should occur. With `*sdk-not-found*` special variable, user programs can get if cl-cuda has found CUDA SDK or not.
+Calling a cl-cuda driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
 
-How cl-cuda determines CUDA SDK is installed or not is that if it has successfully loaded `libuda` dynamic library with `cffi:user-foreign-library` function.
+How cl-cuda decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework.
 
 ## Streams
 

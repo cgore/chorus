@@ -57,9 +57,9 @@
        (free-device-memory ,var))))
 
 (defun device-total-bytes (device)
-  (cffi:with-foreign-objects ((bytes :unsigned-long)) ; size-t doesn't work for some reason...
+  (cffi:with-foreign-object (bytes 'size-t)
     (cu-device-total-mem bytes device)
-    (cffi:mem-ref bytes :unsigned-long)))
+    (cffi:mem-ref bytes 'size-t)))
 
 (defun device-total-kbytes (device)
   (/ (device-total-bytes device) 1024))

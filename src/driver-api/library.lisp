@@ -12,10 +12,15 @@
 ;;;
 
 (cffi:define-foreign-library libcuda
-  (:darwin (:framework "CUDA"))
-  (:unix (:or "libcuda.so" "libcuda64.so")))
+  (:darwin (:or (:framework "CUDA") "libcuda.dylib"))
+  (:windows (:or "nvcuda.dll"))
+  (:unix (:or "libcuda.so.1" "libcuda.so" "libcuda64.so")))
 
-(handler-case (cffi:use-foreign-library libcuda)
+(handler-case (progn
+                (cffi:use-foreign-library libcuda)
+                (pushnew :cuda-sdk *features*))
   (cffi:load-foreign-library-error (e)
     (setf *sdk-not-found* t)
+    (princ e *error-output*)
+    (terpri *error-output*)
     (assert (not (member :cuda-sdk *features*)))))

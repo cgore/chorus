@@ -31,6 +31,21 @@
 (is (built-in-function-return-type 'mod '(int int)) 'int
     "basic case 4")
 
+(is (built-in-function-return-type '+ '(int float)) 'float
+    "int + float promotes to float")
+
+(is (built-in-function-return-type '+ '(float int)) 'float
+    "float + int promotes to float")
+
+(is (built-in-function-return-type '+ '(int double)) 'double
+    "int + double promotes to double")
+
+(is (built-in-function-return-type '+ '(double double)) 'double
+    "double + double")
+
+(is (built-in-function-return-type '* '(float3 float)) 'float3
+    "float3 scaled by float")
+
 ;;;
 ;;; test BUILT-IN-FUNCTION-INFIX-P function
 ;;;

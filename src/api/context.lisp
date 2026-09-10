@@ -44,9 +44,17 @@
     (cffi:mem-ref device-ptr 'cu-device)))
 
 (defun device-compute-capability (device)
+  "Return (values major minor) for DEVICE's compute capability.
+   Uses cuDeviceGetAttribute (current API). RTX 5090 is 12.0."
+  (check-type device integer)
   (cffi:with-foreign-objects ((major :int)
                               (minor :int))
-    (cu-device-compute-capability major minor device)
+    (cu-device-get-attribute major
+                             cu-device-attribute-compute-capability-major
+                             device)
+    (cu-device-get-attribute minor
+                             cu-device-attribute-compute-capability-minor
+                             device)
     (values (cffi:mem-ref major :int)
             (cffi:mem-ref minor :int))))
 
@@ -75,19 +83,17 @@
 
 (defvar *cuda-context*)
 
-(defun get-nvcc-arch (dev-id)
+(defun get-nvcc-arch (device)
   (multiple-value-bind (major minor)
-      (device-compute-capability dev-id)
-    (format nil "-arch=sm_~D~D" major minor)))
+      (device-compute-capability device)
+    (nvcc-arch-option major minor)))
 
 (defun arch-exists-p (options)
-  (some #'(lambda (option)
-            (eql 0 (search "-arch=" option)))
-        options))
+  (arch-option-p options))
 
-(defun append-arch (options dev-id)
+(defun append-arch (options device)
   (check-type options list)
-  (cons (get-nvcc-arch dev-id)
+  (cons (get-nvcc-arch device)
         options))
 
 (defmacro with-cuda ((dev-id) &body body)
@@ -101,7 +107,7 @@
             ;; Append nvcc arch option if not specified.
             (*nvcc-options* (if (arch-exists-p *nvcc-options*)
                                 *nvcc-options*
-                                (append-arch *nvcc-options* ,dev-id))))
+                                (append-arch *nvcc-options* *cuda-device*))))
        (unwind-protect (progn ,@body)
          ;; Unload kernel manager.
          (kernel-manager-unload *kernel-manager*)
