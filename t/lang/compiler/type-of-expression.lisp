@@ -177,7 +177,8 @@
   (is (type-of-function '(+ 1 1) var-env func-env) 'int)
   (is (type-of-function '(foo 1 1) var-env func-env) 'int)
   (is (type-of-function '(+ 1.0 1.0) var-env func-env) 'float)
-  (is-error (type-of-function '(+ 1 1.0) var-env func-env) simple-error)
+  (is (type-of-function '(+ 1 1.0) var-env func-env) 'float
+      "int + float promotes to float, as in CUDA C")
   (is (type-of-function '(expt 1.0 1.0) var-env func-env) 'float))
 
 

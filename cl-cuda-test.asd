@@ -11,7 +11,8 @@
   :components ((:module "t"
                 :serial t
                 :components
-                ((:module "driver-api"
+                ((:file "platform")
+                 (:module "driver-api"
                   :serial t
                   :components
                   ((:file "driver-api")))
@@ -34,7 +35,11 @@
                  (:module "api"
                   :serial t
                   :components
-                  ((:file "kernel-manager")
+                  ((:file "nvcc")
+                   (:file "context")
+                   (:file "kernel-manager")
                    (:file "memory")
                    (:file "defkernel")
-                   (:file "timer")))))))
+                   (:file "timer")
+                   (:file "smoke"))))))
+  :perform (test-op (o c) (symbol-call :asdf :load-system c)))

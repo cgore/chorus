@@ -26,6 +26,9 @@
            :cu-device-get
            :cu-device-get-count
            :cu-device-compute-capability
+           :cu-device-get-attribute
+           :cu-device-attribute-compute-capability-major
+           :cu-device-attribute-compute-capability-minor
            :cu-device-get-name
            :cu-ctx-create
            :cu-ctx-destroy

@@ -20,7 +20,9 @@
 (cffi:defctype cu-event :pointer)
 (cffi:defctype cu-graphics-resource :pointer)
 
-;; The followings are just place holders and should be rederined in grovel if
-;; cuda.h found.
+;; CUdeviceptr is unsigned long long on all current 64-bit CUDA ports.
+;; CFFI's :size is size_t (8 bytes on 64-bit Windows and Unix). These used
+;; to be grovelled from cuda.h; they are hardcoded so the system loads
+;; without a C compiler or CUDA headers.
 (cffi:defctype cu-device-ptr :unsigned-long-long)
-(cffi:defctype size-t :unsigned-long)
+(cffi:defctype size-t :size)

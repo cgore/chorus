@@ -44,3 +44,8 @@
 (defcuenum cu-mem-host-register-flags-enum
   (:cu-mem-host-register-portable  #X1)
   (:cu-mem-host-register-devicemap #X2))
+
+;; From CUdevice_attribute. Only the compute-capability queries are bound;
+;; the rest of the enum is large and unused by cl-cuda.
+(defconstant cu-device-attribute-compute-capability-major 75)
+(defconstant cu-device-attribute-compute-capability-minor 76)

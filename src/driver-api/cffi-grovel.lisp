@@ -4,7 +4,8 @@
 |#
 
 #|
-  This file is a work around for CFFI Bug#1272009
+  Unused. Previously a workaround for CFFI Bug#1272009 when groveling
+  cuda.h. Types are hardcoded in type.lisp; this file is not loaded.
 |#
 
 

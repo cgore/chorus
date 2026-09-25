@@ -175,7 +175,7 @@
     (error "The kernel manager has already loaded the kernel module."))
   (cffi:with-foreign-object (hmodule 'cu-module)
     (let ((module-path (kernel-manager-module-path manager)))
-      (cu-module-load hmodule module-path)
+      (cu-module-load hmodule (uiop:native-namestring module-path))
       (setf (kernel-manager-module-handle manager)
             (cffi:mem-ref hmodule 'cu-module)))))
 

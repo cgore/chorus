@@ -13,6 +13,16 @@
 
 (plan nil)
 
+(defun compile-test-ptx ()
+  "Compile a tiny module for driver-API tests. The checked-in sm_10 PTX
+   cannot load on modern GPUs (including Blackwell)."
+  (unless (cl-cuda.api.nvcc:nvcc-available-p)
+    (return-from compile-test-ptx nil))
+  (cl-cuda.api.nvcc:nvcc-compile
+   "extern \"C\" __global__ void VecAdd_kernel(int *a) { a[0] = 1; }
+__device__ int a = 0;
+"))
+
 
 ;;;
 ;;; WITH-CU-CONTEXT macro
@@ -111,57 +121,130 @@
       (cu-mem-free (cffi:mem-ref dptr 'cu-device-ptr)))))
 
 (diag "test cuModuleLoad")
-(labels ((get-test-path ()
-           (namestring (asdf:system-relative-pathname :cl-cuda #P"t"))))
-  (let ((ptx-path (concatenate 'string (get-test-path)
-                               "/vectorAdd_kernel.ptx")))
-    (cffi:with-foreign-string (fname ptx-path)
+(let ((ptx-path (compile-test-ptx)))
+  (if ptx-path
       (with-cu-context (0)
         (cffi:with-foreign-object (module 'cu-module)
-          (cu-module-load module fname)
-          (format t "CUDA module \"vectorAdd_kernel.ptx\" is loaded.~%"))))))
+          (cu-module-load module ptx-path)
+          (format t "CUDA module is loaded.~%")))
+      (skip 1 "nvcc not installed")))
 
 (diag "test cuModuleGetFunction")
-(labels ((get-test-path ()
-           (namestring (asdf:system-relative-pathname :cl-cuda #P"t"))))
-  (let ((ptx-path (concatenate 'string (get-test-path)
-                               "/vectorAdd_kernel.ptx")))
-    (cffi:with-foreign-string (fname ptx-path)
-      (cffi:with-foreign-string (name "VecAdd_kernel")
-        (with-cu-context (0)
-          (cffi:with-foreign-objects ((module 'cu-module)
-                                      (hfunc  'cu-function))
-            (cu-module-load module fname)
-            (cu-module-get-function hfunc (cffi:mem-ref module 'cu-module)
-                                    name)))))))
+(let ((ptx-path (compile-test-ptx)))
+  (if ptx-path
+      (with-cu-context (0)
+        (cffi:with-foreign-objects ((module 'cu-module)
+                                    (hfunc  'cu-function))
+          (cu-module-load module ptx-path)
+          (cu-module-get-function hfunc (cffi:mem-ref module 'cu-module)
+                                  "VecAdd_kernel")))
+      (skip 1 "nvcc not installed")))
 
 (diag "test cuModuleGetGlobal")
-(let ((ptx-path (namestring
-                 (asdf:system-relative-pathname :cl-cuda
-                                                #P"t/global_kernel.ptx"))))
-  (with-cu-context (0)
-    (cffi:with-foreign-objects ((hmodule 'cu-module)
-                                (dptr 'cu-device-ptr))
-      ;; Load kernel module.
-      (cu-module-load hmodule ptx-path)
-      ;; Get global's device pointer.
-      (cu-module-get-global dptr
+(let ((ptx-path (compile-test-ptx)))
+  (if ptx-path
+      (with-cu-context (0)
+        (cffi:with-foreign-objects ((hmodule 'cu-module)
+                                    (dptr 'cu-device-ptr))
+          ;; Load kernel module.
+          (cu-module-load hmodule ptx-path)
+          ;; Get global's device pointer.
+          (cu-module-get-global dptr
+                                (cffi:null-pointer)
+                                (cffi:mem-ref hmodule 'cu-module)
+                                "a")        ; "a" is the name of the global.
+          ;; Write to global.
+          (cffi:with-foreign-object (a :int)
+            (setf (cffi:mem-ref a :int) 42)
+            (cu-memcpy-host-to-device (cffi:mem-ref dptr 'cu-device-ptr)
+                                      a
+                                      (cffi:foreign-type-size :int)))
+          ;; Read from global and test it.
+          (cffi:with-foreign-object (a :int)
+            (setf (cffi:mem-ref a :int) 0)
+            (cu-memcpy-device-to-host a
+                                      (cffi:mem-ref dptr 'cu-device-ptr)
+                                      (cffi:foreign-type-size :int))
+            (is (cffi:mem-ref a :int) 42))))
+      (skip 1 "nvcc not installed")))
+
+
+(diag "test cuDeviceGetAttribute")
+(let ((dev-id 0))
+  (cffi:with-foreign-objects ((major :int)
+                              (minor :int)
+                              (device 'cu-device))
+    (cu-init 0)
+    (cu-device-get device dev-id)
+    (cu-device-get-attribute major
+                             cu-device-attribute-compute-capability-major
+                             (cffi:mem-ref device 'cu-device))
+    (cu-device-get-attribute minor
+                             cu-device-attribute-compute-capability-minor
+                             (cffi:mem-ref device 'cu-device))
+    (let ((maj (cffi:mem-ref major :int))
+          (min (cffi:mem-ref minor :int)))
+      (ok (>= maj 1) "compute capability major")
+      (ok (<= 0 min 9) "compute capability minor")
+      (cffi:with-foreign-pointer-as-string ((name size) 255)
+        (cu-device-get-name name size (cffi:mem-ref device 'cu-device))
+        (let ((lisp-name (cffi:foreign-string-to-lisp name)))
+          (when (search "5090" lisp-name)
+            (is maj 12 "RTX 5090 is sm_120 major")
+            (is min 0 "RTX 5090 is sm_120 minor")))))))
+
+(diag "test cuDeviceTotalMem")
+(cffi:with-foreign-object (bytes 'size-t)
+  (cu-init 0)
+  (cu-device-total-mem bytes 0)
+  (ok (>= (cffi:mem-ref bytes 'size-t) (* 1024 1024 1024))
+      "total device memory is a 64-bit size_t of at least 1GB"))
+
+(diag "test cuStreamCreate/cuStreamSynchronize/cuStreamDestroy")
+(with-cu-context (0)
+  (cffi:with-foreign-object (stream 'cu-stream)
+    (cu-stream-create stream 0)
+    (cu-stream-synchronize (cffi:mem-ref stream 'cu-stream))
+    (cu-stream-destroy (cffi:mem-ref stream 'cu-stream))))
+
+(diag "test cuLaunchKernel")
+(let ((ptx-path (compile-test-ptx)))
+  (if ptx-path
+      (with-cu-context (0)
+        (cffi:with-foreign-objects ((module 'cu-module)
+                                    (hfunc 'cu-function)
+                                    (dptr 'cu-device-ptr)
+                                    (arg 'cu-device-ptr)
+                                    (kargs :pointer 1)
+                                    (host :int))
+          (cu-module-load module ptx-path)
+          (cu-module-get-function hfunc
+                                  (cffi:mem-ref module 'cu-module)
+                                  "VecAdd_kernel")
+          (cu-mem-alloc dptr (cffi:foreign-type-size :int))
+          (setf (cffi:mem-ref host :int) 0)
+          (cu-memcpy-host-to-device (cffi:mem-ref dptr 'cu-device-ptr)
+                                    host
+                                    (cffi:foreign-type-size :int))
+          (setf (cffi:mem-ref arg 'cu-device-ptr)
+                (cffi:mem-ref dptr 'cu-device-ptr))
+          (setf (cffi:mem-aref kargs :pointer 0) arg)
+          (cu-launch-kernel (cffi:mem-ref hfunc 'cu-function)
+                            1 1 1
+                            1 1 1
+                            0
                             (cffi:null-pointer)
-                            (cffi:mem-ref hmodule 'cu-module)
-                            "a")        ; "a" is the name of the global.
-      ;; Write to global.
-      (cffi:with-foreign-object (a :int)
-        (setf (cffi:mem-ref a :int) 42)
-        (cu-memcpy-host-to-device (cffi:mem-ref dptr 'cu-device-ptr)
-                                  a
-                                  (cffi:foreign-type-size :int)))
-      ;; Read from global and test it.
-      (cffi:with-foreign-object (a :int)
-        (setf (cffi:mem-ref a :int) 0)
-        (cu-memcpy-device-to-host a
-                                  (cffi:mem-ref dptr 'cu-device-ptr)
-                                  (cffi:foreign-type-size :int))
-        (is (cffi:mem-ref a :int) 42)))))
+                            kargs
+                            (cffi:null-pointer))
+          (cu-ctx-synchronize)
+          (cu-memcpy-device-to-host host
+                                    (cffi:mem-ref dptr 'cu-device-ptr)
+                                    (cffi:foreign-type-size :int))
+          (is (cffi:mem-ref host :int) 1
+              "launched kernel wrote 1")
+          (cu-mem-free (cffi:mem-ref dptr 'cu-device-ptr))
+          (cu-module-unload (cffi:mem-ref module 'cu-module))))
+      (skip 1 "nvcc not installed")))
 
 
 ;;;

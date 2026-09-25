@@ -17,7 +17,10 @@
 (reexport-from :cl-cuda.api.nvcc
                :include '(:*tmp-path*
                           :*nvcc-options*
-                          :*nvcc-binary*))
+                          :*nvcc-binary*
+                          :find-nvcc
+                          :nvcc-available-p
+                          :nvcc-arch-option))
 (reexport-from :cl-cuda.api.context)
 (reexport-from :cl-cuda.api.memory)
 (reexport-from :cl-cuda.api.defkernel)
