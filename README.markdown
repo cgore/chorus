@@ -6,7 +6,7 @@ Kernel functions defined with the kernel description language can be launched as
 
 Memory management is also one of the most important things in GPU programming. Cl-cuda provides memory block data structure which abstract host memory and device memory. With memory block, users do not need to manage host memory and device memory individually for themselves. It lightens their burden on memory management, prevents bugs and keeps code simple. Besides memory block that provides high level abstraction on host and device memory, cl-cuda also offers low level interfaces to handle CFFI pointers and CUDA device pointers directly. With these primitive interfaces, users can choose to gain more flexible memory control than using memory block if needed.
 
-Cl-cuda is verified on Windows and Linux with modern CUDA. For detail, see [Verification environments](#verification-environments) section.
+Cl-cuda is verified on Windows and Linux with modern CUDA. Current macOS is not a supported host. For detail, see [Verification environments](#verification-environments) section.
 
 ## Example
 
@@ -64,7 +64,7 @@ or, with SBCL:
 Cl-cuda requires following:
 
 * NVIDIA CUDA-enabled GPU
-* CUDA driver (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, CUDA framework on macOS)
+* CUDA driver (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux)
 * CUDA Toolkit (`nvcc`) to compile kernels to PTX
 * On Windows, Visual Studio with the C++ workload (`cl.exe`) so `nvcc` has a host compiler
 
@@ -72,7 +72,9 @@ RTX 50-series (Blackwell, compute capability 12.0) needs CUDA Toolkit 12.8 or la
 
 With CUDA 13, `nvcc` can target Turing and newer (`sm_75` and above): RTX 20-, 30-, 40-, and 50-series, plus matching professional/datacenter parts (T4, A100, Ada, Hopper, Blackwell). Maxwell, Pascal, and Volta cannot be compiled with CUDA 13.
 
-Windows and Linux are supported. A Darwin FFI spec remains for the CUDA framework, but current CUDA on macOS has not been re-verified. Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
+Windows and Linux are the supported hosts. macOS is not. [CUDA 10.2 release notes](https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/) state that CUDA 10.2 is the last release that supports macOS for developing and running CUDA applications. [CUDA 11.0 release notes](https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html) state that CUDA 11.0 does not support macOS for developing and running CUDA applications. This change targets CUDA 12.8+ / 13.x, which has no macOS driver and no `nvcc`. The Darwin foreign-library spec still names `CUDA.framework` and `libcuda.dylib`. On a current Mac that spec does not load, `*sdk-not-found*` is `t`, and driver calls signal `sdk-not-found-error`.
+
+Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
 
 ## Verification environments
 
@@ -87,6 +89,20 @@ Verified on this configuration; the full test suite passes:
 * SBCL 2.6.8 64-bit
 
 Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-newer GPUs with a matching toolkit are expected to work the same way. They have not all been re-run here.
+
+### macOS (blocked)
+
+Checked on this machine. CUDA cannot run here, so the GPU test suite was not run. This is a platform blocker. There is no macOS code fix that makes CUDA 13 available.
+
+* macOS 26.6.2 (Darwin 25.6.0 arm64)
+* MacBook Pro (Mac17,2), Apple M5, 10-core Apple GPU, no NVIDIA GPU
+* No `nvcc` on `PATH`. `CUDA_PATH` and `CUDA_HOME` unset. No `/usr/local/cuda`. No `/Library/Frameworks/CUDA.framework`
+* SBCL 2.6.8
+
+Loading this checkout through Quicklisp succeeds. `*sdk-not-found*` is `t`. `:cuda-sdk` is absent from `*features*`. `find-nvcc` returns `nil`. `cu-init` signals `sdk-not-found-error`. CFFI reports `size_t` as 8 bytes. The loader prints:
+
+    Unable to load any of the alternatives:
+       ((:FRAMEWORK "CUDA") "libcuda.dylib")
 
 ### Historical (2011–2016)
 
@@ -251,7 +267,7 @@ Specifies whether to let cl-cuda show operational messages or not. The default i
 
 ### [Special Variable] \*sdk-not-found\*
 
-Readonly. The value is `t` if cl-cuda failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, the CUDA framework on macOS), otherwise `nil`. This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
+Readonly. The value is `t` if cl-cuda failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On current macOS it is `t`, because NVIDIA no longer ships that driver. See [macOS (blocked)](#macos-blocked). This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
 
     *sdk-not-found*    ; => nil
 
@@ -492,7 +508,7 @@ Cl-cuda is compiled and loaded without signaling if the CUDA driver library cann
 **Run time**
 Calling a cl-cuda driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
 
-How cl-cuda decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework.
+How cl-cuda decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework. On the macOS machine recorded under [macOS (blocked)](#macos-blocked), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
 
 ## Streams
 
