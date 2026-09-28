@@ -5,7 +5,7 @@
 
 ;;; Load this file after Quicklisp to run the local chorus-test suite.
 ;;; Example:
-;;;   sbcl --load ~/quicklisp/setup.lisp --load t/run.lisp
+;;;   sbcl --load ~/quicklisp/setup.lisp --load test/run.lisp
 
 (setf *debugger-hook*
       (lambda (c h)

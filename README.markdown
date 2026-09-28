@@ -57,9 +57,9 @@ To run the test suite from a checkout:
 
 or, with SBCL:
 
-    sbcl --load ~/quicklisp/setup.lisp --load t/run.lisp
+    sbcl --load ~/quicklisp/setup.lisp --load test/run.lisp
 
-`t/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `chorus-test` (tests run at load time).
+`test/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `chorus-test` (tests run at load time).
 
 ## Requirements
 

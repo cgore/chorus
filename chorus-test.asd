@@ -9,7 +9,7 @@
   :license "MIT"
   :depends-on ("chorus"
                "prove")
-  :components ((:module "t"
+  :components ((:module "test"
                 :serial t
                 :components
                 ((:file "platform")
