@@ -546,6 +546,7 @@ then, call a kernel function with binding a stream to `*cuda-stream*`:
 ## Copyright
 
 Copyright (c) 2012-2021 Masayuki Takagi (kamonama@gmail.com)
+
 Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 
 ## License
