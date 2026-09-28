@@ -4,9 +4,9 @@
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(defpackage :chorus-asd
+(defpackage :chorus/asd
   (:use :cl :asdf :uiop))
-(in-package :chorus-asd)
+(in-package :chorus/asd)
 
 ;;; CUDA-GROVEL-FILE used to subclass CFFI-GROVEL:GROVEL-FILE so that
 ;;; types were grovelled from cuda.h. Types are now hardcoded (CFFI :size

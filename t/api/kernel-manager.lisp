@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.kernel-manager
+(defpackage chorus/test/api/kernel-manager
   (:use :cl :prove
-        :chorus.lang
-        :chorus.api.context
-        :chorus.api.kernel-manager))
-(in-package :chorus-test.api.kernel-manager)
+        :chorus/lang
+        :chorus/api/context
+        :chorus/api/kernel-manager))
+(in-package :chorus/test/api/kernel-manager)
 
 (plan nil)
 
@@ -175,7 +175,7 @@
     (kernel-manager-compile-module mgr)
     ;; delete kernel module
     (let ((module-path
-           (chorus.api.kernel-manager::kernel-manager-module-path mgr)))
+           (chorus/api/kernel-manager::kernel-manager-module-path mgr)))
       (delete-file module-path))
     ;; try to load module which does not exist
     (is-error (kernel-manager-load-module mgr) simple-error

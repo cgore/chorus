@@ -4,16 +4,16 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.nvcc
+(defpackage chorus/test/api/nvcc
   (:use :cl :prove
-        :chorus.api.nvcc)
-  (:import-from :chorus.lang.kernel
+        :chorus/api/nvcc)
+  (:import-from :chorus/lang/kernel
                 :make-kernel
                 :kernel-define-function)
-  (:import-from :chorus.lang.compiler.compile-kernel
+  (:import-from :chorus/lang/compiler/compile-kernel
                 :compile-kernel)
-  (:import-from :chorus.lang.type :void :int*))
-(in-package :chorus-test.api.nvcc)
+  (:import-from :chorus/lang/type :void :int*))
+(in-package :chorus/test/api/nvcc)
 
 (plan nil)
 
@@ -41,7 +41,7 @@
   (is-error (arch-option-p :foo) type-error))
 
 (subtest "temporary directory is writable"
-  (let ((dir (chorus.api.nvcc::get-tmp-path)))
+  (let ((dir (chorus/api/nvcc::get-tmp-path)))
     (ok (uiop:directory-exists-p dir))
     (ok (uiop:absolute-pathname-p dir))))
 
@@ -66,33 +66,33 @@
       (skip 3 "nvcc not installed")))
 
 (subtest "option predicates"
-  (ok (chorus.api.nvcc::ccbin-option-p '("-ccbin" "cl.exe")))
-  (ok (chorus.api.nvcc::ccbin-option-p '("--compiler-bindir=/usr/bin/gcc")))
-  (ok (not (chorus.api.nvcc::ccbin-option-p '("-arch=sm_120"))))
-  (ok (chorus.api.nvcc::machine-option-p '("-m64")))
-  (ok (chorus.api.nvcc::machine-option-p '("-m32" "-O3")))
-  (ok (not (chorus.api.nvcc::machine-option-p '("-arch=sm_120"))))
-  (is-error (chorus.api.nvcc::ccbin-option-p :foo) type-error)
-  (is-error (chorus.api.nvcc::machine-option-p :foo) type-error))
+  (ok (chorus/api/nvcc::ccbin-option-p '("-ccbin" "cl.exe")))
+  (ok (chorus/api/nvcc::ccbin-option-p '("--compiler-bindir=/usr/bin/gcc")))
+  (ok (not (chorus/api/nvcc::ccbin-option-p '("-arch=sm_120"))))
+  (ok (chorus/api/nvcc::machine-option-p '("-m64")))
+  (ok (chorus/api/nvcc::machine-option-p '("-m32" "-O3")))
+  (ok (not (chorus/api/nvcc::machine-option-p '("-arch=sm_120"))))
+  (is-error (chorus/api/nvcc::ccbin-option-p :foo) type-error)
+  (is-error (chorus/api/nvcc::machine-option-p :foo) type-error))
 
 (subtest "version-list>"
-  (ok (chorus.api.nvcc::version-list> '(13 3) '(12 8)))
-  (ok (chorus.api.nvcc::version-list> '(13 3) '(13 2)))
-  (ok (not (chorus.api.nvcc::version-list> '(13 3) '(13 3))))
-  (ok (not (chorus.api.nvcc::version-list> '(12 8) '(13 0))))
-  (is (chorus.api.nvcc::version-key
+  (ok (chorus/api/nvcc::version-list> '(13 3) '(12 8)))
+  (ok (chorus/api/nvcc::version-list> '(13 3) '(13 2)))
+  (ok (not (chorus/api/nvcc::version-list> '(13 3) '(13 3))))
+  (ok (not (chorus/api/nvcc::version-list> '(12 8) '(13 0))))
+  (is (chorus/api/nvcc::version-key
        (make-pathname :directory '(:absolute "CUDA" "v13.3")))
       '(13 3)))
 
 (subtest "get-nvcc-options"
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
-         (opts (chorus.api.nvcc::get-nvcc-options cu ptx)))
+         (opts (chorus/api/nvcc::get-nvcc-options cu ptx)))
     (ok (member "-ptx" opts :test #'string=) "asks for PTX")
     (ok (member "-I" opts :test #'string=) "passes include path")
     (ok (member "-o" opts :test #'string=) "passes output path")
     (ok (arch-option-p opts) "architecture is present")
-    (ok (uiop:directory-exists-p (chorus.api.nvcc::get-include-path))
+    (ok (uiop:directory-exists-p (chorus/api/nvcc::get-include-path))
         "chorus include directory exists")
     (when (= 8 (cffi:foreign-type-size :pointer))
       (ok (member "-m64" opts :test #'string=) "64-bit host"))
@@ -103,7 +103,7 @@
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-arch=sm_75")))
-    (let ((opts (chorus.api.nvcc::get-nvcc-options cu ptx)))
+    (let ((opts (chorus/api/nvcc::get-nvcc-options cu ptx)))
       (ok (member "-arch=sm_75" opts :test #'string=)
           "user -arch is kept")
       (ok (not (member "-arch=native" opts :test #'string=))
@@ -111,25 +111,25 @@
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-m32" "-arch=sm_75")))
-    (ok (not (member "-m64" (chorus.api.nvcc::get-nvcc-options cu ptx)
+    (ok (not (member "-m64" (chorus/api/nvcc::get-nvcc-options cu ptx)
                      :test #'string=))
         "user -m32 is not overridden"))
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-ccbin" "cl.exe" "-arch=native")))
-    (is (count "-ccbin" (chorus.api.nvcc::get-nvcc-options cu ptx)
+    (is (count "-ccbin" (chorus/api/nvcc::get-nvcc-options cu ptx)
                :test #'string=)
         1
         "user -ccbin is not duplicated")))
 
 (subtest "unique stems and path pairing"
-  (isnt (chorus.api.nvcc::unique-stem)
-        (chorus.api.nvcc::unique-stem)
+  (isnt (chorus/api/nvcc::unique-stem)
+        (chorus/api/nvcc::unique-stem)
         "stems differ")
-  (let ((cu (chorus.api.nvcc::get-cu-path)))
+  (let ((cu (chorus/api/nvcc::get-cu-path)))
     (is (pathname-type cu) "cu")
-    (is (pathname-type (chorus.api.nvcc::get-ptx-path cu)) "ptx")
-    (is (pathname-name (chorus.api.nvcc::get-ptx-path cu))
+    (is (pathname-type (chorus/api/nvcc::get-ptx-path cu)) "ptx")
+    (is (pathname-name (chorus/api/nvcc::get-ptx-path cu))
         (pathname-name cu))))
 
 (subtest "*nvcc-binary* override"

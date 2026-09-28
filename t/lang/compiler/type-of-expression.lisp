@@ -5,14 +5,14 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.compiler.type-of-expression
+(defpackage chorus/test/lang/compiler/type-of-expression
   (:use :cl :prove
-        :chorus.lang.compiler.type-of-expression
-        :chorus.lang.data
-        :chorus.lang.type
-        :chorus.lang.syntax
-        :chorus.lang.environment)
-  (:import-from :chorus.lang.compiler.type-of-expression
+        :chorus/lang/compiler/type-of-expression
+        :chorus/lang/data
+        :chorus/lang/type
+        :chorus/lang/syntax
+        :chorus/lang/environment)
+  (:import-from :chorus/lang/compiler/type-of-expression
                 :type-of-macro
                 :type-of-symbol-macro
                 :type-of-literal
@@ -22,7 +22,7 @@
                 :type-of-constructor
                 :type-of-arithmetic
                 :type-of-function))
-(in-package :chorus-test.lang.compiler.type-of-expression)
+(in-package :chorus/test/lang/compiler/type-of-expression)
 
 (plan nil)
 

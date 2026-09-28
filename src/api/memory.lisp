@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.api.memory
+(defpackage chorus/api/memory
   (:use :cl
-        :chorus.driver-api
-        :chorus.lang.type)
+        :chorus/driver-api
+        :chorus/lang/type)
   (:export ;; Device memory
            :device-total-bytes
            :device-total-kbytes
@@ -37,7 +37,7 @@
            :with-memory-blocks
            :sync-memory-block
            :memory-block-aref))
-(in-package :chorus.api.memory)
+(in-package :chorus/api/memory)
 
 
 ;;;

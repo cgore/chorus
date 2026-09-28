@@ -5,13 +5,13 @@
 |#
 
 (in-package :cl-user)
-(defpackage :chorus.api.defkernel
+(defpackage :chorus/api/defkernel
   (:use :cl
-        :chorus.driver-api
-        :chorus.lang.syntax
-        :chorus.lang.type
-        :chorus.api.kernel-manager
-        :chorus.api.memory)
+        :chorus/driver-api
+        :chorus/lang/syntax
+        :chorus/lang/type
+        :chorus/api/kernel-manager
+        :chorus/api/memory)
   (:export :defkernel
            :defkernelmacro
            :expand-macro-1
@@ -24,7 +24,7 @@
   (:import-from :alexandria
                 :format-symbol
                 :with-gensyms))
-(in-package :chorus.api.defkernel)
+(in-package :chorus/api/defkernel)
 
 
 ;;;
@@ -119,7 +119,7 @@
                (cu-launch-kernel ,hfunc
                                  grid-dim-x  grid-dim-y  grid-dim-z
                                  block-dim-x block-dim-y block-dim-z
-                                 0 chorus.api.context:*cuda-stream*
+                                 0 chorus/api/context:*cuda-stream*
                                  ,kargs (cffi:null-pointer))))))))))
 
 
@@ -131,10 +131,10 @@
   `(kernel-manager-define-macro *kernel-manager* ',name ',arguments ',body))
 
 (defun expand-macro-1 (form)
-  (chorus.api.kernel-manager:expand-macro-1 form *kernel-manager*))
+  (chorus/api/kernel-manager:expand-macro-1 form *kernel-manager*))
 
 (defun expand-macro (form)
-  (chorus.api.kernel-manager:expand-macro form *kernel-manager*))
+  (chorus/api/kernel-manager:expand-macro form *kernel-manager*))
 
 
 ;;;

@@ -4,7 +4,7 @@
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(in-package :chorus-interop.driver-api)
+(in-package :chorus/interop/driver-api)
 
 
 ;;;

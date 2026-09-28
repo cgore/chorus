@@ -9,11 +9,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-examples.vector-add
+(defpackage chorus/examples/vector-add
   (:use :cl
         :chorus)
   (:export :main))
-(in-package :chorus-examples.vector-add)
+(in-package :chorus/examples/vector-add)
 
 (defun random-init (data n)
   (dotimes (i n)

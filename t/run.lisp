@@ -25,8 +25,8 @@
 (format t "*sdk-not-found* => ~S~%" chorus:*sdk-not-found*)
 (format t "find-nvcc => ~S~%" (chorus:find-nvcc))
 (format t "nvcc-available-p => ~S~%" (chorus:nvcc-available-p))
-(format t "find-msvc-cl => ~S~%" (chorus.api.nvcc:find-msvc-cl))
-(format t "size_t bytes => ~D~%" (cffi:foreign-type-size 'chorus.driver-api:size-t))
+(format t "find-msvc-cl => ~S~%" (chorus/api/nvcc:find-msvc-cl))
+(format t "size_t bytes => ~D~%" (cffi:foreign-type-size 'chorus/driver-api:size-t))
 
 (ql:quickload :chorus-test)
 (format t "~%All test files loaded.~%")

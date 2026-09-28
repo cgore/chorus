@@ -5,9 +5,9 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.api.timer
+(defpackage chorus/api/timer
   (:use :cl
-        :chorus.driver-api)
+        :chorus/driver-api)
   (:export :create-timer
            :destroy-timer
            :start-timer
@@ -15,7 +15,7 @@
            :synchronize-timer
            :elapsed-time
            :with-timer))
-(in-package :chorus.api.timer)
+(in-package :chorus/api/timer)
 
 
 ;;;

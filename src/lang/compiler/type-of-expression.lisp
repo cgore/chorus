@@ -5,14 +5,14 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.compiler.type-of-expression
+(defpackage chorus/lang/compiler/type-of-expression
   (:use :cl
-        :chorus.lang.type
-        :chorus.lang.syntax
-        :chorus.lang.environment
-        :chorus.lang.built-in)
+        :chorus/lang/type
+        :chorus/lang/syntax
+        :chorus/lang/environment
+        :chorus/lang/built-in)
   (:export :type-of-expression))
-(in-package :chorus.lang.compiler.type-of-expression)
+(in-package :chorus/lang/compiler/type-of-expression)
 
 
 ;;;

@@ -4,7 +4,7 @@
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(in-package :chorus-misc)
+(in-package :chorus/misc)
 
 (defun read-lines (path)
   (with-open-file (in path)

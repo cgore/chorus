@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.api.kernel-manager
+(defpackage chorus/api/kernel-manager
   (:use :cl
-        :chorus.driver-api
-        :chorus.lang.kernel
-        :chorus.lang.compiler.compile-kernel
-        :chorus.api.nvcc)
+        :chorus/driver-api
+        :chorus/lang/kernel
+        :chorus/lang/compiler/compile-kernel
+        :chorus/api/nvcc)
   (:export :kernel-manager
            :make-kernel-manager
            :kernel-manager-compiled-p
@@ -40,7 +40,7 @@
            :expand-macro)
   (:import-from :alexandria
                 :ensure-list))
-(in-package :chorus.api.kernel-manager)
+(in-package :chorus/api/kernel-manager)
 
 
 ;;;
@@ -250,10 +250,10 @@
 
 (defun expand-macro-1 (form manager)
   (let ((kernel (kernel-manager-kernel manager)))
-    (chorus.lang.kernel:expand-macro-1 form kernel)))
+    (chorus/lang/kernel:expand-macro-1 form kernel)))
 
 (defun expand-macro (form manager)
   (let ((kernel (kernel-manager-kernel manager)))
-    (chorus.lang.kernel:expand-macro form kernel)))
+    (chorus/lang/kernel:expand-macro form kernel)))
 
 (defvar *kernel-manager* (make-kernel-manager))

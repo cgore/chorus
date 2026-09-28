@@ -5,18 +5,18 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-interop.api.context
+(defpackage chorus/interop/api/context
   (:use :cl :cl-reexport
-        :chorus.api.kernel-manager
-        :chorus-interop.driver-api)
+        :chorus/api/kernel-manager
+        :chorus/interop/driver-api)
   (:export ;; CUDA context
            :create-cuda-context
            ;; WITH-CUDA macro
            :with-cuda))
-(in-package :chorus-interop.api.context)
+(in-package :chorus/interop/api/context)
 
 (eval-when (:execute :load-toplevel :compile-toplevel)
-  (reexport-from :chorus.api.context
+  (reexport-from :chorus/api/context
                  :exclude '(:create-cuda-context
                             :with-cuda)))
 

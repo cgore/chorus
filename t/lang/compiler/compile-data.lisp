@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.compiler.compile-data
+(defpackage chorus/test/lang/compiler/compile-data
   (:use :cl :prove
-        :chorus.lang.compiler.compile-data))
-(in-package :chorus-test.lang.compiler.compile-data)
+        :chorus/lang/compiler/compile-data))
+(in-package :chorus/test/lang/compiler/compile-data)
 
 (plan nil)
 

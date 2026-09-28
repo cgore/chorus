@@ -5,15 +5,15 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.compiler.compile-statement
+(defpackage chorus/test/lang/compiler/compile-statement
   (:use :cl :prove
-        :chorus.lang.util
-        :chorus.lang.data
-        :chorus.lang.type
-        :chorus.lang.syntax
-        :chorus.lang.environment
-        :chorus.lang.compiler.compile-statement)
-  (:import-from :chorus.lang.compiler.compile-statement
+        :chorus/lang/util
+        :chorus/lang/data
+        :chorus/lang/type
+        :chorus/lang/syntax
+        :chorus/lang/environment
+        :chorus/lang/compiler/compile-statement)
+  (:import-from :chorus/lang/compiler/compile-statement
                 :compile-macro
                 :compile-if
                 :compile-let
@@ -25,7 +25,7 @@
                 :compile-progn
                 :compile-return
                 :compile-function))
-(in-package :chorus-test.lang.compiler.compile-statement)
+(in-package :chorus/test/lang/compiler/compile-statement)
 
 (plan nil)
 

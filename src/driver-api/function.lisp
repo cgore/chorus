@@ -5,7 +5,7 @@
 |#
 
 
-(in-package :chorus.driver-api)
+(in-package :chorus/driver-api)
 
 
 ;;; Some foreign code assumes that floating points traps are disabled

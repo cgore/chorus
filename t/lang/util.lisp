@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.util
+(defpackage chorus/test/lang/util
   (:use :cl :prove
-        :chorus.lang.util))
-(in-package :chorus-test.lang.util)
+        :chorus/lang/util))
+(in-package :chorus/test/lang/util)
 
 (plan nil)
 

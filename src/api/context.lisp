@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.api.context
+(defpackage chorus/api/context
   (:use :cl
-        :chorus.driver-api
-        :chorus.api.nvcc
-        :chorus.api.kernel-manager)
+        :chorus/driver-api
+        :chorus/api/nvcc
+        :chorus/api/kernel-manager)
   (:export ;; Initialize CUDA
            :init-cuda
            ;; CUDA device
@@ -24,7 +24,7 @@
            :*cuda-context*
            :with-cuda
            :*cuda-stream*))
-(in-package :chorus.api.context)
+(in-package :chorus/api/context)
 
 
 ;;;

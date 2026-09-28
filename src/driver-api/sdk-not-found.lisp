@@ -5,7 +5,7 @@
 |#
 
 
-(in-package chorus.driver-api)
+(in-package chorus/driver-api)
 
 (defvar *sdk-not-found* nil)
 

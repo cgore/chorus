@@ -2,6 +2,8 @@
 
 This repository is Chorus, a fork of CL-Cuda. The ASDF systems are `chorus`, `chorus-test`, `chorus-examples`, `chorus-misc`, `chorus-interop`, `chorus-interop-test`, and `chorus-interop-examples`. The git remote is chorus.
 
+Package names use `/` between levels, as in `:chorus/api/nvcc` and `:chorus/test/lang/util`. A new package follows that form.
+
 ## Copyright and license
 
 The license is MIT. Leave the permission text in `LICENSE` as it is written.

@@ -5,16 +5,16 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.defkernel
+(defpackage chorus/test/api/defkernel
   (:use :cl :prove
-        :chorus.api.defkernel
-        :chorus.api.context
-        :chorus.api.memory
-        :chorus.lang
-        :chorus.driver-api)
-  (:import-from :chorus.api.defkernel
+        :chorus/api/defkernel
+        :chorus/api/context
+        :chorus/api/memory
+        :chorus/lang
+        :chorus/driver-api)
+  (:import-from :chorus/api/defkernel
                 :with-launching-arguments))
-(in-package :chorus-test.api.defkernel)
+(in-package :chorus/test/api/defkernel)
 
 (plan nil)
 

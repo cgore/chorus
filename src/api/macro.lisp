@@ -5,13 +5,13 @@
 |#
 
 (in-package :cl-user)
-(defpackage :chorus.api.macro
+(defpackage :chorus/api/macro
   (:use :cl
-        :chorus.api.defkernel)
+        :chorus/api/defkernel)
   (:export :let*
            :when
            :unless))
-(in-package :chorus.api.macro)
+(in-package :chorus/api/macro)
 
 
 (defkernelmacro let* (bindings &body body)

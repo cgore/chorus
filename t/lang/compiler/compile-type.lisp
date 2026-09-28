@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.compiler.compile-type
+(defpackage chorus/test/lang/compiler/compile-type
   (:use :cl :prove
-        :chorus.lang.type
-        :chorus.lang.compiler.compile-type))
-(in-package :chorus-test.lang.compiler.compile-type)
+        :chorus/lang/type
+        :chorus/lang/compiler/compile-type))
+(in-package :chorus/test/lang/compiler/compile-type)
 
 (plan nil)
 

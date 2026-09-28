@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-interop.api.memory
+(defpackage chorus/interop/api/memory
   (:use :cl :cl-reexport
-        :chorus.lang.type
-        :chorus-interop.driver-api)
+        :chorus/lang/type
+        :chorus/interop/driver-api)
   (:export ;; Memory block
            :alloc-memory-block
            :free-memory-block
@@ -25,16 +25,16 @@
            :with-memory-blocks
            :sync-memory-block
            :memory-block-aref)
-  (:import-from :chorus.api.memory
+  (:import-from :chorus/api/memory
                 :alloc-host-memory
                 :free-host-memory
                 :host-memory-aref
                 :memcpy-host-to-device
                 :memcpy-device-to-host))
-(in-package :chorus-interop.api.memory)
+(in-package :chorus/interop/api/memory)
 
 (eval-when (:execute :load-toplevel :compile-toplevel)
-  (reexport-from :chorus.api.memory
+  (reexport-from :chorus/api/memory
                  :include '(:alloc-host-memory
                             :free-host-memory
                             :with-host-memory

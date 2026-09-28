@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.type
+(defpackage chorus/test/lang/type
   (:use :cl :prove
-        :chorus.driver-api
-        :chorus.lang.data
-        :chorus.lang.type))
-(in-package :chorus-test.lang.type)
+        :chorus/driver-api
+        :chorus/lang/data
+        :chorus/lang/type))
+(in-package :chorus/test/lang/type)
 
 (plan nil)
 

@@ -5,13 +5,13 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.util
+(defpackage chorus/lang/util
   (:use :cl)
   (:export :c-identifier
            :lines
            :unlines
            :indent))
-(in-package chorus.lang.util)
+(in-package chorus/lang/util)
 
 
 (defun %c-identifier (object)

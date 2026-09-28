@@ -11,21 +11,21 @@
                (sb-ext:muffle-conditions sb-kernel::package-at-variance))
     (handler-bind
         (#+sbcl (sb-kernel::package-at-variance #'muffle-warning))
-      (defpackage chorus.api
+      (defpackage chorus/api
         (:use :cl :cl-reexport)))))
-(in-package :chorus.api)
+(in-package :chorus/api)
 
-(reexport-from :chorus.api.nvcc
+(reexport-from :chorus/api/nvcc
                :include '(:*tmp-path*
                           :*nvcc-options*
                           :*nvcc-binary*
                           :find-nvcc
                           :nvcc-available-p
                           :nvcc-arch-option))
-(reexport-from :chorus.api.context)
-(reexport-from :chorus.api.memory)
-(reexport-from :chorus.api.defkernel)
-(reexport-from :chorus.api.macro)
-(reexport-from :chorus.api.timer)
+(reexport-from :chorus/api/context)
+(reexport-from :chorus/api/memory)
+(reexport-from :chorus/api/defkernel)
+(reexport-from :chorus/api/macro)
+(reexport-from :chorus/api/timer)
 
-;; reexport no symbols from chorus.api.kernel-manager package
+;; reexport no symbols from chorus/api/kernel-manager package

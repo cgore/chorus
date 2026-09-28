@@ -5,15 +5,15 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.compiler.compile-expression
+(defpackage chorus/test/lang/compiler/compile-expression
   (:use :cl :prove
-        :chorus.lang.syntax
-        :chorus.lang.data
-        :chorus.lang.type
-        :chorus.lang.built-in
-        :chorus.lang.environment
-        :chorus.lang.compiler.compile-expression)
-  (:import-from :chorus.lang.compiler.compile-expression
+        :chorus/lang/syntax
+        :chorus/lang/data
+        :chorus/lang/type
+        :chorus/lang/built-in
+        :chorus/lang/environment
+        :chorus/lang/compiler/compile-expression)
+  (:import-from :chorus/lang/compiler/compile-expression
                 :compile-macro
                 :compile-symbol-macro
                 :compile-literal
@@ -23,7 +23,7 @@
                 :compile-constructor
                 :compile-arithmetic
                 :compile-function))
-(in-package :chorus-test.lang.compiler.compile-expression)
+(in-package :chorus/test/lang/compiler/compile-expression)
 
 (plan nil)
 

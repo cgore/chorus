@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-interop
+(defpackage chorus/interop
   (:use :cl :cl-reexport))
-(in-package :chorus-interop)
+(in-package :chorus/interop)
 
-(reexport-from :chorus-interop.driver-api
+(reexport-from :chorus/interop/driver-api
                :include '(:*show-messages*
                           :*sdk-not-found*))
-(reexport-from :chorus.lang)
-(reexport-from :chorus-interop.api)
+(reexport-from :chorus/lang)
+(reexport-from :chorus/interop/api)

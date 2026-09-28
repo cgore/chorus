@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.environment
+(defpackage chorus/lang/environment
   (:use :cl
-        :chorus.lang.util
-        :chorus.lang.data
-        :chorus.lang.type)
+        :chorus/lang/util
+        :chorus/lang/data
+        :chorus/lang/type)
   (:export ;; Variable environment
            :empty-variable-environment
            ;; Variable environment - Variable
@@ -46,7 +46,7 @@
   (:shadow :variable)
   (:import-from :alexandria
                 :with-gensyms))
-(in-package :chorus.lang.environment)
+(in-package :chorus/lang/environment)
 
 
 ;;;

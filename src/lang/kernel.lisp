@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.kernel
+(defpackage chorus/lang/kernel
   (:use :cl
-        :chorus.lang.util
-        :chorus.lang.data
-        :chorus.lang.type
-        :chorus.lang.syntax)
+        :chorus/lang/util
+        :chorus/lang/data
+        :chorus/lang/type
+        :chorus/lang/syntax)
   (:export ;; Kernel
            :make-kernel
            :kernel-function-names
@@ -48,14 +48,14 @@
            :kernel-global-c-name
            :kernel-global-qualifiers
            :kernel-global-initializer)
-  ;; Shadow symbols in chorus.lang.syntax.
+  ;; Shadow symbols in chorus/lang/syntax.
   (:shadow :macro-p
            :symbol-macro-p
            :function-p)
   (:import-from :alexandria
                 :with-gensyms
                 :ensure-list))
-(in-package :chorus.lang.kernel)
+(in-package :chorus/lang/kernel)
 
 
 ;;;
@@ -177,14 +177,14 @@
 
 (defun expand-macro-1 (form kernel)
   (cond
-    ((chorus.lang.syntax:macro-p form)
+    ((chorus/lang/syntax:macro-p form)
      (let ((operator (macro-operator form))
            (operands (macro-operands form)))
        (if (kernel-macro-exists-p kernel operator)
            (let ((expander (kernel-macro-expander kernel operator)))
              (values (funcall expander operands) t))
            (values form nil))))
-    ((chorus.lang.syntax:symbol-macro-p form)
+    ((chorus/lang/syntax:symbol-macro-p form)
      (if (kernel-symbol-macro-exists-p kernel form)
          (let ((expansion (kernel-symbol-macro-expansion kernel form)))
            (values expansion t))

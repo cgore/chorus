@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.type
+(defpackage chorus/lang/type
   (:use :cl
-        :chorus.driver-api
-        :chorus.lang.data)
+        :chorus/driver-api
+        :chorus/lang/data)
   (:export ;; Chorus types
            :void
            :bool
@@ -51,7 +51,7 @@
            :array-type)
   (:import-from :alexandria
                 :format-symbol))
-(in-package :chorus.lang.type)
+(in-package :chorus/lang/type)
 
 
 ;;;
@@ -216,7 +216,7 @@
   (let ((type-string (princ-to-string type)))
     (cl-ppcre:register-groups-bind (base-string nil)
         (+array-type-regex+ type-string)
-      (intern (string base-string) 'chorus.lang.type))))
+      (intern (string base-string) 'chorus/lang/type))))
 
 (defun array-type-stars (type)
   (unless (array-type-p type)
@@ -225,7 +225,7 @@
     (cl-ppcre:register-groups-bind (_ stars-string)
         (+array-type-regex+ type-string)
       (declare (ignore _))
-      (intern (string stars-string) 'chorus.lang.type))))
+      (intern (string stars-string) 'chorus/lang/type))))
 
 (defun array-type-dimension (type)
   (length (princ-to-string (array-type-stars type))))
@@ -248,4 +248,4 @@
                (not (array-type-p type)))
     (error "The value ~S is an invalid type." type))
   (let ((stars (loop repeat dimension collect #\*)))
-    (format-symbol 'chorus.lang.type "~A~{~A~}" type stars)))
+    (format-symbol 'chorus/lang/type "~A~{~A~}" type stars)))

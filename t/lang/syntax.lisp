@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.lang.syntax
+(defpackage chorus/test/lang/syntax
   (:use :cl :prove
-        :chorus.lang.data
-        :chorus.lang.syntax))
-(in-package :chorus-test.lang.syntax)
+        :chorus/lang/data
+        :chorus/lang/syntax))
+(in-package :chorus/test/lang/syntax)
 
 (plan nil)
 

@@ -5,6 +5,6 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-misc
+(defpackage chorus/misc
   (:use :cl)
   (:export :convert-error-string))

@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.compiler.compile-type
+(defpackage chorus/lang/compiler/compile-type
   (:use :cl
-        :chorus.lang.type)
+        :chorus/lang/type)
   (:export :compile-type))
-(in-package :chorus.lang.compiler.compile-type)
+(in-package :chorus/lang/compiler/compile-type)
 
 
 ;;;

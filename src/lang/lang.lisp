@@ -11,14 +11,14 @@
                (sb-ext:muffle-conditions sb-kernel::package-at-variance))
     (handler-bind
         (#+sbcl (sb-kernel::package-at-variance #'muffle-warning))
-      (defpackage :chorus.lang
+      (defpackage :chorus/lang
         (:use :cl
               :cl-reexport)))))
 
-(in-package :chorus.lang)
+(in-package :chorus/lang)
 
 ;; reexport symbols of data structures chorus provides
-(reexport-from :chorus.lang.data
+(reexport-from :chorus/lang/data
                :include '(;; Float3
                           :float3
                           :make-float3
@@ -59,7 +59,7 @@
                           :with-double4))
 
 ;; reexport symbols of chorus types
-(reexport-from :chorus.lang.type
+(reexport-from :chorus/lang/type
                :include '(:void
                           :bool
                           :int
@@ -83,7 +83,7 @@
 
 ;; reexport symbols of chorus syntax except the ones exported
 ;; from COMMON-LISP package
-(reexport-from :chorus.lang.syntax
+(reexport-from :chorus/lang/syntax
                :include '(:grid-dim-x :grid-dim-y :grid-dim-z
                           :block-dim-x :block-dim-y :block-dim-z
                           :block-idx-x :block-idx-y :block-idx-z
@@ -93,7 +93,7 @@
 
 ;; reexport symbols of chorus built-in functions except the ones
 ;; exported from COMMON-LISP package
-(reexport-from :chorus.lang.built-in
+(reexport-from :chorus/lang/built-in
                :include '(:xor
                           :shl
                           :shr

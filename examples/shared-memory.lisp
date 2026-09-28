@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-examples.shared-memory
+(defpackage chorus/examples/shared-memory
   (:use :cl
         :chorus
         :alexandria)
   (:export :main-shared-memory :main-global-memory))
-(in-package :chorus-examples.shared-memory)
+(in-package :chorus/examples/shared-memory)
 
 (setf chorus:*show-messages* nil)
 

@@ -5,20 +5,20 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.compiler.compile-kernel
+(defpackage chorus/lang/compiler/compile-kernel
   (:use :cl
-        :chorus.lang.util
-        :chorus.lang.type
-        :chorus.lang.syntax
-        :chorus.lang.environment
-        :chorus.lang.kernel
-        :chorus.lang.compiler.compile-data
-        :chorus.lang.compiler.compile-type
-        :chorus.lang.compiler.compile-expression
-        :chorus.lang.compiler.compile-statement
-        :chorus.lang.compiler.type-of-expression)
+        :chorus/lang/util
+        :chorus/lang/type
+        :chorus/lang/syntax
+        :chorus/lang/environment
+        :chorus/lang/kernel
+        :chorus/lang/compiler/compile-data
+        :chorus/lang/compiler/compile-type
+        :chorus/lang/compiler/compile-expression
+        :chorus/lang/compiler/compile-statement
+        :chorus/lang/compiler/type-of-expression)
   (:export :compile-kernel))
-(in-package :chorus.lang.compiler.compile-kernel)
+(in-package :chorus/lang/compiler/compile-kernel)
 
 
 ;;;

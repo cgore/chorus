@@ -5,18 +5,18 @@
 |#
 
 (in-package :cl-user)
-(defpackage :chorus-interop.api.defkernel
+(defpackage :chorus/interop/api/defkernel
   (:use :cl :cl-reexport
-        :chorus.lang.syntax
-        :chorus.lang.type
-        :chorus-interop.driver-api
-        :chorus-interop.api.memory)
+        :chorus/lang/syntax
+        :chorus/lang/type
+        :chorus/interop/driver-api
+        :chorus/interop/api/memory)
   (:export :defkernel)
-  (:import-from :chorus.api.kernel-manager
+  (:import-from :chorus/api/kernel-manager
                 :kernel-manager-define-function
                 :ensure-kernel-function-loaded
                 :*kernel-manager*)
-  (:import-from :chorus.api.defkernel
+  (:import-from :chorus/api/defkernel
                 :argument-vars
                 :argument-var-ptr
                 :argument-cffi-type
@@ -24,9 +24,9 @@
                 :setf-to-argument-array-form)
   (:import-from :alexandria
                 :with-gensyms))
-(in-package :chorus-interop.api.defkernel)
+(in-package :chorus/interop/api/defkernel)
 
-(reexport-from :chorus.api.defkernel
+(reexport-from :chorus/api/defkernel
                :include '(:defkernelmacro
                           :expand-macro-1
                           :expand-macro
@@ -61,7 +61,7 @@
         nil)))
 
 (defmacro with-launching-arguments ((var arguments) &body body)
-  ;; See CHORUS.API.DEFKERNEL:WITH-LAUNCHING-ARGUMENTS macro for detailed comments.
+  ;; See CHORUS/API/DEFKERNEL:WITH-LAUNCHING-ARGUMENTS macro for detailed comments.
   ;;
   ;; Example:
   ;;

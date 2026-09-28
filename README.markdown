@@ -449,14 +449,14 @@ The following figure illustrates Chorus's overall architecture.
 
                        +---------------------------------+-----------+-----------+
                        | defkernel                       | memory    | context   |
-            chorus.api +---------------------------------+           |           |
+            chorus/api +---------------------------------+           |           |
                        | kernel-manager / nvcc           |           |           |
                        +---------------------------------+-----------+-----------+
                        +----------------------------+----------------------------+
-           chorus.lang | Kernel description lang.   | the Compiler               |
+           chorus/lang | Kernel description lang.   | the Compiler               |
                        +----------------------------+----------------------------+
                        +---------------------------------------------------------+
-     chorus.driver-api | driver-api                                              |
+     chorus/driver-api | driver-api                                              |
                        +---------------------------------------------------------+
                        +---------------------------------------------------------+
                   CUDA | CUDA driver API                                         |
@@ -521,13 +521,13 @@ The following is for working with streams in [mgl-mat](https://github.com/melisg
     (defmacro with-cuda-stream ((stream) &body body)
       (alexandria:with-gensyms (stream-pointer)
         `(cffi:with-foreign-objects
-             ((,stream-pointer 'chorus.driver-api:cu-stream))
-           (chorus.driver-api:cu-stream-create ,stream-pointer 0)
+             ((,stream-pointer 'chorus/driver-api:cu-stream))
+           (chorus/driver-api:cu-stream-create ,stream-pointer 0)
            (let ((,stream (cffi:mem-ref ,stream-pointer
-                                        'chorus.driver-api:cu-stream)))
+                                        'chorus/driver-api:cu-stream)))
              (unwind-protect
                   (locally ,@body)
-               (chorus.driver-api:cu-stream-destroy ,stream))))))
+               (chorus/driver-api:cu-stream-destroy ,stream))))))
 
 then, call a kernel function with binding a stream to `*cuda-stream*`:
 

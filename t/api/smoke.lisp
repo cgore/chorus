@@ -4,15 +4,15 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.smoke
+(defpackage chorus/test/api/smoke
   (:use :cl :prove
-        :chorus.api.defkernel
-        :chorus.api.context
-        :chorus.api.memory
-        :chorus.lang)
-  (:shadowing-import-from :chorus.api.macro
+        :chorus/api/defkernel
+        :chorus/api/context
+        :chorus/api/memory
+        :chorus/lang)
+  (:shadowing-import-from :chorus/api/macro
                           :let* :when :unless))
-(in-package :chorus-test.api.smoke)
+(in-package :chorus/test/api/smoke)
 
 (plan nil)
 

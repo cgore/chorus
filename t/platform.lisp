@@ -4,10 +4,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.platform
+(defpackage chorus/test/platform
   (:use :cl :prove
-        :chorus.driver-api))
-(in-package :chorus-test.platform)
+        :chorus/driver-api))
+(in-package :chorus/test/platform)
 
 (plan nil)
 
@@ -31,14 +31,14 @@
   (is (cffi:foreign-type-size 'cu-event) (cffi:foreign-type-size :pointer)))
 
 (subtest "driver error strings"
-  (is (chorus.driver-api::get-error-string 0) "CUDA_SUCCESS")
-  (is (chorus.driver-api::get-error-string 700) "CUDA_ERROR_ILLEGAL_ADDRESS")
-  (is (chorus.driver-api::get-error-string 719) "CUDA_ERROR_LAUNCH_FAILED")
-  (is (chorus.driver-api::get-error-string 218) "CUDA_ERROR_INVALID_PTX")
-  (is (chorus.driver-api::get-error-string 221) "CUDA_ERROR_JIT_COMPILER_NOT_FOUND")
-  (is (chorus.driver-api::get-error-string 222) "CUDA_ERROR_UNSUPPORTED_PTX_VERSION")
-  (is (chorus.driver-api::get-error-string 801) "CUDA_ERROR_NOT_SUPPORTED")
-  (is (chorus.driver-api::get-error-string 123456)
+  (is (chorus/driver-api::get-error-string 0) "CUDA_SUCCESS")
+  (is (chorus/driver-api::get-error-string 700) "CUDA_ERROR_ILLEGAL_ADDRESS")
+  (is (chorus/driver-api::get-error-string 719) "CUDA_ERROR_LAUNCH_FAILED")
+  (is (chorus/driver-api::get-error-string 218) "CUDA_ERROR_INVALID_PTX")
+  (is (chorus/driver-api::get-error-string 221) "CUDA_ERROR_JIT_COMPILER_NOT_FOUND")
+  (is (chorus/driver-api::get-error-string 222) "CUDA_ERROR_UNSUPPORTED_PTX_VERSION")
+  (is (chorus/driver-api::get-error-string 801) "CUDA_ERROR_NOT_SUPPORTED")
+  (is (chorus/driver-api::get-error-string 123456)
       "CUDA_ERROR_UNKNOWN_CODE_123456"
       "unknown codes do not signal"))
 

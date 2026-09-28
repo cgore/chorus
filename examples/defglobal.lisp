@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-examples.defglobal
+(defpackage chorus/examples/defglobal
   (:use :cl :chorus)
   (:export :main))
-(in-package :chorus-examples.defglobal)
+(in-package :chorus/examples/defglobal)
 
 (setf chorus:*show-messages* nil)
 

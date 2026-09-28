@@ -5,13 +5,13 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-examples.sph-cpu
+(defpackage chorus/examples/sph-cpu
   (:use :cl)
   (:import-from :alexandria
                 :with-gensyms
                 :once-only)
   (:export :main))
-(in-package :chorus-examples.sph-cpu)
+(in-package :chorus/examples/sph-cpu)
 
 
 ;;

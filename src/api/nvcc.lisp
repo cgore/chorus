@@ -5,7 +5,7 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.api.nvcc
+(defpackage chorus/api/nvcc
   (:use :cl)
   (:export :*tmp-path*
            :*nvcc-options*
@@ -16,7 +16,7 @@
            :nvcc-available-p
            :nvcc-arch-option
            :arch-option-p))
-(in-package :chorus.api.nvcc)
+(in-package :chorus/api/nvcc)
 
 
 ;;;

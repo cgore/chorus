@@ -10,7 +10,7 @@
   driver error cannot crash error reporting itself.
 |#
 
-(in-package :chorus.driver-api)
+(in-package :chorus/driver-api)
 
 (defparameter +error-strings+
   '(0 "CUDA_SUCCESS"

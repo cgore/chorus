@@ -5,7 +5,7 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.data
+(defpackage chorus/lang/data
   (:use :cl)
   (:export ;; Symbol
            :chorus-symbol
@@ -58,7 +58,7 @@
            :with-double4)
   (:import-from :alexandria
                 :once-only))
-(in-package :chorus.lang.data)
+(in-package :chorus/lang/data)
 
 
 ;;;

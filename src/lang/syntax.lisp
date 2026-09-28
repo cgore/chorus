@@ -5,10 +5,10 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.syntax
+(defpackage chorus/lang/syntax
   (:use :cl
-        :chorus.lang.data
-        :chorus.lang.type)
+        :chorus/lang/data
+        :chorus/lang/type)
   (:export ;; Symbol macro
            :symbol-macro-p
            ;; Macro
@@ -126,7 +126,7 @@
            :argument-p
            :argument-var
            :argument-type))
-(in-package :chorus.lang.syntax)
+(in-package :chorus/lang/syntax)
 
 
 ;;;

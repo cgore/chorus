@@ -5,14 +5,14 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-examples.sph
+(defpackage chorus/examples/sph
   (:use :cl
         :chorus)
   (:import-from :alexandria
                 :with-gensyms
                 :once-only)
   (:export :main))
-(in-package :chorus-examples.sph)
+(in-package :chorus/examples/sph)
 
 
 ;;

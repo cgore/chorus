@@ -5,18 +5,18 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.compiler.compile-statement
+(defpackage chorus/lang/compiler/compile-statement
   (:use :cl
-        :chorus.lang.util
-        :chorus.lang.type
-        :chorus.lang.syntax
-        :chorus.lang.environment
-        :chorus.lang.compiler.compile-data
-        :chorus.lang.compiler.compile-type
-        :chorus.lang.compiler.type-of-expression
-        :chorus.lang.compiler.compile-expression)
+        :chorus/lang/util
+        :chorus/lang/type
+        :chorus/lang/syntax
+        :chorus/lang/environment
+        :chorus/lang/compiler/compile-data
+        :chorus/lang/compiler/compile-type
+        :chorus/lang/compiler/type-of-expression
+        :chorus/lang/compiler/compile-expression)
   (:export :compile-statement))
-(in-package :chorus.lang.compiler.compile-statement)
+(in-package :chorus/lang/compiler/compile-statement)
 
 
 ;;;
@@ -45,7 +45,7 @@
 ;;;
 
 (defun %macro-p (form func-env)
-  (chorus.lang.compiler.compile-expression::%macro-p form func-env))
+  (chorus/lang/compiler/compile-expression::%macro-p form func-env))
 
 (defun compile-macro (form var-env func-env)
   (let ((operator (macro-operator form))
@@ -318,6 +318,6 @@
 ;;;
 
 (defun compile-function (form var-env func-env)
-  (let ((code (chorus.lang.compiler.compile-expression::compile-function
+  (let ((code (chorus/lang/compiler/compile-expression::compile-function
                 form var-env func-env)))
     (format nil "~A;~%" code)))

@@ -5,16 +5,16 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.compiler.compile-data
+(defpackage chorus/lang/compiler/compile-data
   (:use :cl
-        :chorus.lang.data
-        :chorus.lang.util)
+        :chorus/lang/data
+        :chorus/lang/util)
   (:export :compile-symbol
            :compile-bool
            :compile-int
            :compile-float
            :compile-double))
-(in-package :chorus.lang.compiler.compile-data)
+(in-package :chorus/lang/compiler/compile-data)
 
 
 ;;;

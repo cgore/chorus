@@ -5,7 +5,7 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-interop.driver-api
+(defpackage chorus/interop/driver-api
   (:use :cl :cl-reexport)
   (:export ;; Types
            :cu-graphics-resource
@@ -28,8 +28,8 @@
            :cu-graphics-resource-set-map-flags
            :cu-graphics-unmap-resources
            :cu-graphics-unregister-resource)
-  (:import-from :chorus.driver-api
+  (:import-from :chorus/driver-api
                 :defcufun))
-(in-package :chorus-interop.driver-api)
+(in-package :chorus/interop/driver-api)
 
-(reexport-from :chorus.driver-api)
+(reexport-from :chorus/driver-api)

@@ -5,9 +5,9 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.lang.built-in
+(defpackage chorus/lang/built-in
   (:use :cl
-        :chorus.lang.type)
+        :chorus/lang/type)
   (:export ;; Built-in functions
            :xor
            :shl
@@ -31,7 +31,7 @@
            :built-in-function-return-type
            :built-in-function-infix-p
            :built-in-function-c-name))
-(in-package :chorus.lang.built-in)
+(in-package :chorus/lang/built-in)
 
 
 ;;;

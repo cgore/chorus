@@ -5,12 +5,12 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.memory
+(defpackage chorus/test/api/memory
   (:use :cl :prove
-        :chorus.api.memory
-        :chorus.api.context
-        :chorus.lang))
-(in-package :chorus-test.api.memory)
+        :chorus/api/memory
+        :chorus/api/context
+        :chorus/lang))
+(in-package :chorus/test/api/memory)
 
 (plan nil)
 

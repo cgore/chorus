@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-test.api.timer
+(defpackage chorus/test/api/timer
   (:use :cl :prove
-        :chorus.api.timer
-        :chorus.api.context))
-(in-package :chorus-test.api.timer)
+        :chorus/api/timer
+        :chorus/api/context))
+(in-package :chorus/test/api/timer)
 
 (plan nil)
 

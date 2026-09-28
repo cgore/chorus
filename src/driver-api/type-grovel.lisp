@@ -10,7 +10,7 @@
 |#
 
 (pkg-config-cflags "cuda" :optional t)
-(in-package :chorus.driver-api)
+(in-package :chorus/driver-api)
 
 
 ;;;

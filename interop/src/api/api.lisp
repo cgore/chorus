@@ -5,11 +5,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus-interop.api
+(defpackage chorus/interop/api
   (:use :cl :cl-reexport))
-(in-package :chorus-interop.api)
+(in-package :chorus/interop/api)
 
-(reexport-from :chorus.api
+(reexport-from :chorus/api
                :exclude '(;; context
                           :create-cuda-context
                           :with-cuda
@@ -27,6 +27,6 @@
                           :memory-block-aref
                           ;; defkernel
                           :defkernel))
-(reexport-from :chorus-interop.api.context)
-(reexport-from :chorus-interop.api.memory)
-(reexport-from :chorus-interop.api.defkernel)
+(reexport-from :chorus/interop/api/context)
+(reexport-from :chorus/interop/api/memory)
+(reexport-from :chorus/interop/api/defkernel)

@@ -5,7 +5,7 @@
 |#
 
 (in-package :cl-user)
-(defpackage chorus.driver-api
+(defpackage chorus/driver-api
   (:use :cl)
   (:export ;; Types
            :cu-result
