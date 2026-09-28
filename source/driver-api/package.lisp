@@ -60,7 +60,8 @@
            :cu-stream-wait-event
            ;; Variables
            :*show-messages*
-           :*sdk-not-found*)
+           :*sdk-not-found*
+           :sdk-not-found-error)
   (:import-from :alexandria
                 :format-symbol
                 :symbolicate))

@@ -7,9 +7,14 @@
 \lispPackageChapter{chorus}
 
 Load this package with \texttt{(ql:quickload :chorus)}. It reexports the
-kernel language from \texttt{chorus/lang}, the high-level API from
-\texttt{chorus/api}, and two driver variables from \texttt{chorus/driver-api}:
-\texttt{*show-messages*} and \texttt{*sdk-not-found*}.
+generic backend interface from \texttt{chorus/backend}, the kernel language
+from \texttt{chorus/lang}, the CUDA API from \texttt{chorus/api}, and two
+driver variables from \texttt{chorus/driver-api}: \texttt{*show-messages*}
+and \texttt{*sdk-not-found*}.
+
+\texttt{*backend*} and \texttt{list-devices} are the calls most programs
+make. \texttt{chorus/cuda} is the native CUDA package.
+\texttt{chorus/apple-silicon} is the native Apple silicon package.
 
 \texttt{*sdk-not-found*} is true when the CUDA driver library does not load.
 Driver calls then signal \texttt{sdk-not-found-error}. Chorus also targets

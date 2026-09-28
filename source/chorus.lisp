@@ -15,6 +15,7 @@
         (:use :cl :cl-reexport)))))
 (in-package :chorus)
 
+(reexport-from :chorus/backend)
 (reexport-from :chorus/driver-api
                :include '(:*show-messages*
                           :*sdk-not-found*))

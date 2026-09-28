@@ -2,11 +2,13 @@
 
 Chorus is a Common Lisp library for programming GPUs. It targets NVIDIA GPUs through CUDA, Apple silicon, and AMD GPUs.
 
-Chorus began as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA. The implementation in this tree is the CUDA backend. The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
+Chorus began as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA. The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
+
+Most programs use the `chorus` package. `*backend*` and `list-devices` select the backend that is available. On a Mac that is Apple silicon when Metal loads. Where the CUDA driver loads, and on other hosts, it is CUDA. Native CUDA is `chorus/cuda`, which reexports the driver API, `with-cuda`, and `defkernel`. Native Apple silicon is `chorus/apple-silicon`. Kernel launch in this tree is still the CUDA API.
 
 ## Targets
 
-* **CUDA.** NVIDIA GPUs, through the CUDA driver API and `nvcc`. This tree implements this backend. Toolkit and architecture constraints are under [Requirements for the CUDA backend](#requirements-for-the-cuda-backend).
+* **CUDA.** NVIDIA GPUs, through the CUDA driver API and `nvcc`, in the package `chorus/cuda`. Toolkit and architecture constraints are under [Requirements for the CUDA backend](#requirements-for-the-cuda-backend).
 * **Apple silicon.** See [Apple silicon](#apple-silicon).
 * **AMD.** AMD GPUs. See [AMD](#amd).
 
@@ -102,7 +104,7 @@ Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-
 
 ### Apple silicon
 
-Apple silicon is a Chorus target. This tree has no Apple silicon backend.
+`chorus/apple-silicon` lists Metal devices with `MTLCopyAllDevices`. On this machine `list-devices` returns one device, `Apple M5`, and the current backend is `:apple-silicon`.
 
 ### AMD
 

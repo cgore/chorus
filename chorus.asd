@@ -65,6 +65,18 @@
                                    (:file "macro")
                                    (:file "timer")
                                    (:file "api")))
+                         (:module "apple-silicon"
+                                  :serial t
+                                  :components
+                                  ((:file "metal")))
+                         (:module "cuda"
+                                  :serial t
+                                  :components
+                                  ((:file "cuda")))
+                         (:module "backend"
+                                  :serial t
+                                  :components
+                                  ((:file "backend")))
                          (:file "chorus"))))
   :description "Common Lisp GPU programming for CUDA, Apple silicon, and AMD GPUs."
   :long-description #.(read-file-string (subpathname *load-pathname* "README.md"))

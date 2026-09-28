@@ -27,6 +27,13 @@
 (format t "nvcc-available-p => ~S~%" (chorus:nvcc-available-p))
 (format t "find-msvc-cl => ~S~%" (chorus/api/nvcc:find-msvc-cl))
 (format t "size_t bytes => ~D~%" (cffi:foreign-type-size 'chorus/driver-api:size-t))
+(format t "current-backend => ~S~%"
+        (chorus:backend-name (chorus:current-backend)))
+(handler-case
+    (format t "devices => ~{~A~^, ~}~%"
+            (mapcar #'chorus:device-name (chorus:list-devices)))
+  (error (e)
+    (format t "devices => ~A~%" e)))
 
 (ql:quickload :chorus-test)
 (format t "~%All test files loaded.~%")
