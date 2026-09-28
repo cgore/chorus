@@ -14,9 +14,12 @@ The package \texttt{chorus} is the interface most programs use.
 \texttt{*backend*} and \texttt{list-devices} select a backend. On a Mac the
 default is Apple silicon when Metal is available. Where the CUDA driver
 loads, the default is CUDA. Native CUDA is the package \texttt{chorus/cuda}.
-Native Apple silicon is the package \texttt{chorus/apple-silicon}. The
-chapters after this introduction describe the CUDA implementation: the kernel
-language, the driver API, and \texttt{with-cuda}.
+Native Apple silicon is the package \texttt{chorus/apple-silicon}. It
+keeps a command queue, allocates shared buffers, compiles Metal Shading
+Language, and launches kernels. Its \texttt{defkernel} accepts \texttt{let},
+\texttt{set}, \texttt{if}, \texttt{aref}, arithmetic, and the index
+variables. The chapters after this introduction describe the CUDA
+implementation: the kernel language, the driver API, and \texttt{with-cuda}.
 
 The kernel language expresses kernel functions, kernel macros, and kernel
 symbol macros as S-expressions. On the CUDA backend, a kernel is compiled to

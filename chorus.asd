@@ -68,7 +68,9 @@
                          (:module "apple-silicon"
                                   :serial t
                                   :components
-                                  ((:file "metal")))
+                                  ((:file "metal")
+                                   (:file "runtime")
+                                   (:file "kernel")))
                          (:module "cuda"
                                   :serial t
                                   :components

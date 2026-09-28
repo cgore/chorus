@@ -11,7 +11,21 @@
            :device
            :device-name
            :device-pointer
-           :metal-unavailable))
+           :metal-unavailable
+           :metal-error
+           :*device*
+           :*command-queue*
+           :with-device
+           :make-command-queue
+           :make-buffer
+           :buffer-aref
+           :with-buffers
+           :release
+           :compile-source
+           :library-function
+           :make-pipeline
+           :launch
+           :defkernel))
 (in-package :chorus/apple-silicon)
 
 (define-condition metal-unavailable (error) ()

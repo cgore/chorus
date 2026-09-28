@@ -104,7 +104,7 @@ Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-
 
 ### Apple silicon
 
-`chorus/apple-silicon` lists Metal devices with `MTLCopyAllDevices`. On this machine `list-devices` returns one device, `Apple M5`, and the current backend is `:apple-silicon`.
+`chorus/apple-silicon` is the Metal interface. `with-device` keeps a device and a command queue. `with-buffers` allocates shared buffers, and `buffer-aref` reads and writes them. `compile-source` compiles Metal Shading Language. `defkernel` compiles the kernel forms `let`, `set`, `if`, `aref`, arithmetic, and the index variables (`thread-idx-x`, `block-idx-x`, `block-dim-x`, and the y and z forms) to Metal and launches them. On this machine that vector-add kernel wrote 1.0, 4.0, and 1001.0 into elements 0, 3, and 1000.
 
 ### AMD
 
