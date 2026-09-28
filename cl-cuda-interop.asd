@@ -1,6 +1,6 @@
 #|
   This file is a part of cl-cuda project.
-  Copyright (c) 2012 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2014-2019 Masayuki Takagi (kamonama@gmail.com)
 |#
 
 (defsystem "cl-cuda-interop"

@@ -1,10 +1,11 @@
 #|
   This file is a part of cl-cuda project.
-  Copyright (c) 2012 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2012-2019 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (defsystem "cl-cuda-test"
-  :author "Masayuki Takagi"
+  :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
   :depends-on ("cl-cuda"
                "prove")

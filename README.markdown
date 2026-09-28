@@ -535,11 +535,13 @@ then, call a kernel function with binding a stream to `*cuda-stream*`:
 ## Author
 
 * Masayuki Takagi (kamonama@gmail.com)
+* Christopher Mark Gore (cgore@cgore.com)
 
 ## Copyright
 
-Copyright (c) 2012 Masayuki Takagi (kamonama@gmail.com)
+Copyright (c) 2012-2021 Masayuki Takagi (kamonama@gmail.com)
+Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 
 ## License
 
-Licensed under the MIT License.
+Licensed under the MIT License. `misc/drvapi_error_string.h` remains under the terms stated in that file.

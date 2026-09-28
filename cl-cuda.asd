@@ -1,6 +1,7 @@
 #|
   This file is a part of cl-cuda project.
-  Copyright (c) 2012 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2012-2019 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (defpackage :cl-cuda-asd
@@ -19,7 +20,7 @@
 
 (defsystem "cl-cuda"
   :version "0.1"
-  :author "Masayuki Takagi"
+  :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
   :depends-on ("cffi" "alexandria"
                       "cl-pattern" "split-sequence" "cl-reexport" "cl-ppcre")

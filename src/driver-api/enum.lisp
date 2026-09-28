@@ -1,6 +1,7 @@
 #|
   This file is a part of cl-cuda project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 

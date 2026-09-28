@@ -1,3 +1,8 @@
+#|
+  This file is a part of cl-cuda project.
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
+|#
+
 ;;; Load this file after Quicklisp to run the local cl-cuda-test suite.
 ;;; Example:
 ;;;   sbcl --load ~/quicklisp/setup.lisp --load t/run.lisp
