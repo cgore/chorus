@@ -1,24 +1,30 @@
 # Chorus
 
-Chorus originated as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA.
+Chorus is a Common Lisp library for programming GPUs. It targets NVIDIA GPUs through CUDA, Apple silicon, and AMD GPUs.
 
-The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
+Chorus began as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA. The implementation in this tree is the CUDA backend. The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
 
-Chorus is a library to use NVIDIA CUDA in Common Lisp programs. It provides not only FFI binding to CUDA driver API but the kernel description language with which users can define CUDA kernel functions in S-expression. The kernel description language also provides facilities to define kernel macros and kernel symbol macros in addition to kernel functions. Chorus's kernel macro and kernel symbol macro offer powerful abstraction that CUDA C itself does not have and provide enormous advantage in resource-limited GPU programming.
+## Targets
 
-Kernel functions defined with the kernel description language can be launched as almost same as ordinary Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by Chorus. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](#kernel-manager) section.
+* **CUDA.** NVIDIA GPUs, through the CUDA driver API and `nvcc`. This tree implements this backend. Toolkit and architecture constraints are under [Requirements for the CUDA backend](#requirements-for-the-cuda-backend).
+* **Apple silicon.** See [Apple silicon](#apple-silicon).
+* **AMD.** AMD GPUs. See [AMD](#amd).
 
-Memory management is also one of the most important things in GPU programming. Chorus provides memory block data structure which abstract host memory and device memory. With memory block, users do not need to manage host memory and device memory individually for themselves. It lightens their burden on memory management, prevents bugs and keeps code simple. Besides memory block that provides high level abstraction on host and device memory, Chorus also offers low level interfaces to handle CFFI pointers and CUDA device pointers directly. With these primitive interfaces, users can choose to gain more flexible memory control than using memory block if needed.
+The kernel language defines kernel functions, kernel macros, and kernel symbol macros as S-expressions. Kernel macros and kernel symbol macros give abstractions that CUDA C does not have. That matters in GPU programming, where resources are tight.
 
-Chorus is verified on Windows and Linux with modern CUDA. Current macOS is not a supported host. For detail, see [Verification environments](#verification-environments) section.
+On the CUDA backend, a kernel launches much as an ordinary Common Lisp function does. The launch runs in a CUDA context and takes grid and block sizes. The kernel manager compiles and loads the kernel the first time it is launched. Chorus compiles the kernel to CUDA C (a `.cu` file). NVCC, the NVIDIA CUDA compiler driver, compiles that file to PTX. The CUDA driver API loads the module and launches the kernel. See [Kernel manager](#kernel-manager).
+
+A memory block allocates the host side and the device side together. `sync-memory-block` copies between them. The same layer also exposes CFFI host pointers and CUDA device pointers.
+
+The CUDA backend is verified on Windows and Linux. See [Verification environments](#verification-environments).
 
 ## Example
 
-Following code is a part of vector addition example using Chorus based on CUDA SDK's "vectorAdd" sample.
+The following is part of the vector-addition example, the CUDA backend's version of the CUDA SDK `vectorAdd` sample.
 
-You can define `vec-add-kernel` kernel function using `defkernel` macro. In the definition, `aref` is to refer values stored in an array. `set` is to store values into an array. `block-dim-x`, `block-idx-x` and `thread-idx-x` have their counterparts in CUDA C's built-in variables and are used to specify the array index to be operated in each CUDA thread.
+You can define `vec-add-kernel` with the `defkernel` macro. In the definition, `aref` reads a value stored in an array. `set` stores a value into an array. `block-dim-x`, `block-idx-x`, and `thread-idx-x` are the kernel language's index variables. The CUDA backend maps them to the CUDA C built-ins, and each CUDA thread uses them to choose the array index it operates on.
 
-Once the kernel function is defined, you can launch it as if it is an ordinary Common Lisp function except that it requires to be in a CUDA context and followed by `:grid-dim` and `:block-dim` keyword parameters which specify the dimensions of grid and block. To keep a CUDA context, you can use `with-cuda` macro which has responsibility on initializing CUDA and managing a CUDA context. `with-cuda` also selects the nvcc `-arch=sm_XY` option from the device's compute capability. `with-memory-blocks` manages memory blocks which abstract host memory area and device memory area, then `sync-memory-block` copies data stored in a memory block between host and device.
+On the CUDA backend, launch the kernel inside `with-cuda` and pass `:grid-dim` and `:block-dim`. `with-cuda` initializes CUDA, keeps a CUDA context, and selects the nvcc `-arch=sm_XY` option from the device's compute capability when `*nvcc-options*` does not already name an architecture. `with-memory-blocks` allocates the memory blocks. `sync-memory-block` copies a block between host and device.
 
 For the whole code, please see [examples/vector-add.lisp](examples/vector-add.lisp).
 
@@ -63,26 +69,26 @@ or, with SBCL:
 
 `test/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `chorus-test` (tests run at load time).
 
-## Requirements
+## Requirements for the CUDA backend
 
-Chorus requires following:
+The CUDA backend requires:
 
 * NVIDIA CUDA-enabled GPU
 * CUDA driver (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux)
 * CUDA Toolkit (`nvcc`) to compile kernels to PTX
 * On Windows, Visual Studio with the C++ workload (`cl.exe`) so `nvcc` has a host compiler
 
-RTX 50-series (Blackwell, compute capability 12.0) needs CUDA Toolkit 12.8 or later. CUDA 13.x is recommended.
+RTX 50-series (Blackwell, compute capability 12.0) needs CUDA Toolkit 12.8 or later. CUDA 13.x is the toolkit this backend is written for.
 
-With CUDA 13, `nvcc` can target Turing and newer (`sm_75` and above): RTX 20-, 30-, 40-, and 50-series, plus matching professional/datacenter parts (T4, A100, Ada, Hopper, Blackwell). Maxwell, Pascal, and Volta cannot be compiled with CUDA 13.
+With CUDA 13, `nvcc` can target Turing and newer (`sm_75` and above): RTX 20-, 30-, 40-, and 50-series, plus matching professional and datacenter parts (T4, A100, Ada, Hopper, Blackwell). Maxwell, Pascal, and Volta are outside what CUDA 13 can compile.
 
-Windows and Linux are the supported hosts. macOS is not. [CUDA 10.2 release notes](https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/) state that CUDA 10.2 is the last release that supports macOS for developing and running CUDA applications. [CUDA 11.0 release notes](https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html) state that CUDA 11.0 does not support macOS for developing and running CUDA applications. This change targets CUDA 12.8+ / 13.x, which has no macOS driver and no `nvcc`. The Darwin foreign-library spec still names `CUDA.framework` and `libcuda.dylib`. On a current Mac that spec does not load, `*sdk-not-found*` is `t`, and driver calls signal `sdk-not-found-error`.
+The CUDA backend runs on Windows and Linux. Current macOS has no CUDA driver and no `nvcc`. The [CUDA 10.2 release notes](https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/) state that CUDA 10.2 is the last release that supports macOS for developing and running CUDA applications. The [CUDA 11.0 release notes](https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html) state that CUDA 11.0 does not support macOS for developing and running CUDA applications. The Darwin foreign-library spec still names `CUDA.framework` and `libcuda.dylib`. On a current Mac that spec does not load, `*sdk-not-found*` is `t`, and a CUDA driver call signals `sdk-not-found-error`. Apple silicon remains a Chorus target. See [Apple silicon](#apple-silicon).
 
 Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
 
 ## Verification environments
 
-### Current
+### CUDA on Windows
 
 Verified on this configuration; the full test suite passes:
 
@@ -94,12 +100,12 @@ Verified on this configuration; the full test suite passes:
 
 Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-newer GPUs with a matching toolkit are expected to work the same way. They have not all been re-run here.
 
-### macOS (blocked)
+### Apple silicon
 
-Checked on this machine. CUDA cannot run here, so the GPU test suite was not run. This is a platform blocker. There is no macOS code fix that makes CUDA 13 available.
+Checked on this machine, a Mac with Apple silicon. Apple silicon is a Chorus target. The CUDA backend does not run here: current macOS has no CUDA driver and no `nvcc`. The GPU test suite was not run.
 
 * macOS 26.6.2 (Darwin 25.6.0 arm64)
-* MacBook Pro (Mac17,2), Apple M5, 10-core Apple GPU, no NVIDIA GPU
+* MacBook Pro (Mac17,2), Apple M5, 10-core Apple GPU
 * No `nvcc` on `PATH`. `CUDA_PATH` and `CUDA_HOME` unset. No `/usr/local/cuda`. No `/Library/Frameworks/CUDA.framework`
 * SBCL 2.6.8
 
@@ -107,6 +113,10 @@ Loading this checkout through Quicklisp succeeds. `*sdk-not-found*` is `t`. `:cu
 
     Unable to load any of the alternatives:
        ((:FRAMEWORK "CUDA") "libcuda.dylib")
+
+### AMD
+
+AMD GPUs are a Chorus target. This tree has no AMD backend, and no verification run on AMD hardware is recorded here.
 
 ### Historical (2011–2016)
 
@@ -271,7 +281,7 @@ Specifies whether to let Chorus show operational messages or not. The default is
 
 ### [Special Variable] \*sdk-not-found\*
 
-Readonly. The value is `t` if Chorus failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On current macOS it is `t`, because NVIDIA no longer ships that driver. See [macOS (blocked)](#macos-blocked). This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
+Readonly. The value is `t` if the CUDA backend failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On a current Mac the driver library does not load, so the value is `t`. See [Apple silicon](#apple-silicon). The variable says nothing about the CUDA Toolkit (`nvcc`). Use `nvcc-available-p` for that.
 
     *sdk-not-found*    ; => nil
 
@@ -447,7 +457,7 @@ Compiled:
 
 ## Architecture
 
-The following figure illustrates Chorus's overall architecture.
+The following figure illustrates the CUDA backend in this tree.
 
                        +---------------------------------+-----------+-----------+
                        | defkernel                       | memory    | context   |
@@ -502,9 +512,9 @@ In the module-loaded state and function-loaded state, `kernel-manager-unload` fu
 
 The kernel manager is stored in `*kernel-manager*` special variable when Chorus is loaded and keeps alive during the Common Lisp process. Usually, you do not need to manage it explicitly.
 
-## How Chorus works when the CUDA driver is not installed
+## How the CUDA backend works when the CUDA driver is not installed
 
-This section is for Chorus users who develop an application or a library which has an alternative subsystem other than Chorus and may run on machines without an NVIDIA driver.
+On a machine with no NVIDIA driver, the CUDA backend still compiles and loads. A call into the driver then signals `sdk-not-found-error`. With this tree, an Apple silicon Mac is in that state, and so is a machine with an AMD GPU. The same behavior matters for an application that has a path other than the CUDA backend and may run where the NVIDIA driver is absent.
 
 **Compile and load time**
 Chorus is compiled and loaded without signaling if the CUDA driver library cannot be loaded. API symbols are still interned, so user programs can refer to them.
@@ -512,7 +522,7 @@ Chorus is compiled and loaded without signaling if the CUDA driver library canno
 **Run time**
 Calling a Chorus driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
 
-How Chorus decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework. On the macOS machine recorded under [macOS (blocked)](#macos-blocked), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
+The CUDA backend decides the driver is present when `cffi:use-foreign-library` successfully loads `nvcuda.dll`, `libcuda.so.1`, or the CUDA framework. On the machine recorded under [Apple silicon](#apple-silicon), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
 
 ## Streams
 

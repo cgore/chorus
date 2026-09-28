@@ -69,7 +69,8 @@
 \newcommand{\GithubIssue}[1]{\href{https://github.com/cgore/chorus/issues/#1}{{\color{red}[Issue \##1]}}}
 
 \title{Chorus\\
-  NVIDIA CUDA for \textsc{Ansi} Common Lisp\\
+  GPUs for \textsc{Ansi} Common Lisp\\
+  CUDA, Apple silicon, and AMD\\
   \url{https://github.com/cgore/chorus/}}
 \author{Masayuki Takagi\\
   and Christopher Mark Gore\\

@@ -66,6 +66,6 @@
                                    (:file "timer")
                                    (:file "api")))
                          (:file "chorus"))))
-  :description "Chorus is a library to use NVIDIA CUDA in Common Lisp programs."
+  :description "Common Lisp GPU programming for CUDA, Apple silicon, and AMD GPUs."
   :long-description #.(read-file-string (subpathname *load-pathname* "README.md"))
   :in-order-to ((test-op (test-op "chorus-test"))))

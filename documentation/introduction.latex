@@ -6,31 +6,51 @@
 
 \chapter{Introduction}
 
-Chorus is a library for using NVIDIA CUDA from Common Lisp. It is a fork of
-cl-cuda by Masayuki Takagi \cite{takagi-cl-cuda}. The library provides a
-foreign binding to the CUDA driver API and a kernel language in which kernel
-functions, kernel macros, and kernel symbol macros are written as
-S-expressions.
+Chorus is a library for GPU programming from Common Lisp. It targets NVIDIA
+GPUs through CUDA, Apple silicon, and AMD GPUs. It is a fork of
+cl-cuda by Masayuki Takagi \cite{takagi-cl-cuda}. The implementation in this
+tree is the CUDA backend. The chapters after this introduction describe that
+backend.
 
-A kernel is compiled to CUDA C, then to PTX by \texttt{nvcc}, then loaded
-through the driver API. The kernel manager does this the first time the kernel
-is launched. Launch looks like an ordinary function call, except that it must
-happen inside a CUDA context and takes \texttt{:grid-dim} and
-\texttt{:block-dim}.
+The kernel language expresses kernel functions, kernel macros, and kernel
+symbol macros as S-expressions. On the CUDA backend, a kernel is compiled to
+CUDA C, then to PTX by \texttt{nvcc}, then loaded through the CUDA driver API.
+The kernel manager does this the first time the kernel is launched. A launch
+looks like an ordinary function call. It takes \texttt{:grid-dim} and
+\texttt{:block-dim}, and on the CUDA backend it runs inside a CUDA context.
 
 Memory blocks pair a host allocation with a device allocation.
 \texttt{sync-memory-block} copies between them. The same package also exposes
 the host pointer and the device pointer separately.
 
-Chorus is verified on Windows and Linux with a current CUDA toolkit. macOS is
-not a supported host. An RTX 50-series GPU (Blackwell, compute capability
-12.0) needs CUDA Toolkit 12.8 or later. CUDA 13.x is the recommended toolkit.
+\section*{Targets}
+
+\begin{itemize}
+  \item NVIDIA GPUs, through CUDA.
+  \item Apple silicon.
+  \item AMD GPUs.
+\end{itemize}
+
+The CUDA backend is verified on Windows and Linux with a current CUDA
+toolkit. An RTX 50-series GPU (Blackwell, compute capability 12.0) needs CUDA
+Toolkit 12.8 or later. CUDA 13.x is the toolkit this backend is written for.
 With CUDA 13, \texttt{nvcc} can target Turing and newer (\texttt{sm\_75} and
 above).
 
+Current macOS has no CUDA driver and no \texttt{nvcc}. NVIDIA's CUDA 10.2
+release notes state that CUDA 10.2 is the last release that supports macOS
+for developing and running CUDA applications
+(\url{https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/}).
+The CUDA 11.0 release notes state that CUDA 11.0 does not support macOS for
+developing and running CUDA applications
+(\url{https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html}).
+Apple silicon remains a Chorus target. On an Apple silicon Mac the CUDA backend
+leaves \texttt{*sdk-not-found*} true, and a CUDA driver call signals
+\texttt{sdk-not-found-error}.
+
 The repository is at \url{https://github.com/cgore/chorus/}.
 
-\section*{Requirements}
+\section*{Requirements for the CUDA backend}
 
 \begin{itemize}
   \item An NVIDIA CUDA-capable GPU.
@@ -67,7 +87,7 @@ sbcl --load ~/quicklisp/setup.lisp --load test/run.lisp
 
 \section*{A kernel}
 
-The following is the shape of \texttt{examples/vector-add.lisp}.
+The following is the CUDA backend's form of \texttt{examples/vector-add.lisp}.
 
 \begin{lstlisting}
 (defkernel vec-add-kernel (void ((a float*) (b float*) (c float*) (n int)))
@@ -98,4 +118,5 @@ The following is the shape of \texttt{examples/vector-add.lisp}.
 
 \texttt{aref} reads an array element. \texttt{set} writes one.
 \texttt{block-dim-x}, \texttt{block-idx-x}, and \texttt{thread-idx-x} are the
-kernel language's names for the corresponding CUDA built-ins.
+kernel language's index variables. The CUDA backend maps them to the CUDA
+built-ins.
