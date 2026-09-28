@@ -1,29 +1,30 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.type
+(defpackage chorus-test.lang.type
   (:use :cl :prove
-        :cl-cuda.driver-api
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type))
-(in-package :cl-cuda-test.lang.type)
+        :chorus.driver-api
+        :chorus.lang.data
+        :chorus.lang.type))
+(in-package :chorus-test.lang.type)
 
 (plan nil)
 
 
 ;;;
-;;; test CL-CUDA-TYPE-P function
+;;; test CHORUS-TYPE-P function
 ;;;
 
-(diag "CL-CUDA-TYPE-P")
+(diag "CHORUS-TYPE-P")
 
-(is (cl-cuda-type-p 'int) t "basic case 1")
-(is (cl-cuda-type-p 'float3) t "basic case 2")
-(is (cl-cuda-type-p 'float3*) t "basic case 3")
-(is (cl-cuda-type-p '*float*) nil "basic case 4")
+(is (chorus-type-p 'int) t "basic case 1")
+(is (chorus-type-p 'float3) t "basic case 2")
+(is (chorus-type-p 'float3*) t "basic case 3")
+(is (chorus-type-p '*float*) nil "basic case 4")
 
 
 ;;;

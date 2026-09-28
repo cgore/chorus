@@ -1,21 +1,22 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-interop.api.context
+(defpackage chorus-interop.api.context
   (:use :cl :cl-reexport
-        :cl-cuda.api.kernel-manager
-        :cl-cuda-interop.driver-api)
+        :chorus.api.kernel-manager
+        :chorus-interop.driver-api)
   (:export ;; CUDA context
            :create-cuda-context
            ;; WITH-CUDA macro
            :with-cuda))
-(in-package :cl-cuda-interop.api.context)
+(in-package :chorus-interop.api.context)
 
 (eval-when (:execute :load-toplevel :compile-toplevel)
-  (reexport-from :cl-cuda.api.context
+  (reexport-from :chorus.api.context
                  :exclude '(:create-cuda-context
                             :with-cuda)))
 
@@ -44,7 +45,7 @@
             (*cuda-context*
               (if ,interop
                   (create-cuda-context *cuda-device*)
-                  (cl-cuda:create-cuda-context *cuda-device*))))
+                  (chorus:create-cuda-context *cuda-device*))))
        (unwind-protect (progn ,@body)
          ;; unload kernel manager
          (kernel-manager-unload *kernel-manager*)

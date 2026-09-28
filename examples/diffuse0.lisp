@@ -1,15 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-examples.diffuse0
-  (:use :cl :cl-cuda)
+(defpackage chorus-examples.diffuse0
+  (:use :cl :chorus)
   (:export :main))
-(in-package :cl-cuda-examples.diffuse0)
+(in-package :chorus-examples.diffuse0)
 
-(setf cl-cuda:*show-messages* nil)
+(setf chorus:*show-messages* nil)
 
 
 ;;; image output functions

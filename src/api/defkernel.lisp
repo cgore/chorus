@@ -1,16 +1,17 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage :cl-cuda.api.defkernel
+(defpackage :chorus.api.defkernel
   (:use :cl
-        :cl-cuda.driver-api
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.type
-        :cl-cuda.api.kernel-manager
-        :cl-cuda.api.memory)
+        :chorus.driver-api
+        :chorus.lang.syntax
+        :chorus.lang.type
+        :chorus.api.kernel-manager
+        :chorus.api.memory)
   (:export :defkernel
            :defkernelmacro
            :expand-macro-1
@@ -23,7 +24,7 @@
   (:import-from :alexandria
                 :format-symbol
                 :with-gensyms))
-(in-package :cl-cuda.api.defkernel)
+(in-package :chorus.api.defkernel)
 
 
 ;;;
@@ -118,7 +119,7 @@
                (cu-launch-kernel ,hfunc
                                  grid-dim-x  grid-dim-y  grid-dim-z
                                  block-dim-x block-dim-y block-dim-z
-                                 0 cl-cuda.api.context:*cuda-stream*
+                                 0 chorus.api.context:*cuda-stream*
                                  ,kargs (cffi:null-pointer))))))))))
 
 
@@ -130,10 +131,10 @@
   `(kernel-manager-define-macro *kernel-manager* ',name ',arguments ',body))
 
 (defun expand-macro-1 (form)
-  (cl-cuda.api.kernel-manager:expand-macro-1 form *kernel-manager*))
+  (chorus.api.kernel-manager:expand-macro-1 form *kernel-manager*))
 
 (defun expand-macro (form)
-  (cl-cuda.api.kernel-manager:expand-macro form *kernel-manager*))
+  (chorus.api.kernel-manager:expand-macro form *kernel-manager*))
 
 
 ;;;

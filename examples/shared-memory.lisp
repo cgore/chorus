@@ -1,17 +1,18 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-examples.shared-memory
+(defpackage chorus-examples.shared-memory
   (:use :cl
-        :cl-cuda
+        :chorus
         :alexandria)
   (:export :main-shared-memory :main-global-memory))
-(in-package :cl-cuda-examples.shared-memory)
+(in-package :chorus-examples.shared-memory)
 
-(setf cl-cuda:*show-messages* nil)
+(setf chorus:*show-messages* nil)
 
 (defmacro def-global-memory (n)
   (let ((name (symbolicate "GLOBAL-MEMORY-" (princ-to-string n))))

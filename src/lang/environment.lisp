@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.environment
+(defpackage chorus.lang.environment
   (:use :cl
-        :cl-cuda.lang.util
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type)
+        :chorus.lang.util
+        :chorus.lang.data
+        :chorus.lang.type)
   (:export ;; Variable environment
            :empty-variable-environment
            ;; Variable environment - Variable
@@ -45,7 +46,7 @@
   (:shadow :variable)
   (:import-from :alexandria
                 :with-gensyms))
-(in-package :cl-cuda.lang.environment)
+(in-package :chorus.lang.environment)
 
 
 ;;;
@@ -112,7 +113,7 @@
     (acons name elem var-env)))
 
 (defun variable-environment-global-exists-p (var-env name)
-  (check-type name cl-cuda-symbol)
+  (check-type name chorus-symbol)
   (global-p (cdr (assoc name var-env))))
 
 (defun %lookup-global (var-env name)
@@ -203,10 +204,10 @@
   (type :type :read-only t))
 
 (defun make-variable (name type)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
-  (unless (cl-cuda-type-p type)
-    (error 'type-error :datum type :expected-type 'cl-cuda-type))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
+  (unless (chorus-type-p type)
+    (error 'type-error :datum type :expected-type 'chorus-type))
   (%make-variable :name name :type type))
 
 
@@ -219,8 +220,8 @@
   (expansion :expansion :read-only t))
 
 (defun make-symbol-macro (name expansion)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
   (%make-symbol-macro :name name :expansion expansion))
 
 
@@ -234,8 +235,8 @@
   (initializer :initializer :read-only t))
 
 (defun make-global (name type initializer)
-  (check-type name cl-cuda-symbol)
-  (check-type type cl-cuda-type)
+  (check-type name chorus-symbol)
+  (check-type type chorus-type)
   (%make-global :name name :type type :initializer initializer))
 
 (defun global-c-name (global)
@@ -255,14 +256,14 @@
   (argument-types :argument-types :read-only t))
 
 (defun make-function (name return-type argument-types)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
-  (unless (cl-cuda-type-p return-type)
-    (error 'type-error :datum return-type :expected-type 'cl-cuda-type))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
+  (unless (chorus-type-p return-type)
+    (error 'type-error :datum return-type :expected-type 'chorus-type))
   (dolist (argument-type argument-types)
-    (unless (cl-cuda-type-p argument-type)
+    (unless (chorus-type-p argument-type)
       (error 'type-error :datum argument-type
-                         :expected-type 'cl-cuda-type)))
+                         :expected-type 'chorus-type)))
   (%make-function :name name
                   :return-type return-type
                   :argument-types argument-types))
@@ -281,8 +282,8 @@
   (body :body :read-only t))
 
 (defun make-macro (name arguments body)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
   (unless (listp arguments)
     (error 'type-error :datum arguments :expected-type 'list))
   (unless (listp body)

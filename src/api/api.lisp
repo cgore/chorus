@@ -1,5 +1,5 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
@@ -11,21 +11,21 @@
                (sb-ext:muffle-conditions sb-kernel::package-at-variance))
     (handler-bind
         (#+sbcl (sb-kernel::package-at-variance #'muffle-warning))
-      (defpackage cl-cuda.api
+      (defpackage chorus.api
         (:use :cl :cl-reexport)))))
-(in-package :cl-cuda.api)
+(in-package :chorus.api)
 
-(reexport-from :cl-cuda.api.nvcc
+(reexport-from :chorus.api.nvcc
                :include '(:*tmp-path*
                           :*nvcc-options*
                           :*nvcc-binary*
                           :find-nvcc
                           :nvcc-available-p
                           :nvcc-arch-option))
-(reexport-from :cl-cuda.api.context)
-(reexport-from :cl-cuda.api.memory)
-(reexport-from :cl-cuda.api.defkernel)
-(reexport-from :cl-cuda.api.macro)
-(reexport-from :cl-cuda.api.timer)
+(reexport-from :chorus.api.context)
+(reexport-from :chorus.api.memory)
+(reexport-from :chorus.api.defkernel)
+(reexport-from :chorus.api.macro)
+(reexport-from :chorus.api.timer)
 
-;; reexport no symbols from cl-cuda.api.kernel-manager package
+;; reexport no symbols from chorus.api.kernel-manager package

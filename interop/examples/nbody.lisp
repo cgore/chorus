@@ -1,6 +1,7 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 #|
@@ -8,11 +9,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-interop-examples.nbody
+(defpackage chorus-interop-examples.nbody
   (:use :cl
-        :cl-cuda-interop)
+        :chorus-interop)
   (:export :main))
-(in-package :cl-cuda-interop-examples.nbody)
+(in-package :chorus-interop-examples.nbody)
 
 
 ;;;
@@ -79,14 +80,14 @@
     (error "Interoperability is available on GPU only."))
   (cond
     ((and gpu interop)
-     (list :gpu/interop (cl-cuda-interop:alloc-memory-block 'float4 n)))
-    (gpu (list :gpu (cl-cuda:alloc-memory-block 'float4 n)))
+     (list :gpu/interop (chorus-interop:alloc-memory-block 'float4 n)))
+    (gpu (list :gpu (chorus:alloc-memory-block 'float4 n)))
     (t (list :cpu (make-vec3-array n)))))
 
 (defun free-array (array)
   (ecase (array-type array)
-    (:gpu/interop (cl-cuda-interop:free-memory-block (raw-array array)))
-    (:gpu (cl-cuda:free-memory-block (raw-array array)))
+    (:gpu/interop (chorus-interop:free-memory-block (raw-array array)))
+    (:gpu (chorus:free-memory-block (raw-array array)))
     (:cpu nil)))
 
 (defun array-ref (array i)
@@ -94,10 +95,10 @@
         (raw-array (raw-array array)))
     (ecase type
       (:gpu/interop
-       (let ((x (cl-cuda-interop:memory-block-aref raw-array i)))
+       (let ((x (chorus-interop:memory-block-aref raw-array i)))
          (values (float4-x x) (float4-y x) (float4-z x) (float4-w x))))
       (:gpu
-       (let ((x (cl-cuda:memory-block-aref raw-array i)))
+       (let ((x (chorus:memory-block-aref raw-array i)))
          (values (float4-x x) (float4-y x) (float4-z x) (float4-w x))))
       (:cpu
        (values (vec3-aref raw-array i :x)
@@ -110,9 +111,9 @@
     (let ((type (array-type array))
           (raw-array (raw-array array)))
       (ecase type
-        (:gpu/interop (setf (cl-cuda-interop:memory-block-aref raw-array i)
+        (:gpu/interop (setf (chorus-interop:memory-block-aref raw-array i)
                             (make-float4 x y z w)))
-        (:gpu (setf (cl-cuda:memory-block-aref raw-array i)
+        (:gpu (setf (chorus:memory-block-aref raw-array i)
                     (make-float4 x y z w)))
         (:cpu (setf (vec3-aref raw-array i :x) x
                     (vec3-aref raw-array i :y) y
@@ -128,8 +129,8 @@
   (let ((array-type (array-type array))
         (raw-array (raw-array array)))
     (ecase array-type
-      (:gpu/interop (cl-cuda-interop:sync-memory-block raw-array direction))
-      (:gpu (cl-cuda:sync-memory-block raw-array direction)))))
+      (:gpu/interop (chorus-interop:sync-memory-block raw-array direction))
+      (:gpu (chorus:sync-memory-block raw-array direction)))))
 
 
 ;;;
@@ -182,7 +183,7 @@
         (syncthreads))
       (return acc))))
 
-(defkernel compute-body-accel-without-shared-memory (float3 ((body-pos float4) (positions float4*) (num-bodies cl-cuda:int)))
+(defkernel compute-body-accel-without-shared-memory (float3 ((body-pos float4) (positions float4*) (num-bodies chorus:int)))
   (let ((acc (float3 0.0 0.0 0.0)))
     (do ((i 0 (+ i 1)))
         ((>= i num-bodies))
@@ -522,7 +523,7 @@
 ;;;
 
 (defparameter +vertex-shader+
-  (cl-cuda.lang.util:unlines
+  (chorus.lang.util:unlines
     "void main()                                                            "
     "{                                                                      "
     "    float pointSize = 500.0 * gl_Point.size;                           "
@@ -538,7 +539,7 @@
     "}                                                                      "))
 
 (defparameter +pixel-shader+
-  (cl-cuda.lang.util:unlines
+  (chorus.lang.util:unlines
      "uniform sampler2D splatTexture;                                        "
      "void main()                                                            "
      "{                                                                      "
@@ -791,7 +792,7 @@
         (glut:*run-main-loop-after-display* nil)
         (window (make-instance 'nbody-window)))
     (glut:display-window window) ; GLUT window must be created before initializing CUDA
-    (let ((cl-cuda-interop:*show-messages* nil))
+    (let ((chorus-interop:*show-messages* nil))
       (with-cuda (dev-id :interop interop)
         (with-framerate-counter (counter)
           (with-nbody-demo (demo 2048 :gpu gpu :interop interop)

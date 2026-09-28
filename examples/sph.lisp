@@ -1,17 +1,18 @@
 #|
-  This file is a part of cl-cuda project.
-  Copyright (c) 2013 Masayuki Takagi (kamonama@gmail.com)
+  This file is a part of the Chorus project.
+  Copyright (c) 2013-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-examples.sph
+(defpackage chorus-examples.sph
   (:use :cl
-        :cl-cuda)
+        :chorus)
   (:import-from :alexandria
                 :with-gensyms
                 :once-only)
   (:export :main))
-(in-package :cl-cuda-examples.sph)
+(in-package :chorus-examples.sph)
 
 
 ;;

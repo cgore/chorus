@@ -1,18 +1,19 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.compiler.compile-expression
+(defpackage chorus-test.lang.compiler.compile-expression
   (:use :cl :prove
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type
-        :cl-cuda.lang.built-in
-        :cl-cuda.lang.environment
-        :cl-cuda.lang.compiler.compile-expression)
-  (:import-from :cl-cuda.lang.compiler.compile-expression
+        :chorus.lang.syntax
+        :chorus.lang.data
+        :chorus.lang.type
+        :chorus.lang.built-in
+        :chorus.lang.environment
+        :chorus.lang.compiler.compile-expression)
+  (:import-from :chorus.lang.compiler.compile-expression
                 :compile-macro
                 :compile-symbol-macro
                 :compile-literal
@@ -22,7 +23,7 @@
                 :compile-constructor
                 :compile-arithmetic
                 :compile-function))
-(in-package :cl-cuda-test.lang.compiler.compile-expression)
+(in-package :chorus-test.lang.compiler.compile-expression)
 
 (plan nil)
 
@@ -111,7 +112,7 @@
   (is (compile-reference 'x var-env func-env) "x"
       "basic case 1")
   (is (compile-reference 'z var-env func-env)
-      "cl_cuda_test_lang_compiler_compile_expression_z"
+      "chorus_test_lang_compiler_compile_expression_z"
       "basic case 2")
   (is-error (compile-reference 'y var-env func-env) simple-error
             "FORM which is a variable not found.")
@@ -194,7 +195,7 @@
       (func-env (function-environment-add-function 'foo 'int '(int int)
                   (empty-function-environment))))
   (is (compile-function '(foo 1 1) var-env func-env)
-      "cl_cuda_test_lang_compiler_compile_expression_foo( 1, 1 )"
+      "chorus_test_lang_compiler_compile_expression_foo( 1, 1 )"
       "basic case 1")
   (is-error (compile-function '(foo 1 1 1) var-env func-env) simple-error))
 

@@ -1,25 +1,25 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.driver-api
+(defpackage chorus-test.driver-api
   (:use :cl :prove
-        :cl-cuda.driver-api)
+        :chorus.driver-api)
   (:import-from :alexandria
                 :with-gensyms))
-(in-package :cl-cuda-test.driver-api)
+(in-package :chorus-test.driver-api)
 
 (plan nil)
 
 (defun compile-test-ptx ()
   "Compile a tiny module for driver-API tests. The checked-in sm_10 PTX
    cannot load on modern GPUs (including Blackwell)."
-  (unless (cl-cuda.api.nvcc:nvcc-available-p)
+  (unless (chorus.api.nvcc:nvcc-available-p)
     (return-from compile-test-ptx nil))
-  (cl-cuda.api.nvcc:nvcc-compile
+  (chorus.api.nvcc:nvcc-compile
    "extern \"C\" __global__ void VecAdd_kernel(int *a) { a[0] = 1; }
 __device__ int a = 0;
 "))

@@ -1,18 +1,19 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2017 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.compiler.compile-statement
+(defpackage chorus-test.lang.compiler.compile-statement
   (:use :cl :prove
-        :cl-cuda.lang.util
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.environment
-        :cl-cuda.lang.compiler.compile-statement)
-  (:import-from :cl-cuda.lang.compiler.compile-statement
+        :chorus.lang.util
+        :chorus.lang.data
+        :chorus.lang.type
+        :chorus.lang.syntax
+        :chorus.lang.environment
+        :chorus.lang.compiler.compile-statement)
+  (:import-from :chorus.lang.compiler.compile-statement
                 :compile-macro
                 :compile-if
                 :compile-let
@@ -24,7 +25,7 @@
                 :compile-progn
                 :compile-return
                 :compile-function))
-(in-package :cl-cuda-test.lang.compiler.compile-statement)
+(in-package :chorus-test.lang.compiler.compile-statement)
 
 (plan nil)
 

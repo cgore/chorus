@@ -1,14 +1,14 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.api.memory
+(defpackage chorus.api.memory
   (:use :cl
-        :cl-cuda.driver-api
-        :cl-cuda.lang.type)
+        :chorus.driver-api
+        :chorus.lang.type)
   (:export ;; Device memory
            :device-total-bytes
            :device-total-kbytes
@@ -37,7 +37,7 @@
            :with-memory-blocks
            :sync-memory-block
            :memory-block-aref))
-(in-package :cl-cuda.api.memory)
+(in-package :chorus.api.memory)
 
 
 ;;;

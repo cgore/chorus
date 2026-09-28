@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.type
+(defpackage chorus.lang.type
   (:use :cl
-        :cl-cuda.driver-api
-        :cl-cuda.lang.data)
-  (:export ;; Cl-cuda types
+        :chorus.driver-api
+        :chorus.lang.data)
+  (:export ;; Chorus types
            :void
            :bool
            :int
@@ -29,8 +30,8 @@
            :double3*
            :double4*
            ;; Type
-           :cl-cuda-type
-           :cl-cuda-type-p
+           :chorus-type
+           :chorus-type-p
            :cffi-type
            :cffi-type-size
            :cuda-type
@@ -50,17 +51,17 @@
            :array-type)
   (:import-from :alexandria
                 :format-symbol))
-(in-package :cl-cuda.lang.type)
+(in-package :chorus.lang.type)
 
 
 ;;;
 ;;; Type
 ;;;
 
-(deftype cl-cuda-type ()
-  `(satisfies cl-cuda-type-p))
+(deftype chorus-type ()
+  `(satisfies chorus-type-p))
 
-(defun cl-cuda-type-p (object)
+(defun chorus-type-p (object)
   (or (scalar-type-p object)
       (structure-type-p object)
       (array-type-p object)))
@@ -207,7 +208,7 @@
       (cl-ppcre:register-groups-bind (base-string nil)
           (+array-type-regex+ object-string)
         (let ((base (intern (string base-string) package)))
-          (cl-cuda-type-p base))))))
+          (chorus-type-p base))))))
 
 (defun array-type-base (type)
   (unless (array-type-p type)
@@ -215,7 +216,7 @@
   (let ((type-string (princ-to-string type)))
     (cl-ppcre:register-groups-bind (base-string nil)
         (+array-type-regex+ type-string)
-      (intern (string base-string) 'cl-cuda.lang.type))))
+      (intern (string base-string) 'chorus.lang.type))))
 
 (defun array-type-stars (type)
   (unless (array-type-p type)
@@ -224,7 +225,7 @@
     (cl-ppcre:register-groups-bind (_ stars-string)
         (+array-type-regex+ type-string)
       (declare (ignore _))
-      (intern (string stars-string) 'cl-cuda.lang.type))))
+      (intern (string stars-string) 'chorus.lang.type))))
 
 (defun array-type-dimension (type)
   (length (princ-to-string (array-type-stars type))))
@@ -243,8 +244,8 @@
     (format nil "~A~A" (cuda-type base) stars)))
 
 (defun array-type (type dimension)
-  (unless (and (cl-cuda-type-p type)
+  (unless (and (chorus-type-p type)
                (not (array-type-p type)))
     (error "The value ~S is an invalid type." type))
   (let ((stars (loop repeat dimension collect #\*)))
-    (format-symbol 'cl-cuda.lang.type "~A~{~A~}" type stars)))
+    (format-symbol 'chorus.lang.type "~A~{~A~}" type stars)))

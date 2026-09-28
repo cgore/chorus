@@ -1,12 +1,13 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2021 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.built-in
+(defpackage chorus.lang.built-in
   (:use :cl
-        :cl-cuda.lang.type)
+        :chorus.lang.type)
   (:export ;; Built-in functions
            :xor
            :shl
@@ -30,7 +31,7 @@
            :built-in-function-return-type
            :built-in-function-infix-p
            :built-in-function-c-name))
-(in-package :cl-cuda.lang.built-in)
+(in-package :chorus.lang.built-in)
 
 
 ;;;

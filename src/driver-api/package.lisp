@@ -1,11 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.driver-api
+(defpackage chorus.driver-api
   (:use :cl)
   (:export ;; Types
            :cu-result

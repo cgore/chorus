@@ -1,16 +1,17 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.util
+(defpackage chorus.lang.util
   (:use :cl)
   (:export :c-identifier
            :lines
            :unlines
            :indent))
-(in-package cl-cuda.lang.util)
+(in-package chorus.lang.util)
 
 
 (defun %c-identifier (object)

@@ -1,12 +1,13 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2019 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(defsystem "cl-cuda-examples"
-  :author "Masayuki Takagi"
+(defsystem "chorus-examples"
+  :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
-  :depends-on ("cl-cuda"
+  :depends-on ("chorus"
                "imago")
   :components ((:module "examples"
                 :components

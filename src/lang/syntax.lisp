@@ -1,13 +1,14 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2017 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.syntax
+(defpackage chorus.lang.syntax
   (:use :cl
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type)
+        :chorus.lang.data
+        :chorus.lang.type)
   (:export ;; Symbol macro
            :symbol-macro-p
            ;; Macro
@@ -125,7 +126,7 @@
            :argument-p
            :argument-var
            :argument-type))
-(in-package :cl-cuda.lang.syntax)
+(in-package :chorus.lang.syntax)
 
 
 ;;;
@@ -133,7 +134,7 @@
 ;;;
 
 (defun symbol-macro-p (form)
-  (cl-cuda-symbol-p form))
+  (chorus-symbol-p form))
 
 
 ;;;
@@ -142,7 +143,7 @@
 
 (defun macro-p (form)
   (cl-pattern:match form
-    ((name . _) (cl-cuda-symbol-p name))
+    ((name . _) (chorus-symbol-p name))
     (_ nil)))
 
 (defun macro-operator (form)
@@ -167,16 +168,16 @@
       (double-literal-p form)))
 
 (defun bool-literal-p (form)
-  (cl-cuda-bool-p form))
+  (chorus-bool-p form))
 
 (defun int-literal-p (form)
-  (cl-cuda-int-p form))
+  (chorus-int-p form))
 
 (defun float-literal-p (form)
-  (cl-cuda-float-p form))
+  (chorus-float-p form))
 
 (defun double-literal-p (form)
-  (cl-cuda-double-p form))
+  (chorus-double-p form))
 
 
 ;;;
@@ -221,7 +222,7 @@
 ;;;
 
 (defun variable-reference-p (form)
-  (cl-cuda-symbol-p form))
+  (chorus-symbol-p form))
 
 
 ;;;
@@ -349,7 +350,7 @@
 
 (defun function-p (form)
   (cl-pattern:match form
-    ((name . _) (cl-cuda-symbol-p name))
+    ((name . _) (chorus-symbol-p name))
     (_ nil)))
 
 (defun function-operator (form)
@@ -424,7 +425,7 @@
 
 (defun let-binding-p (object)
   (cl-pattern:match object
-    ((var _) (cl-cuda-symbol-p var))
+    ((var _) (chorus-symbol-p var))
     (_ nil)))
 
 (defun let-binding-var (binding)
@@ -509,9 +510,9 @@
 (defun macrolet-binding-p (object)
   (cl-pattern:match object
     ((name bindings . _)
-     (and (cl-cuda-symbol-p name)
+     (and (chorus-symbol-p name)
           (alexandria:proper-list-p bindings)
-          (mapcar #'cl-cuda-symbol-p bindings)))
+          (mapcar #'chorus-symbol-p bindings)))
     (_ nil)))
 
 (defun macrolet-binding-symbol (binding)
@@ -567,8 +568,8 @@
 
 (defun do-binding-p (object)
   (cl-pattern:match object
-    ((var _) (cl-cuda-symbol-p var))
-    ((var _ _) (cl-cuda-symbol-p var))
+    ((var _) (chorus-symbol-p var))
+    ((var _ _) (chorus-symbol-p var))
     (_ nil)))
 
 (defun do-binding-var (binding)
@@ -620,8 +621,8 @@
 
 (defun with-shared-memory-spec-p (object)
   (cl-pattern:match object
-    ((var type . _) (and (cl-cuda-symbol-p var)
-                         (cl-cuda-type-p type)))
+    ((var type . _) (and (chorus-symbol-p var)
+                         (chorus-type-p type)))
     (_ nil)))
 
 (defun with-shared-memory-spec-var (spec)
@@ -706,8 +707,8 @@
 
 (defun argument-p (object)
   (cl-pattern:match object
-    ((var type) (and (cl-cuda-symbol-p var)
-                     (cl-cuda-type-p type)))
+    ((var type) (and (chorus-symbol-p var)
+                     (chorus-type-p type)))
     (_ nil)))
 
 (defun argument-var (argument)

@@ -1,9 +1,10 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(in-package :cl-cuda-misc)
+(in-package :chorus-misc)
 
 (defun read-lines (path)
   (with-open-file (in path)
@@ -21,7 +22,7 @@
         (list (parse-integer (aref xs 1)) (aref xs 0))))))   
 
 (defun read-error-strings ()
-  (let ((path (asdf:system-relative-pathname :cl-cuda #P"misc/drvapi_error_string.h")))
+  (let ((path (asdf:system-relative-pathname :chorus #P"misc/drvapi_error_string.h")))
     (remove nil (mapcar #'scan-error-string (read-lines path)))))
 
 (defun list->plist (num-and-str)
@@ -29,7 +30,7 @@
     `(:num ,num :str ,str)))
 
 (defun output-template (out)
-  (let ((path (asdf:system-relative-pathname :cl-cuda #P"misc/get-error-string.template"))
+  (let ((path (asdf:system-relative-pathname :chorus #P"misc/get-error-string.template"))
         (timestamp (local-time:format-timestring nil (local-time:now)
                                                  :format '(:short-month ". " :day " " :year)))
         (error-strings (mapcar #'list->plist (read-error-strings))))
@@ -38,7 +39,7 @@
                                                   :error-strings ,error-strings)))))
 
 (defun convert-error-string ()
-  (let ((path (asdf:system-relative-pathname :cl-cuda #P"src/driver-api/get-error-string.lisp")))
+  (let ((path (asdf:system-relative-pathname :chorus #P"src/driver-api/get-error-string.lisp")))
     (with-open-file (out path :direction :output :if-exists :supersede)
       (unless out
         (error "cannot open file: ~A" path))

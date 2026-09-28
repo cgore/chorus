@@ -1,11 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 
-(in-package cl-cuda.driver-api)
+(in-package chorus.driver-api)
 
 (defvar *sdk-not-found* nil)
 

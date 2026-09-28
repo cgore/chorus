@@ -1,15 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.compiler.compile-kernel
+(defpackage chorus-test.lang.compiler.compile-kernel
   (:use :cl :prove
-        :cl-cuda.lang.type
-        :cl-cuda.lang.kernel
-        :cl-cuda.lang.compiler.compile-kernel))
-(in-package :cl-cuda-test.lang.compiler.compile-kernel)
+        :chorus.lang.type
+        :chorus.lang.kernel
+        :chorus.lang.compiler.compile-kernel))
+(in-package :chorus-test.lang.compiler.compile-kernel)
 
 (plan nil)
 
@@ -43,35 +44,35 @@
  *  Kernel globals
  */
 
-__device__ __constant__ static int cl_cuda_test_lang_compiler_compile_kernel_a = 1;
-__device__ static float cl_cuda_test_lang_compiler_compile_kernel_b = 1.0f;
+__device__ __constant__ static int chorus_test_lang_compiler_compile_kernel_a = 1;
+__device__ static float chorus_test_lang_compiler_compile_kernel_b = 1.0f;
 
 
 /**
  *  Kernel function prototypes
  */
 
-extern \"C\" __global__ void cl_cuda_test_lang_compiler_compile_kernel_foo( int* x );
-extern \"C\" __device__ int cl_cuda_test_lang_compiler_compile_kernel_bar( int x );
-extern \"C\" __global__ void cl_cuda_test_lang_compiler_compile_kernel_baz();
+extern \"C\" __global__ void chorus_test_lang_compiler_compile_kernel_foo( int* x );
+extern \"C\" __device__ int chorus_test_lang_compiler_compile_kernel_bar( int x );
+extern \"C\" __global__ void chorus_test_lang_compiler_compile_kernel_baz();
 
 
 /**
  *  Kernel function definitions
  */
 
-__global__ void cl_cuda_test_lang_compiler_compile_kernel_foo( int* x )
+__global__ void chorus_test_lang_compiler_compile_kernel_foo( int* x )
 {
-  x[0] = cl_cuda_test_lang_compiler_compile_kernel_bar( 1 );
+  x[0] = chorus_test_lang_compiler_compile_kernel_bar( 1 );
   return;
 }
 
-__device__ int cl_cuda_test_lang_compiler_compile_kernel_bar( int x )
+__device__ int chorus_test_lang_compiler_compile_kernel_bar( int x )
 {
   return x;
 }
 
-__global__ void cl_cuda_test_lang_compiler_compile_kernel_baz()
+__global__ void chorus_test_lang_compiler_compile_kernel_baz()
 {
   return;
 }

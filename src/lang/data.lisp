@@ -1,22 +1,23 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.data
+(defpackage chorus.lang.data
   (:use :cl)
   (:export ;; Symbol
-           :cl-cuda-symbol
-           :cl-cuda-symbol-p
+           :chorus-symbol
+           :chorus-symbol-p
            ;; Bool
-           :cl-cuda-bool-p
+           :chorus-bool-p
            ;; Int
-           :cl-cuda-int-p
+           :chorus-int-p
            ;; Float
-           :cl-cuda-float-p
+           :chorus-float-p
            ;; Double
-           :cl-cuda-double-p
+           :chorus-double-p
            ;; Float3
            :float3
            :make-float3
@@ -57,17 +58,17 @@
            :with-double4)
   (:import-from :alexandria
                 :once-only))
-(in-package :cl-cuda.lang.data)
+(in-package :chorus.lang.data)
 
 
 ;;;
 ;;; Symbol
 ;;;
 
-(deftype cl-cuda-symbol ()
-  `(satisfies cl-cuda-symbol-p))
+(deftype chorus-symbol ()
+  `(satisfies chorus-symbol-p))
 
-(defun cl-cuda-symbol-p (object)
+(defun chorus-symbol-p (object)
   (symbolp object))
 
 
@@ -75,7 +76,7 @@
 ;;; Bool
 ;;;
 
-(defun cl-cuda-bool-p (object)
+(defun chorus-bool-p (object)
   (typep object 'boolean))
 
 
@@ -83,7 +84,7 @@
 ;;; Int
 ;;;
 
-(defun cl-cuda-int-p (object)
+(defun chorus-int-p (object)
   (integerp object))
 
 
@@ -91,7 +92,7 @@
 ;;; Float
 ;;;
 
-(defun cl-cuda-float-p (object)
+(defun chorus-float-p (object)
   (typep object 'single-float))
 
 
@@ -99,7 +100,7 @@
 ;;; Double
 ;;;
 
-(defun cl-cuda-double-p (object)
+(defun chorus-double-p (object)
   (typep object 'double-float))
 
 

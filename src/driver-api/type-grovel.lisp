@@ -1,5 +1,5 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
@@ -10,7 +10,7 @@
 |#
 
 (pkg-config-cflags "cuda" :optional t)
-(in-package :cl-cuda.driver-api)
+(in-package :chorus.driver-api)
 
 
 ;;;

@@ -1,16 +1,17 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage :cl-cuda.api.macro
+(defpackage :chorus.api.macro
   (:use :cl
-        :cl-cuda.api.defkernel)
+        :chorus.api.defkernel)
   (:export :let*
            :when
            :unless))
-(in-package :cl-cuda.api.macro)
+(in-package :chorus.api.macro)
 
 
 (defkernelmacro let* (bindings &body body)

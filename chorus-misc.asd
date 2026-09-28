@@ -1,10 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2019 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(defsystem "cl-cuda-misc"
-  :author "Masayuki Takagi"
+(defsystem "chorus-misc"
+  :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
   :depends-on ("local-time" "cl-emb")
   :components ((:module "misc"

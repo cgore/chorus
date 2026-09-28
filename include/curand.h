@@ -1,10 +1,11 @@
 /**
-   This file is a part of cl-cuda project.
+   This file is a part of the Chorus project.
    Copyright (c) 2013 Masayuki Takagi (kamonama@gmail.com)
+   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
  */
 
-#ifndef CL_CUDA_CURAND_H_
-#define CL_CUDA_CURAND_H_
+#ifndef CHORUS_CURAND_H_
+#define CHORUS_CURAND_H_
 
 #include <curand_kernel.h>
 
@@ -34,4 +35,4 @@ __device__ double curand_normal_double_xorwow ( curandStateXORWOW_t *state )
     return curand_normal_double ( state );
 }
 
-#endif // CL_CUDA_CURAND_H_
+#endif // CHORUS_CURAND_H_

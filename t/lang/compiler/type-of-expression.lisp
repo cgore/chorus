@@ -1,18 +1,18 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.compiler.type-of-expression
+(defpackage chorus-test.lang.compiler.type-of-expression
   (:use :cl :prove
-        :cl-cuda.lang.compiler.type-of-expression
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.environment)
-  (:import-from :cl-cuda.lang.compiler.type-of-expression
+        :chorus.lang.compiler.type-of-expression
+        :chorus.lang.data
+        :chorus.lang.type
+        :chorus.lang.syntax
+        :chorus.lang.environment)
+  (:import-from :chorus.lang.compiler.type-of-expression
                 :type-of-macro
                 :type-of-symbol-macro
                 :type-of-literal
@@ -22,7 +22,7 @@
                 :type-of-constructor
                 :type-of-arithmetic
                 :type-of-function))
-(in-package :cl-cuda-test.lang.compiler.type-of-expression)
+(in-package :chorus-test.lang.compiler.type-of-expression)
 
 (plan nil)
 

@@ -1,12 +1,13 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.api.timer
+(defpackage chorus.api.timer
   (:use :cl
-        :cl-cuda.driver-api)
+        :chorus.driver-api)
   (:export :create-timer
            :destroy-timer
            :start-timer
@@ -14,7 +15,7 @@
            :synchronize-timer
            :elapsed-time
            :with-timer))
-(in-package :cl-cuda.api.timer)
+(in-package :chorus.api.timer)
 
 
 ;;;

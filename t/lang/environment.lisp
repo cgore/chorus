@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.environment
+(defpackage chorus-test.lang.environment
   (:use :cl :prove
-        :cl-cuda.lang.type
-        :cl-cuda.lang.environment))
-(in-package :cl-cuda-test.lang.environment)
+        :chorus.lang.type
+        :chorus.lang.environment))
+(in-package :chorus-test.lang.environment)
 
 (plan nil)
 
@@ -88,7 +89,7 @@
   (is (variable-environment-global-name var-env 'x) 'x
       "basic case 4")
   (is (variable-environment-global-c-name var-env 'x)
-      "cl_cuda_test_lang_environment_x"
+      "chorus_test_lang_environment_x"
       "basic case 5")
   (is (variable-environment-global-type var-env 'x) 'int
       "basic case 6")
@@ -105,7 +106,7 @@
 (is-error (variable-environment-add-global 'x :foo 1
            (empty-variable-environment))
           type-error
-          "Invalid cl-cuda type.")
+          "Invalid chorus type.")
 
 (is-error (variable-environment-add-global 'x 'int 1
            :foo)
@@ -171,7 +172,7 @@
       "basic case 3")
   (is (function-environment-function-name func-env 'foo) 'foo
       "basic case 4")
-  (is (function-environment-function-c-name func-env 'foo) "cl_cuda_test_lang_environment_foo"
+  (is (function-environment-function-c-name func-env 'foo) "chorus_test_lang_environment_foo"
       "basic case 5")
   (is (function-environment-function-return-type func-env 'foo) 'int
       "basic case 6")

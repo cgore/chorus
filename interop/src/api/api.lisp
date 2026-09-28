@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-interop.api
+(defpackage chorus-interop.api
   (:use :cl :cl-reexport))
-(in-package :cl-cuda-interop.api)
+(in-package :chorus-interop.api)
 
-(reexport-from :cl-cuda.api
+(reexport-from :chorus.api
                :exclude '(;; context
                           :create-cuda-context
                           :with-cuda
@@ -26,6 +27,6 @@
                           :memory-block-aref
                           ;; defkernel
                           :defkernel))
-(reexport-from :cl-cuda-interop.api.context)
-(reexport-from :cl-cuda-interop.api.memory)
-(reexport-from :cl-cuda-interop.api.defkernel)
+(reexport-from :chorus-interop.api.context)
+(reexport-from :chorus-interop.api.memory)
+(reexport-from :chorus-interop.api.defkernel)

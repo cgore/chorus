@@ -1,19 +1,20 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.compiler.compile-expression
+(defpackage chorus.lang.compiler.compile-expression
   (:use :cl
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.environment
-        :cl-cuda.lang.built-in
-        :cl-cuda.lang.compiler.compile-data
-        :cl-cuda.lang.compiler.type-of-expression)
+        :chorus.lang.type
+        :chorus.lang.syntax
+        :chorus.lang.environment
+        :chorus.lang.built-in
+        :chorus.lang.compiler.compile-data
+        :chorus.lang.compiler.type-of-expression)
   (:export :compile-expression))
-(in-package :cl-cuda.lang.compiler.compile-expression)
+(in-package :chorus.lang.compiler.compile-expression)
 
 
 ;;;
@@ -42,7 +43,7 @@
 ;;;
 
 (defun %macro-p (form func-env)
-  (cl-cuda.lang.compiler.type-of-expression::%macro-p form func-env))
+  (chorus.lang.compiler.type-of-expression::%macro-p form func-env))
 
 (defun compile-macro (form var-env func-env initializer-p)
   (let ((operator (macro-operator form))
@@ -57,7 +58,7 @@
 ;;;
 
 (defun %symbol-macro-p (form var-env)
-  (cl-cuda.lang.compiler.type-of-expression::%symbol-macro-p form var-env))
+  (chorus.lang.compiler.type-of-expression::%symbol-macro-p form var-env))
 
 (defun compile-symbol-macro (form var-env func-env initializer-p)
   (let ((form1 (variable-environment-symbol-macro-expansion var-env form)))
@@ -236,7 +237,7 @@
 ;;;
 
 (defun type-of-operands (operands var-env func-env)
-  (cl-cuda.lang.compiler.type-of-expression::type-of-operands operands var-env
+  (chorus.lang.compiler.type-of-expression::type-of-operands operands var-env
                                                               func-env))
 
 (defun compile-operands (operands var-env func-env)

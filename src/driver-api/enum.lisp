@@ -1,11 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 
-(in-package :cl-cuda.driver-api)
+(in-package :chorus.driver-api)
 
 
 ;;;
@@ -47,6 +47,6 @@
   (:cu-mem-host-register-devicemap #X2))
 
 ;; From CUdevice_attribute. Only the compute-capability queries are bound;
-;; the rest of the enum is large and unused by cl-cuda.
+;; the rest of the enum is large and unused by chorus.
 (defconstant cu-device-attribute-compute-capability-major 75)
 (defconstant cu-device-attribute-compute-capability-minor 76)

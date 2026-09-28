@@ -1,16 +1,18 @@
-# Cl-Cuda
+# Chorus
 
-Cl-cuda is a library to use NVIDIA CUDA in Common Lisp programs. It provides not only FFI binding to CUDA driver API but the kernel description language with which users can define CUDA kernel functions in S-expression. The kernel description language also provides facilities to define kernel macros and kernel symbol macros in addition to kernel functions. Cl-cuda's kernel macro and kernel symbol macro offer powerful abstraction that CUDA C itself does not have and provide enormous advantage in resource-limited GPU programming.
+Chorus originated as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA.
 
-Kernel functions defined with the kernel description language can be launched as almost same as ordinary Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by cl-cuda. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](#kernel-manager) section.
+Chorus is a library to use NVIDIA CUDA in Common Lisp programs. It provides not only FFI binding to CUDA driver API but the kernel description language with which users can define CUDA kernel functions in S-expression. The kernel description language also provides facilities to define kernel macros and kernel symbol macros in addition to kernel functions. Chorus's kernel macro and kernel symbol macro offer powerful abstraction that CUDA C itself does not have and provide enormous advantage in resource-limited GPU programming.
 
-Memory management is also one of the most important things in GPU programming. Cl-cuda provides memory block data structure which abstract host memory and device memory. With memory block, users do not need to manage host memory and device memory individually for themselves. It lightens their burden on memory management, prevents bugs and keeps code simple. Besides memory block that provides high level abstraction on host and device memory, cl-cuda also offers low level interfaces to handle CFFI pointers and CUDA device pointers directly. With these primitive interfaces, users can choose to gain more flexible memory control than using memory block if needed.
+Kernel functions defined with the kernel description language can be launched as almost same as ordinary Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by Chorus. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](#kernel-manager) section.
 
-Cl-cuda is verified on Windows and Linux with modern CUDA. Current macOS is not a supported host. For detail, see [Verification environments](#verification-environments) section.
+Memory management is also one of the most important things in GPU programming. Chorus provides memory block data structure which abstract host memory and device memory. With memory block, users do not need to manage host memory and device memory individually for themselves. It lightens their burden on memory management, prevents bugs and keeps code simple. Besides memory block that provides high level abstraction on host and device memory, Chorus also offers low level interfaces to handle CFFI pointers and CUDA device pointers directly. With these primitive interfaces, users can choose to gain more flexible memory control than using memory block if needed.
+
+Chorus is verified on Windows and Linux with modern CUDA. Current macOS is not a supported host. For detail, see [Verification environments](#verification-environments) section.
 
 ## Example
 
-Following code is a part of vector addition example using cl-cuda based on CUDA SDK's "vectorAdd" sample.
+Following code is a part of vector addition example using Chorus based on CUDA SDK's "vectorAdd" sample.
 
 You can define `vec-add-kernel` kernel function using `defkernel` macro. In the definition, `aref` is to refer values stored in an array. `set` is to store values into an array. `block-dim-x`, `block-idx-x` and `thread-idx-x` have their counterparts in CUDA C's built-in variables and are used to specify the array index to be operated in each CUDA thread.
 
@@ -45,23 +47,23 @@ For the whole code, please see [examples/vector-add.lisp](examples/vector-add.li
 
 ## Installation
 
-You can install cl-cuda via Quicklisp once this system is on the local-projects path (or otherwise visible to ASDF):
+You can install Chorus via Quicklisp once this system is on the local-projects path (or otherwise visible to ASDF):
 
-    > (ql:quickload :cl-cuda)
+    > (ql:quickload :chorus)
 
 To run the test suite from a checkout:
 
-    > (asdf:test-system :cl-cuda)
+    > (asdf:test-system :chorus)
 
 or, with SBCL:
 
     sbcl --load ~/quicklisp/setup.lisp --load t/run.lisp
 
-`t/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `cl-cuda-test` (tests run at load time).
+`t/run.lisp` loads the local `.asd` files, prints driver/`nvcc` discovery, then loads `chorus-test` (tests run at load time).
 
 ## Requirements
 
-Cl-cuda requires following:
+Chorus requires following:
 
 * NVIDIA CUDA-enabled GPU
 * CUDA driver (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux)
@@ -223,20 +225,20 @@ Accesses a global variable's value on device from host with automatically copyin
 
 ### [Special Variable] \*tmp-path\*
 
-Specifies the temporary directory in which cl-cuda generates files such as `.cu` file and `.ptx` file. The default is `nil`, which uses the OS temporary directory (`UIOP:TEMPORARY-DIRECTORY`).
+Specifies the temporary directory in which Chorus generates files such as `.cu` file and `.ptx` file. The default is `nil`, which uses the OS temporary directory (`UIOP:TEMPORARY-DIRECTORY`).
 
     (setf *tmp-path* "/path/to/tmp/")   ; Unix
-    (setf *tmp-path* #P"C:/Temp/cl-cuda/")
+    (setf *tmp-path* #P"C:/Temp/chorus/")
 
 ### [Special Variable] \*nvcc-options\*
 
-Specifies additional command line options passed to `nvcc` command that cl-cuda calls internally. The default is `nil`. If no architecture option is present (`-arch=…`, `--gpu-architecture`, or `-gencode`), `with-cuda` inserts `-arch=sm_XY` from the device. Compiles that happen outside `with-cuda` fall back to `-arch=native` (CUDA 11.6+).
+Specifies additional command line options passed to `nvcc` command that Chorus calls internally. The default is `nil`. If no architecture option is present (`-arch=…`, `--gpu-architecture`, or `-gencode`), `with-cuda` inserts `-arch=sm_XY` from the device. Compiles that happen outside `with-cuda` fall back to `-arch=native` (CUDA 11.6+).
 
     (setf *nvcc-options* (list "-arch=sm_120"))
 
 ### [Special Variable] \*nvcc-binary\*
 
-Specifies the path to `nvcc` so that cl-cuda can call it internally. The default is `nil`, which auto-detects `nvcc` on `PATH` and in standard CUDA Toolkit locations. The strings `"nvcc"` and `"nvcc.exe"` also mean auto-detect.
+Specifies the path to `nvcc` so that Chorus can call it internally. The default is `nil`, which auto-detects `nvcc` on `PATH` and in standard CUDA Toolkit locations. The strings `"nvcc"` and `"nvcc.exe"` also mean auto-detect.
 
     (setf *nvcc-binary* "/usr/local/cuda/bin/nvcc")
     (setf *nvcc-binary* #P"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3/bin/nvcc.exe")
@@ -261,13 +263,13 @@ Formats an nvcc architecture flag from a compute capability. `(nvcc-arch-option 
 
 ### [Special Variable] \*show-messages\*
 
-Specifies whether to let cl-cuda show operational messages or not. The default is `t`.
+Specifies whether to let Chorus show operational messages or not. The default is `t`.
 
     (setf *show-messages* nil)
 
 ### [Special Variable] \*sdk-not-found\*
 
-Readonly. The value is `t` if cl-cuda failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On current macOS it is `t`, because NVIDIA no longer ships that driver. See [macOS (blocked)](#macos-blocked). This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
+Readonly. The value is `t` if Chorus failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On current macOS it is `t`, because NVIDIA no longer ships that driver. See [macOS (blocked)](#macos-blocked). This does not indicate whether the CUDA Toolkit (`nvcc`) is installed; use `nvcc-available-p` for that.
 
     *sdk-not-found*    ; => nil
 
@@ -319,7 +321,7 @@ Compiled:
 
     SYMBOL-MACROLET ({(symbol expansion)}*) statement*
 
-`symbol-macrolet` establishes symbol expansion rules in the variable environment and execute a series of `statement`s that use these rules. In cl-cuda's compilation process, the symbol macros found in a form are replaces by corresponding `expansion`s.
+`symbol-macrolet` establishes symbol expansion rules in the variable environment and execute a series of `statement`s that use these rules. In Chorus's compilation process, the symbol macros found in a form are replaces by corresponding `expansion`s.
 
 Example:
 
@@ -443,30 +445,30 @@ Compiled:
 
 ## Architecture
 
-The following figure illustrates cl-cuda's overall architecture.
+The following figure illustrates Chorus's overall architecture.
 
                        +---------------------------------+-----------+-----------+
                        | defkernel                       | memory    | context   |
-           cl-cuda.api +---------------------------------+           |           |
+            chorus.api +---------------------------------+           |           |
                        | kernel-manager / nvcc           |           |           |
                        +---------------------------------+-----------+-----------+
                        +----------------------------+----------------------------+
-          cl-cuda.lang | Kernel description lang.   | the Compiler               |
+           chorus.lang | Kernel description lang.   | the Compiler               |
                        +----------------------------+----------------------------+
                        +---------------------------------------------------------+
-    cl-cuda.driver-api | driver-api                                              |
+     chorus.driver-api | driver-api                                              |
                        +---------------------------------------------------------+
                        +---------------------------------------------------------+
                   CUDA | CUDA driver API                                         |
                        +---------------------------------------------------------+
 
-Cl-cuda consists of three subpackages: `api`, `lang` and `driver-api`.
+Chorus consists of three subpackages: `api`, `lang` and `driver-api`.
 
 `driver-api` subpackage is a FFI binding to CUDA driver API. `api` subpackage invokes CUDA driver API via this binding internally.
 
 `lang` subpackage provides the kernel description language. It provides the language's syntax, type, built-in functions and the compiler to CUDA C. `api` subpackage calls this compiler.
 
-`api` subpackage provides API for cl-cuda users. It further consists of `context`, `memory`, `nvcc`, `kernel-manager` and `defkernel` subpackages. `context` subpackage has responsibility on initializing CUDA and managing CUDA contexts. `memory` subpackage offers memory management, providing high level API for memory block data structure and low level API for handling host memory and device memory directly. `nvcc` locates the CUDA toolkit compiler and invokes it. `kernel-manager` subpackage manages the entire process from compiling the kernel description language to loading/unloading obtained kernel module autonomously. Since it is wrapped by `defkernel` subpackage which provides the interface to define kernel functions, cl-cuda's users usually do not need to use it for themselves.
+`api` subpackage provides API for Chorus users. It further consists of `context`, `memory`, `nvcc`, `kernel-manager` and `defkernel` subpackages. `context` subpackage has responsibility on initializing CUDA and managing CUDA contexts. `memory` subpackage offers memory management, providing high level API for memory block data structure and low level API for handling host memory and device memory directly. `nvcc` locates the CUDA toolkit compiler and invokes it. `kernel-manager` subpackage manages the entire process from compiling the kernel description language to loading/unloading obtained kernel module autonomously. Since it is wrapped by `defkernel` subpackage which provides the interface to define kernel functions, Chorus's users usually do not need to use it for themselves.
 
 ## Kernel manager
 
@@ -496,36 +498,36 @@ Following illustrates the kernel manager's state transfer.
 
 In the module-loaded state and function-loaded state, `kernel-manager-unload` function unloads the kernel module and turn the kernel manager's state back to the compiled state. `kernel-manager-define-function`, `kernel-manager-define-macro`, `kernel-manager-define-symbol-macro` and `kernel-manager-define-global` functions, which are wrapped as `defkernel`, `defkernelmacro`, `defkernel-symbol-macro` and `defglobal` macros respectively, change its state back into the initial state and make it require compilation again.
 
-The kernel manager is stored in `*kernel-manager*` special variable when cl-cuda is loaded and keeps alive during the Common Lisp process. Usually, you do not need to manage it explicitly.
+The kernel manager is stored in `*kernel-manager*` special variable when Chorus is loaded and keeps alive during the Common Lisp process. Usually, you do not need to manage it explicitly.
 
-## How cl-cuda works when the CUDA driver is not installed
+## How Chorus works when the CUDA driver is not installed
 
-This section is for cl-cuda users who develop an application or a library which has an alternative subsystem other than cl-cuda and may run on machines without an NVIDIA driver.
+This section is for Chorus users who develop an application or a library which has an alternative subsystem other than Chorus and may run on machines without an NVIDIA driver.
 
 **Compile and load time**
-Cl-cuda is compiled and loaded without signaling if the CUDA driver library cannot be loaded. API symbols are still interned, so user programs can refer to them.
+Chorus is compiled and loaded without signaling if the CUDA driver library cannot be loaded. API symbols are still interned, so user programs can refer to them.
 
 **Run time**
-Calling a cl-cuda driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
+Calling a Chorus driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
 
-How cl-cuda decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework. On the macOS machine recorded under [macOS (blocked)](#macos-blocked), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
+How Chorus decides the driver is present is whether `cffi:use-foreign-library` successfully loaded `nvcuda.dll` / `libcuda.so.1` / the CUDA framework. On the macOS machine recorded under [macOS (blocked)](#macos-blocked), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
 
 ## Streams
 
-The low level interface works with multiple streams. With the async stuff it's possible to overlap copy and computation with two streams. Cl-cuda provides `*cuda-stream*` special variable, to which bound stream is used in kernel function calls.
+The low level interface works with multiple streams. With the async stuff it's possible to overlap copy and computation with two streams. Chorus provides `*cuda-stream*` special variable, to which bound stream is used in kernel function calls.
 
 The following is for working with streams in [mgl-mat](https://github.com/melisgl/mgl-mat):
 
     (defmacro with-cuda-stream ((stream) &body body)
       (alexandria:with-gensyms (stream-pointer)
         `(cffi:with-foreign-objects
-             ((,stream-pointer 'cl-cuda.driver-api:cu-stream))
-           (cl-cuda.driver-api:cu-stream-create ,stream-pointer 0)
+             ((,stream-pointer 'chorus.driver-api:cu-stream))
+           (chorus.driver-api:cu-stream-create ,stream-pointer 0)
            (let ((,stream (cffi:mem-ref ,stream-pointer
-                                        'cl-cuda.driver-api:cu-stream)))
+                                        'chorus.driver-api:cu-stream)))
              (unwind-protect
                   (locally ,@body)
-               (cl-cuda.driver-api:cu-stream-destroy ,stream))))))
+               (chorus.driver-api:cu-stream-destroy ,stream))))))
 
 then, call a kernel function with binding a stream to `*cuda-stream*`:
 

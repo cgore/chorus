@@ -1,10 +1,11 @@
 /**
-   This file is a part of cl-cuda project.
-   Copyright (c) 2013 Masayuki Takagi (kamonama@gmail.com)
+   This file is a part of the Chorus project.
+   Copyright (c) 2013-2016 Masayuki Takagi (kamonama@gmail.com)
+   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
  */
 
-#ifndef CL_CUDA_FLOAT3_H_
-#define CL_CUDA_FLOAT3_H_
+#ifndef CHORUS_FLOAT3_H_
+#define CHORUS_FLOAT3_H_
 
 __device__ float3 float3_add ( float3 a, float3 b )
 {
@@ -46,4 +47,4 @@ __device__ float float3_dot ( float3 a, float3 b )
   return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-#endif // CL_CUDA_FLOAT3_H_
+#endif // CHORUS_FLOAT3_H_

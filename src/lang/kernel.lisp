@@ -1,15 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.kernel
+(defpackage chorus.lang.kernel
   (:use :cl
-        :cl-cuda.lang.util
-        :cl-cuda.lang.data
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax)
+        :chorus.lang.util
+        :chorus.lang.data
+        :chorus.lang.type
+        :chorus.lang.syntax)
   (:export ;; Kernel
            :make-kernel
            :kernel-function-names
@@ -47,14 +48,14 @@
            :kernel-global-c-name
            :kernel-global-qualifiers
            :kernel-global-initializer)
-  ;; Shadow symbols in cl-cuda.lang.syntax.
+  ;; Shadow symbols in chorus.lang.syntax.
   (:shadow :macro-p
            :symbol-macro-p
            :function-p)
   (:import-from :alexandria
                 :with-gensyms
                 :ensure-list))
-(in-package :cl-cuda.lang.kernel)
+(in-package :chorus.lang.kernel)
 
 
 ;;;
@@ -176,14 +177,14 @@
 
 (defun expand-macro-1 (form kernel)
   (cond
-    ((cl-cuda.lang.syntax:macro-p form)
+    ((chorus.lang.syntax:macro-p form)
      (let ((operator (macro-operator form))
            (operands (macro-operands form)))
        (if (kernel-macro-exists-p kernel operator)
            (let ((expander (kernel-macro-expander kernel operator)))
              (values (funcall expander operands) t))
            (values form nil))))
-    ((cl-cuda.lang.syntax:symbol-macro-p form)
+    ((chorus.lang.syntax:symbol-macro-p form)
      (if (kernel-symbol-macro-exists-p kernel form)
          (let ((expansion (kernel-symbol-macro-expansion kernel form)))
            (values expansion t))
@@ -238,7 +239,7 @@
   name)
 
 (defun kernel-global-exists-p (kernel name)
-  (check-type name cl-cuda-symbol)
+  (check-type name chorus-symbol)
   (let ((namespace (kernel-variable-namespace kernel)))
     (global-p (getf namespace name))))
 
@@ -275,10 +276,10 @@
   (body :body :read-only t))
 
 (defun make-function (name return-type arguments body)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
-  (unless (cl-cuda-type-p return-type)
-    (error 'type-error :datum return-type :expected-type 'cl-cuda-type))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
+  (unless (chorus-type-p return-type)
+    (error 'type-error :datum return-type :expected-type 'chorus-type))
   (dolist (argument arguments)
     (unless (argument-p argument)
       (error 'type-error :datum argument :expected-type 'argument)))
@@ -311,8 +312,8 @@
   (body :body :read-only t))
 
 (defun make-macro (name arguments body)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
   (unless (listp arguments)
     (error 'type-error :datum arguments :expected-type 'list))
   (unless (listp body)
@@ -339,8 +340,8 @@
   (expansion :expansion :read-only t))
 
 (defun make-symbol-macro (name expansion)
-  (unless (cl-cuda-symbol-p name)
-    (error 'type-error :datum name :expected-type 'cl-cuda-symbol))
+  (unless (chorus-symbol-p name)
+    (error 'type-error :datum name :expected-type 'chorus-symbol))
   (%make-symbol-macro :name name
                       :expansion expansion))
 
@@ -364,7 +365,7 @@
 (defun make-global (name qualifiers initializer)
   (let ((qualifiers1 (ensure-list qualifiers)))
     ;; Check type of name.
-    (check-type name cl-cuda-symbol)
+    (check-type name chorus-symbol)
     ;; Check type of qualifiers.
     (loop for qualifier in qualifiers1
        do (check-type qualifier variable-qualifier))

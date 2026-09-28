@@ -1,5 +1,5 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
@@ -10,7 +10,7 @@
   driver error cannot crash error reporting itself.
 |#
 
-(in-package :cl-cuda.driver-api)
+(in-package :chorus.driver-api)
 
 (defparameter +error-strings+
   '(0 "CUDA_SUCCESS"

@@ -1,16 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.api.memory
+(defpackage chorus-test.api.memory
   (:use :cl :prove
-        :cl-cuda.api.memory
-        :cl-cuda.api.context
-        :cl-cuda.lang))
-(in-package :cl-cuda-test.api.memory)
+        :chorus.api.memory
+        :chorus.api.context
+        :chorus.lang))
+(in-package :chorus-test.api.memory)
 
 (plan nil)
 

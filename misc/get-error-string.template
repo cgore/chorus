@@ -1,5 +1,5 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012 Masayuki Takagi (kamonama@gmail.com)
 |#
 
@@ -8,7 +8,7 @@
   Timestamp: <% @var timestamp %>
 |#
 
-(in-package :cl-cuda.driver-api)
+(in-package :chorus.driver-api)
 
 (defparameter +error-strings+
   '(<% @loop error-strings %><% @var num %> <% @var str %>

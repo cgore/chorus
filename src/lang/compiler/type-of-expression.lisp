@@ -1,17 +1,18 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.compiler.type-of-expression
+(defpackage chorus.lang.compiler.type-of-expression
   (:use :cl
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.environment
-        :cl-cuda.lang.built-in)
+        :chorus.lang.type
+        :chorus.lang.syntax
+        :chorus.lang.environment
+        :chorus.lang.built-in)
   (:export :type-of-expression))
-(in-package :cl-cuda.lang.compiler.type-of-expression)
+(in-package :chorus.lang.compiler.type-of-expression)
 
 
 ;;;

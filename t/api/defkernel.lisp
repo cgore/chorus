@@ -1,19 +1,20 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.api.defkernel
+(defpackage chorus-test.api.defkernel
   (:use :cl :prove
-        :cl-cuda.api.defkernel
-        :cl-cuda.api.context
-        :cl-cuda.api.memory
-        :cl-cuda.lang
-        :cl-cuda.driver-api)
-  (:import-from :cl-cuda.api.defkernel
+        :chorus.api.defkernel
+        :chorus.api.context
+        :chorus.api.memory
+        :chorus.lang
+        :chorus.driver-api)
+  (:import-from :chorus.api.defkernel
                 :with-launching-arguments))
-(in-package :cl-cuda-test.api.defkernel)
+(in-package :chorus-test.api.defkernel)
 
 (plan nil)
 

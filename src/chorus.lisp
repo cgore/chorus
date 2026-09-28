@@ -1,6 +1,7 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
@@ -10,12 +11,12 @@
                (sb-ext:muffle-conditions sb-kernel::package-at-variance))
     (handler-bind
         (#+sbcl (sb-kernel::package-at-variance #'muffle-warning))
-      (defpackage cl-cuda
+      (defpackage chorus
         (:use :cl :cl-reexport)))))
-(in-package :cl-cuda)
+(in-package :chorus)
 
-(reexport-from :cl-cuda.driver-api
+(reexport-from :chorus.driver-api
                :include '(:*show-messages*
                           :*sdk-not-found*))
-(reexport-from :cl-cuda.lang)
-(reexport-from :cl-cuda.api)
+(reexport-from :chorus.lang)
+(reexport-from :chorus.api)

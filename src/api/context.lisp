@@ -1,15 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.api.context
+(defpackage chorus.api.context
   (:use :cl
-        :cl-cuda.driver-api
-        :cl-cuda.api.nvcc
-        :cl-cuda.api.kernel-manager)
+        :chorus.driver-api
+        :chorus.api.nvcc
+        :chorus.api.kernel-manager)
   (:export ;; Initialize CUDA
            :init-cuda
            ;; CUDA device
@@ -24,7 +24,7 @@
            :*cuda-context*
            :with-cuda
            :*cuda-stream*))
-(in-package :cl-cuda.api.context)
+(in-package :chorus.api.context)
 
 
 ;;;

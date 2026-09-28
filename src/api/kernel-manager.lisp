@@ -1,16 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.api.kernel-manager
+(defpackage chorus.api.kernel-manager
   (:use :cl
-        :cl-cuda.driver-api
-        :cl-cuda.lang.kernel
-        :cl-cuda.lang.compiler.compile-kernel
-        :cl-cuda.api.nvcc)
+        :chorus.driver-api
+        :chorus.lang.kernel
+        :chorus.lang.compiler.compile-kernel
+        :chorus.api.nvcc)
   (:export :kernel-manager
            :make-kernel-manager
            :kernel-manager-compiled-p
@@ -40,7 +40,7 @@
            :expand-macro)
   (:import-from :alexandria
                 :ensure-list))
-(in-package :cl-cuda.api.kernel-manager)
+(in-package :chorus.api.kernel-manager)
 
 
 ;;;
@@ -250,10 +250,10 @@
 
 (defun expand-macro-1 (form manager)
   (let ((kernel (kernel-manager-kernel manager)))
-    (cl-cuda.lang.kernel:expand-macro-1 form kernel)))
+    (chorus.lang.kernel:expand-macro-1 form kernel)))
 
 (defun expand-macro (form manager)
   (let ((kernel (kernel-manager-kernel manager)))
-    (cl-cuda.lang.kernel:expand-macro form kernel)))
+    (chorus.lang.kernel:expand-macro form kernel)))
 
 (defvar *kernel-manager* (make-kernel-manager))

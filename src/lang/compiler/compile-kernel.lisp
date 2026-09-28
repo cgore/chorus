@@ -1,23 +1,24 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.lang.compiler.compile-kernel
+(defpackage chorus.lang.compiler.compile-kernel
   (:use :cl
-        :cl-cuda.lang.util
-        :cl-cuda.lang.type
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.environment
-        :cl-cuda.lang.kernel
-        :cl-cuda.lang.compiler.compile-data
-        :cl-cuda.lang.compiler.compile-type
-        :cl-cuda.lang.compiler.compile-expression
-        :cl-cuda.lang.compiler.compile-statement
-        :cl-cuda.lang.compiler.type-of-expression)
+        :chorus.lang.util
+        :chorus.lang.type
+        :chorus.lang.syntax
+        :chorus.lang.environment
+        :chorus.lang.kernel
+        :chorus.lang.compiler.compile-data
+        :chorus.lang.compiler.compile-type
+        :chorus.lang.compiler.compile-expression
+        :chorus.lang.compiler.compile-statement
+        :chorus.lang.compiler.type-of-expression)
   (:export :compile-kernel))
-(in-package :cl-cuda.lang.compiler.compile-kernel)
+(in-package :chorus.lang.compiler.compile-kernel)
 
 
 ;;;
@@ -125,8 +126,8 @@
 ~{~A~}" globals))))
 
 (defun compile-specifier (return-type)
-  (unless (cl-cuda-type-p return-type)
-    (error 'type-error :datum return-type :expected 'cl-cuda-type))
+  (unless (chorus-type-p return-type)
+    (error 'type-error :datum return-type :expected 'chorus-type))
   (if (eq return-type 'void)
       "__global__"
       "__device__"))

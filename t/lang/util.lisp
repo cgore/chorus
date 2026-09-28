@@ -1,13 +1,14 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.util
+(defpackage chorus-test.lang.util
   (:use :cl :prove
-        :cl-cuda.lang.util))
-(in-package :cl-cuda-test.lang.util)
+        :chorus.lang.util))
+(in-package :chorus-test.lang.util)
 
 (plan nil)
 
@@ -28,7 +29,7 @@
     "basic case 4")
 (is (c-identifier 'VecAdd_kernel) "vecadd_kernel"
     "basic case 5")
-(is (c-identifier 'foo t) "cl_cuda_test_lang_util_foo"
+(is (c-identifier 'foo t) "chorus_test_lang_util_foo"
     "basic case 6")
 
 

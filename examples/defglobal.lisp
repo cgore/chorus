@@ -1,15 +1,16 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-examples.defglobal
-  (:use :cl :cl-cuda)
+(defpackage chorus-examples.defglobal
+  (:use :cl :chorus)
   (:export :main))
-(in-package :cl-cuda-examples.defglobal)
+(in-package :chorus-examples.defglobal)
 
-(setf cl-cuda:*show-messages* nil)
+(setf chorus:*show-messages* nil)
 
 
 ;;

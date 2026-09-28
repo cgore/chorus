@@ -1,12 +1,12 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2019 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
-(defpackage :cl-cuda-asd
+(defpackage :chorus-asd
   (:use :cl :asdf :uiop))
-(in-package :cl-cuda-asd)
+(in-package :chorus-asd)
 
 ;;; CUDA-GROVEL-FILE used to subclass CFFI-GROVEL:GROVEL-FILE so that
 ;;; types were grovelled from cuda.h. Types are now hardcoded (CFFI :size
@@ -15,10 +15,10 @@
 (defclass cuda-grovel-file (cl-source-file) ())
 
 ;;;
-;;; Cl-cuda system definition
+;;; Chorus system definition
 ;;;
 
-(defsystem "cl-cuda"
+(defsystem "chorus"
   :version "0.1"
   :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
@@ -65,7 +65,7 @@
                                    (:file "macro")
                                    (:file "timer")
                                    (:file "api")))
-                         (:file "cl-cuda"))))
-  :description "Cl-cuda is a library to use NVIDIA CUDA in Common Lisp programs."
+                         (:file "chorus"))))
+  :description "Chorus is a library to use NVIDIA CUDA in Common Lisp programs."
   :long-description #.(read-file-string (subpathname *load-pathname* "README.markdown"))
-  :in-order-to ((test-op (test-op "cl-cuda-test"))))
+  :in-order-to ((test-op (test-op "chorus-test"))))

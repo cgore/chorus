@@ -1,6 +1,7 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
@@ -10,14 +11,14 @@
                (sb-ext:muffle-conditions sb-kernel::package-at-variance))
     (handler-bind
         (#+sbcl (sb-kernel::package-at-variance #'muffle-warning))
-      (defpackage :cl-cuda.lang
+      (defpackage :chorus.lang
         (:use :cl
               :cl-reexport)))))
 
-(in-package :cl-cuda.lang)
+(in-package :chorus.lang)
 
-;; reexport symbols of data structures cl-cuda provides
-(reexport-from :cl-cuda.lang.data
+;; reexport symbols of data structures chorus provides
+(reexport-from :chorus.lang.data
                :include '(;; Float3
                           :float3
                           :make-float3
@@ -57,8 +58,8 @@
                           :double4-=
                           :with-double4))
 
-;; reexport symbols of cl-cuda types
-(reexport-from :cl-cuda.lang.type
+;; reexport symbols of chorus types
+(reexport-from :chorus.lang.type
                :include '(:void
                           :bool
                           :int
@@ -80,9 +81,9 @@
                           :curand-state-xorwow*
                           :cffi-type))
 
-;; reexport symbols of cl-cuda syntax except the ones exported
+;; reexport symbols of chorus syntax except the ones exported
 ;; from COMMON-LISP package
-(reexport-from :cl-cuda.lang.syntax
+(reexport-from :chorus.lang.syntax
                :include '(:grid-dim-x :grid-dim-y :grid-dim-z
                           :block-dim-x :block-dim-y :block-dim-z
                           :block-idx-x :block-idx-y :block-idx-z
@@ -90,9 +91,9 @@
                           :with-shared-memory
                           :set))
 
-;; reexport symbols of cl-cuda built-in functions except the ones
+;; reexport symbols of chorus built-in functions except the ones
 ;; exported from COMMON-LISP package
-(reexport-from :cl-cuda.lang.built-in
+(reexport-from :chorus.lang.built-in
                :include '(:xor
                           :shl
                           :shr

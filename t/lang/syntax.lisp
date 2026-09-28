@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2017 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.syntax
+(defpackage chorus-test.lang.syntax
   (:use :cl :prove
-        :cl-cuda.lang.data
-        :cl-cuda.lang.syntax))
-(in-package :cl-cuda-test.lang.syntax)
+        :chorus.lang.data
+        :chorus.lang.syntax))
+(in-package :chorus-test.lang.syntax)
 
 (plan nil)
 

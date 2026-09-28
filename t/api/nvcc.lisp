@@ -1,19 +1,19 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.api.nvcc
+(defpackage chorus-test.api.nvcc
   (:use :cl :prove
-        :cl-cuda.api.nvcc)
-  (:import-from :cl-cuda.lang.kernel
+        :chorus.api.nvcc)
+  (:import-from :chorus.lang.kernel
                 :make-kernel
                 :kernel-define-function)
-  (:import-from :cl-cuda.lang.compiler.compile-kernel
+  (:import-from :chorus.lang.compiler.compile-kernel
                 :compile-kernel)
-  (:import-from :cl-cuda.lang.type :void :int*))
-(in-package :cl-cuda-test.api.nvcc)
+  (:import-from :chorus.lang.type :void :int*))
+(in-package :chorus-test.api.nvcc)
 
 (plan nil)
 
@@ -41,7 +41,7 @@
   (is-error (arch-option-p :foo) type-error))
 
 (subtest "temporary directory is writable"
-  (let ((dir (cl-cuda.api.nvcc::get-tmp-path)))
+  (let ((dir (chorus.api.nvcc::get-tmp-path)))
     (ok (uiop:directory-exists-p dir))
     (ok (uiop:absolute-pathname-p dir))))
 
@@ -56,7 +56,7 @@
 (subtest "nvcc-compile produces sm_120-capable PTX"
   (if (nvcc-available-p)
       (let ((ptx (nvcc-compile
-                  "extern \"C\" __global__ void cl_cuda_probe(void) { return; }")))
+                  "extern \"C\" __global__ void chorus_probe(void) { return; }")))
         (ok (probe-file ptx) "ptx file written")
         (let ((text (uiop:read-file-string ptx)))
           (ok (search ".version" text) "PTX has .version")
@@ -66,34 +66,34 @@
       (skip 3 "nvcc not installed")))
 
 (subtest "option predicates"
-  (ok (cl-cuda.api.nvcc::ccbin-option-p '("-ccbin" "cl.exe")))
-  (ok (cl-cuda.api.nvcc::ccbin-option-p '("--compiler-bindir=/usr/bin/gcc")))
-  (ok (not (cl-cuda.api.nvcc::ccbin-option-p '("-arch=sm_120"))))
-  (ok (cl-cuda.api.nvcc::machine-option-p '("-m64")))
-  (ok (cl-cuda.api.nvcc::machine-option-p '("-m32" "-O3")))
-  (ok (not (cl-cuda.api.nvcc::machine-option-p '("-arch=sm_120"))))
-  (is-error (cl-cuda.api.nvcc::ccbin-option-p :foo) type-error)
-  (is-error (cl-cuda.api.nvcc::machine-option-p :foo) type-error))
+  (ok (chorus.api.nvcc::ccbin-option-p '("-ccbin" "cl.exe")))
+  (ok (chorus.api.nvcc::ccbin-option-p '("--compiler-bindir=/usr/bin/gcc")))
+  (ok (not (chorus.api.nvcc::ccbin-option-p '("-arch=sm_120"))))
+  (ok (chorus.api.nvcc::machine-option-p '("-m64")))
+  (ok (chorus.api.nvcc::machine-option-p '("-m32" "-O3")))
+  (ok (not (chorus.api.nvcc::machine-option-p '("-arch=sm_120"))))
+  (is-error (chorus.api.nvcc::ccbin-option-p :foo) type-error)
+  (is-error (chorus.api.nvcc::machine-option-p :foo) type-error))
 
 (subtest "version-list>"
-  (ok (cl-cuda.api.nvcc::version-list> '(13 3) '(12 8)))
-  (ok (cl-cuda.api.nvcc::version-list> '(13 3) '(13 2)))
-  (ok (not (cl-cuda.api.nvcc::version-list> '(13 3) '(13 3))))
-  (ok (not (cl-cuda.api.nvcc::version-list> '(12 8) '(13 0))))
-  (is (cl-cuda.api.nvcc::version-key
+  (ok (chorus.api.nvcc::version-list> '(13 3) '(12 8)))
+  (ok (chorus.api.nvcc::version-list> '(13 3) '(13 2)))
+  (ok (not (chorus.api.nvcc::version-list> '(13 3) '(13 3))))
+  (ok (not (chorus.api.nvcc::version-list> '(12 8) '(13 0))))
+  (is (chorus.api.nvcc::version-key
        (make-pathname :directory '(:absolute "CUDA" "v13.3")))
       '(13 3)))
 
 (subtest "get-nvcc-options"
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
-         (opts (cl-cuda.api.nvcc::get-nvcc-options cu ptx)))
+         (opts (chorus.api.nvcc::get-nvcc-options cu ptx)))
     (ok (member "-ptx" opts :test #'string=) "asks for PTX")
     (ok (member "-I" opts :test #'string=) "passes include path")
     (ok (member "-o" opts :test #'string=) "passes output path")
     (ok (arch-option-p opts) "architecture is present")
-    (ok (uiop:directory-exists-p (cl-cuda.api.nvcc::get-include-path))
-        "cl-cuda include directory exists")
+    (ok (uiop:directory-exists-p (chorus.api.nvcc::get-include-path))
+        "chorus include directory exists")
     (when (= 8 (cffi:foreign-type-size :pointer))
       (ok (member "-m64" opts :test #'string=) "64-bit host"))
     (if (uiop:os-windows-p)
@@ -103,7 +103,7 @@
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-arch=sm_75")))
-    (let ((opts (cl-cuda.api.nvcc::get-nvcc-options cu ptx)))
+    (let ((opts (chorus.api.nvcc::get-nvcc-options cu ptx)))
       (ok (member "-arch=sm_75" opts :test #'string=)
           "user -arch is kept")
       (ok (not (member "-arch=native" opts :test #'string=))
@@ -111,25 +111,25 @@
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-m32" "-arch=sm_75")))
-    (ok (not (member "-m64" (cl-cuda.api.nvcc::get-nvcc-options cu ptx)
+    (ok (not (member "-m64" (chorus.api.nvcc::get-nvcc-options cu ptx)
                      :test #'string=))
         "user -m32 is not overridden"))
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (*nvcc-options* '("-ccbin" "cl.exe" "-arch=native")))
-    (is (count "-ccbin" (cl-cuda.api.nvcc::get-nvcc-options cu ptx)
+    (is (count "-ccbin" (chorus.api.nvcc::get-nvcc-options cu ptx)
                :test #'string=)
         1
         "user -ccbin is not duplicated")))
 
 (subtest "unique stems and path pairing"
-  (isnt (cl-cuda.api.nvcc::unique-stem)
-        (cl-cuda.api.nvcc::unique-stem)
+  (isnt (chorus.api.nvcc::unique-stem)
+        (chorus.api.nvcc::unique-stem)
         "stems differ")
-  (let ((cu (cl-cuda.api.nvcc::get-cu-path)))
+  (let ((cu (chorus.api.nvcc::get-cu-path)))
     (is (pathname-type cu) "cu")
-    (is (pathname-type (cl-cuda.api.nvcc::get-ptx-path cu)) "ptx")
-    (is (pathname-name (cl-cuda.api.nvcc::get-ptx-path cu))
+    (is (pathname-type (chorus.api.nvcc::get-ptx-path cu)) "ptx")
+    (is (pathname-name (chorus.api.nvcc::get-ptx-path cu))
         (pathname-name cu))))
 
 (subtest "*nvcc-binary* override"
@@ -146,11 +146,11 @@
 (subtest "*tmp-path* override"
   (if (nvcc-available-p)
       (let* ((dir (merge-pathnames
-                   (make-pathname :directory '(:relative "cl-cuda-test-tmp"))
+                   (make-pathname :directory '(:relative "chorus-test-tmp"))
                    (uiop:temporary-directory)))
              (*tmp-path* dir)
              (ptx (nvcc-compile
-                   "extern \"C\" __global__ void cl_cuda_tmp(void) { return; }")))
+                   "extern \"C\" __global__ void chorus_tmp(void) { return; }")))
         (ok (probe-file ptx))
         (is (pathname-directory (pathname ptx))
             (pathname-directory (uiop:ensure-directory-pathname dir))
@@ -168,7 +168,7 @@
   (if (nvcc-available-p)
       (let ((kernel (make-kernel)))
         (kernel-define-function
-         kernel 'cl-cuda-roundtrip 'void '((x int*))
+         kernel 'chorus-roundtrip 'void '((x int*))
          '((set (aref x 0) 1) (return)))
         (let ((ptx (nvcc-compile (compile-kernel kernel))))
           (ok (probe-file ptx) "compiler output is accepted by nvcc")

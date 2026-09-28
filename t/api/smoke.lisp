@@ -1,18 +1,18 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.api.smoke
+(defpackage chorus-test.api.smoke
   (:use :cl :prove
-        :cl-cuda.api.defkernel
-        :cl-cuda.api.context
-        :cl-cuda.api.memory
-        :cl-cuda.lang)
-  (:shadowing-import-from :cl-cuda.api.macro
+        :chorus.api.defkernel
+        :chorus.api.context
+        :chorus.api.memory
+        :chorus.lang)
+  (:shadowing-import-from :chorus.api.macro
                           :let* :when :unless))
-(in-package :cl-cuda-test.api.smoke)
+(in-package :chorus-test.api.smoke)
 
 (plan nil)
 

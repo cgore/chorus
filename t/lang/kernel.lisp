@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2016 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.lang.kernel
+(defpackage chorus-test.lang.kernel
   (:use :cl :prove
-        :cl-cuda.lang.kernel
-        :cl-cuda.lang.type))
-(in-package :cl-cuda-test.lang.kernel)
+        :chorus.lang.kernel
+        :chorus.lang.type))
+(in-package :chorus-test.lang.kernel)
 
 (plan nil)
 
@@ -91,12 +92,12 @@
   (is-error (kernel-define-function kernel
                                     1 'int '((x int)) '((return x)))
             type-error
-            "NAME which is not a cl-cuda symbol."))
+            "NAME which is not a chorus symbol."))
 
 (let ((kernel (make-kernel)))
   (is-error (kernel-define-function kernel 'foo 1 '((x int)) '((return x)))
             type-error
-            "RETURN-TYPE which is not a cl-cuda type."))
+            "RETURN-TYPE which is not a chorus type."))
 
 (let ((kernel (make-kernel)))
   (is-error (kernel-define-function kernel 'foo 1 'bar '((return x)))
@@ -177,7 +178,7 @@
 (let ((kernel (make-kernel)))
   (is-error (kernel-define-macro kernel 1 '(x) '(`(return ,x)))
             type-error
-            "NAME which is not a cl-cuda symbol."))
+            "NAME which is not a chorus symbol."))
 
 
 ;;;
@@ -277,7 +278,7 @@
 
 (let ((kernel (make-kernel)))
   (is-error (kernel-define-symbol-macro kernel 1 1.0) type-error
-            "NAME which is not a cl-cuda symbol."))
+            "NAME which is not a chorus symbol."))
 
 
 ;;;
@@ -320,7 +321,7 @@
     (is (kernel-global-name kernel 'foo)
         'foo)
     (is (kernel-global-c-name kernel 'foo)
-        "cl_cuda_test_lang_kernel_foo")
+        "chorus_test_lang_kernel_foo")
     (is (kernel-global-qualifiers kernel 'foo)
         '(:device))
     (is (kernel-global-initializer kernel 'foo)
@@ -402,7 +403,7 @@
   (let ((kernel (make-kernel)))
     (kernel-define-global kernel 'foo :device 42)
     (is (kernel-global-c-name kernel 'foo)
-        "cl_cuda_test_lang_kernel_foo"))
+        "chorus_test_lang_kernel_foo"))
 
   (let ((kernel (make-kernel)))
     (is-error (kernel-global-c-name kernel 'foo)

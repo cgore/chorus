@@ -1,10 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-interop.driver-api
+(defpackage chorus-interop.driver-api
   (:use :cl :cl-reexport)
   (:export ;; Types
            :cu-graphics-resource
@@ -27,8 +28,8 @@
            :cu-graphics-resource-set-map-flags
            :cu-graphics-unmap-resources
            :cu-graphics-unregister-resource)
-  (:import-from :cl-cuda.driver-api
+  (:import-from :chorus.driver-api
                 :defcufun))
-(in-package :cl-cuda-interop.driver-api)
+(in-package :chorus-interop.driver-api)
 
-(reexport-from :cl-cuda.driver-api)
+(reexport-from :chorus.driver-api)

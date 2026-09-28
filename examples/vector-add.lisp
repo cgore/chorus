@@ -1,6 +1,7 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2012-2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 #|
@@ -8,11 +9,11 @@
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-examples.vector-add
+(defpackage chorus-examples.vector-add
   (:use :cl
-        :cl-cuda)
+        :chorus)
   (:export :main))
-(in-package :cl-cuda-examples.vector-add)
+(in-package :chorus-examples.vector-add)
 
 (defun random-init (data n)
   (dotimes (i n)

@@ -1,21 +1,22 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage :cl-cuda-interop.api.defkernel
+(defpackage :chorus-interop.api.defkernel
   (:use :cl :cl-reexport
-        :cl-cuda.lang.syntax
-        :cl-cuda.lang.type
-        :cl-cuda-interop.driver-api
-        :cl-cuda-interop.api.memory)
+        :chorus.lang.syntax
+        :chorus.lang.type
+        :chorus-interop.driver-api
+        :chorus-interop.api.memory)
   (:export :defkernel)
-  (:import-from :cl-cuda.api.kernel-manager
+  (:import-from :chorus.api.kernel-manager
                 :kernel-manager-define-function
                 :ensure-kernel-function-loaded
                 :*kernel-manager*)
-  (:import-from :cl-cuda.api.defkernel
+  (:import-from :chorus.api.defkernel
                 :argument-vars
                 :argument-var-ptr
                 :argument-cffi-type
@@ -23,9 +24,9 @@
                 :setf-to-argument-array-form)
   (:import-from :alexandria
                 :with-gensyms))
-(in-package :cl-cuda-interop.api.defkernel)
+(in-package :chorus-interop.api.defkernel)
 
-(reexport-from :cl-cuda.api.defkernel
+(reexport-from :chorus.api.defkernel
                :include '(:defkernelmacro
                           :expand-macro-1
                           :expand-macro
@@ -46,8 +47,8 @@
                (cond
                  ((memory-block-p ,var)
                   (memory-block-init-device-ptr ,var))
-                 ((cl-cuda:memory-block-p ,var)
-                  (cl-cuda:memory-block-device-ptr ,var))
+                 ((chorus:memory-block-p ,var)
+                  (chorus:memory-block-device-ptr ,var))
                  (t ,var)))
         `(setf (cffi:mem-ref ,var-ptr ',cffi-type) ,var))))
 
@@ -60,7 +61,7 @@
         nil)))
 
 (defmacro with-launching-arguments ((var arguments) &body body)
-  ;; See CL-CUDA.API.DEFKERNEL:WITH-LAUNCHING-ARGUMENTS macro for detailed comments.
+  ;; See CHORUS.API.DEFKERNEL:WITH-LAUNCHING-ARGUMENTS macro for detailed comments.
   ;;
   ;; Example:
   ;;

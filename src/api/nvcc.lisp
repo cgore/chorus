@@ -1,11 +1,11 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014-2016 Masayuki Takagi (kamonama@gmail.com)
   Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda.api.nvcc
+(defpackage chorus.api.nvcc
   (:use :cl)
   (:export :*tmp-path*
            :*nvcc-options*
@@ -16,7 +16,7 @@
            :nvcc-available-p
            :nvcc-arch-option
            :arch-option-p))
-(in-package :cl-cuda.api.nvcc)
+(in-package :chorus.api.nvcc)
 
 
 ;;;
@@ -42,7 +42,7 @@
     (ensure-directories-exist (uiop:ensure-directory-pathname path))))
 
 (defun unique-stem ()
-  (format nil "cl-cuda-~A-~A-~A"
+  (format nil "chorus-~A-~A-~A"
           (get-universal-time)
           (get-internal-real-time)
           (random 1000000000)))
@@ -56,7 +56,7 @@
   (make-pathname :type "ptx" :defaults cu-path))
 
 (defun get-include-path ()
-  (asdf:system-relative-pathname :cl-cuda #P"include/"))
+  (asdf:system-relative-pathname :chorus #P"include/"))
 
 
 ;;;

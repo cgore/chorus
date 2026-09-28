@@ -1,14 +1,15 @@
 #|
-  This file is a part of cl-cuda project.
+  This file is a part of the Chorus project.
   Copyright (c) 2014 Masayuki Takagi (kamonama@gmail.com)
+  Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 |#
 
 (in-package :cl-user)
-(defpackage cl-cuda-test.api.timer
+(defpackage chorus-test.api.timer
   (:use :cl :prove
-        :cl-cuda.api.timer
-        :cl-cuda.api.context))
-(in-package :cl-cuda-test.api.timer)
+        :chorus.api.timer
+        :chorus.api.context))
+(in-package :chorus-test.api.timer)
 
 (plan nil)
 
