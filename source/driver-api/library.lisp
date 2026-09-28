@@ -12,9 +12,6 @@
 ;;; Load CUDA library
 ;;;
 
-;;; Darwin still names CUDA.framework and libcuda.dylib. CUDA 10.2 is
-;;; the last toolkit that supports macOS. CUDA 11.0 does not. This
-;;; clause does not load on current Macs, and *sdk-not-found* is set.
 (cffi:define-foreign-library libcuda
   (:darwin (:or (:framework "CUDA") "libcuda.dylib"))
   (:windows (:or "nvcuda.dll"))

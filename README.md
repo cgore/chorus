@@ -82,7 +82,7 @@ RTX 50-series (Blackwell, compute capability 12.0) needs CUDA Toolkit 12.8 or la
 
 With CUDA 13, `nvcc` can target Turing and newer (`sm_75` and above): RTX 20-, 30-, 40-, and 50-series, plus matching professional and datacenter parts (T4, A100, Ada, Hopper, Blackwell). Maxwell, Pascal, and Volta are outside what CUDA 13 can compile.
 
-The CUDA backend runs on Windows and Linux. Current macOS has no CUDA driver and no `nvcc`. The [CUDA 10.2 release notes](https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/) state that CUDA 10.2 is the last release that supports macOS for developing and running CUDA applications. The [CUDA 11.0 release notes](https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html) state that CUDA 11.0 does not support macOS for developing and running CUDA applications. The Darwin foreign-library spec still names `CUDA.framework` and `libcuda.dylib`. On a current Mac that spec does not load, `*sdk-not-found*` is `t`, and a CUDA driver call signals `sdk-not-found-error`. Apple silicon remains a Chorus target. See [Apple silicon](#apple-silicon).
+The CUDA backend runs on Windows and Linux.
 
 Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
 
@@ -102,17 +102,7 @@ Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-
 
 ### Apple silicon
 
-Checked on this machine, a Mac with Apple silicon. Apple silicon is a Chorus target. The CUDA backend does not run here: current macOS has no CUDA driver and no `nvcc`. The GPU test suite was not run.
-
-* macOS 26.6.2 (Darwin 25.6.0 arm64)
-* MacBook Pro (Mac17,2), Apple M5, 10-core Apple GPU
-* No `nvcc` on `PATH`. `CUDA_PATH` and `CUDA_HOME` unset. No `/usr/local/cuda`. No `/Library/Frameworks/CUDA.framework`
-* SBCL 2.6.8
-
-Loading this checkout through Quicklisp succeeds. `*sdk-not-found*` is `t`. `:cuda-sdk` is absent from `*features*`. `find-nvcc` returns `nil`. `cu-init` signals `sdk-not-found-error`. CFFI reports `size_t` as 8 bytes. The loader prints:
-
-    Unable to load any of the alternatives:
-       ((:FRAMEWORK "CUDA") "libcuda.dylib")
+Apple silicon is a Chorus target. This tree has no Apple silicon backend.
 
 ### AMD
 
@@ -281,7 +271,7 @@ Specifies whether to let Chorus show operational messages or not. The default is
 
 ### [Special Variable] \*sdk-not-found\*
 
-Readonly. The value is `t` if the CUDA backend failed to load the CUDA *driver* library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. On a current Mac the driver library does not load, so the value is `t`. See [Apple silicon](#apple-silicon). The variable says nothing about the CUDA Toolkit (`nvcc`). Use `nvcc-available-p` for that.
+Readonly. The value is `t` if the CUDA backend failed to load the CUDA driver library (`nvcuda.dll` on Windows, `libcuda.so.1` on Linux, or, on Darwin, `CUDA.framework` / `libcuda.dylib`), otherwise `nil`. The variable says nothing about the CUDA Toolkit (`nvcc`). Use `nvcc-available-p` for that.
 
     *sdk-not-found*    ; => nil
 
@@ -514,7 +504,7 @@ The kernel manager is stored in `*kernel-manager*` special variable when Chorus 
 
 ## How the CUDA backend works when the CUDA driver is not installed
 
-On a machine with no NVIDIA driver, the CUDA backend still compiles and loads. A call into the driver then signals `sdk-not-found-error`. With this tree, an Apple silicon Mac is in that state, and so is a machine with an AMD GPU. The same behavior matters for an application that has a path other than the CUDA backend and may run where the NVIDIA driver is absent.
+On a machine with no NVIDIA driver, the CUDA backend still compiles and loads. A call into the driver then signals `sdk-not-found-error`. The same behavior matters for an application that has a path other than the CUDA backend and may run where the NVIDIA driver is absent.
 
 **Compile and load time**
 Chorus is compiled and loaded without signaling if the CUDA driver library cannot be loaded. API symbols are still interned, so user programs can refer to them.
@@ -522,7 +512,7 @@ Chorus is compiled and loaded without signaling if the CUDA driver library canno
 **Run time**
 Calling a Chorus driver API signals `sdk-not-found-error`. `*sdk-not-found*` is `t` in that case. Absence of `nvcc` is separate: `*sdk-not-found*` can be `nil` (driver present) while `nvcc-available-p` is false (toolkit missing). Kernel launch then fails when nvcc is invoked.
 
-The CUDA backend decides the driver is present when `cffi:use-foreign-library` successfully loads `nvcuda.dll`, `libcuda.so.1`, or the CUDA framework. On the machine recorded under [Apple silicon](#apple-silicon), that load fails, `*sdk-not-found*` is `t`, and `cu-init` signals `sdk-not-found-error`.
+The CUDA backend decides the driver is present when `cffi:use-foreign-library` successfully loads `nvcuda.dll`, `libcuda.so.1`, or the CUDA framework.
 
 ## Streams
 

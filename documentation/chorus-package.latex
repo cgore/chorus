@@ -12,9 +12,8 @@ kernel language from \texttt{chorus/lang}, the high-level API from
 \texttt{*show-messages*} and \texttt{*sdk-not-found*}.
 
 \texttt{*sdk-not-found*} is true when the CUDA driver library does not load.
-Driver calls then signal \texttt{sdk-not-found-error}. On a current Mac the
-CUDA driver does not load, so the CUDA backend is in this state there. Chorus
-also targets Apple silicon and AMD GPUs.
+Driver calls then signal \texttt{sdk-not-found-error}. Chorus also targets
+Apple silicon and AMD GPUs.
 
 The packages below are the ones \texttt{chorus} is built from. Use them when
 you want a narrower set of symbols than the reexport.

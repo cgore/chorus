@@ -37,17 +37,6 @@ Toolkit 12.8 or later. CUDA 13.x is the toolkit this backend is written for.
 With CUDA 13, \texttt{nvcc} can target Turing and newer (\texttt{sm\_75} and
 above).
 
-Current macOS has no CUDA driver and no \texttt{nvcc}. NVIDIA's CUDA 10.2
-release notes state that CUDA 10.2 is the last release that supports macOS
-for developing and running CUDA applications
-(\url{https://docs.nvidia.com/cuda/archive/10.2/cuda-toolkit-release-notes/}).
-The CUDA 11.0 release notes state that CUDA 11.0 does not support macOS for
-developing and running CUDA applications
-(\url{https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html}).
-Apple silicon remains a Chorus target. On an Apple silicon Mac the CUDA backend
-leaves \texttt{*sdk-not-found*} true, and a CUDA driver call signals
-\texttt{sdk-not-found-error}.
-
 The repository is at \url{https://github.com/cgore/chorus/}.
 
 \section*{Requirements for the CUDA backend}
