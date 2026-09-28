@@ -2,6 +2,8 @@
 
 Chorus originated as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA.
 
+The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
+
 Chorus is a library to use NVIDIA CUDA in Common Lisp programs. It provides not only FFI binding to CUDA driver API but the kernel description language with which users can define CUDA kernel functions in S-expression. The kernel description language also provides facilities to define kernel macros and kernel symbol macros in addition to kernel functions. Chorus's kernel macro and kernel symbol macro offer powerful abstraction that CUDA C itself does not have and provide enormous advantage in resource-limited GPU programming.
 
 Kernel functions defined with the kernel description language can be launched as almost same as ordinary Common Lisp functions except that they must be launched in a CUDA context and followed with grid and block sizes. Kernel functions are compiled and loaded automatically and lazily when they are to be launched for the first time. This process is as following. First, they are compiled into a CUDA C code (.cu file) by Chorus. The compiled CUDA C code, then, is compiled into a CUDA kernel module (.ptx file) by NVCC - NVIDIA CUDA Compiler Driver. The obtained kernel module is automatically loaded via CUDA driver API and finally the kernel functions are launched with properly constructed arguments to be passed to CUDA device. Since this process is autonomously managed by the kernel manager, users do not need to handle it for themselves. About the kernel manager, see [Kernel manager](#kernel-manager) section.

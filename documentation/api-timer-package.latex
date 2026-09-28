@@ -1,0 +1,45 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/timer}
+
+Timers are built from CUDA events. \texttt{chorus/api} reexports this package.
+
+\lispFunctionSubsection{create-timer}
+
+\lispSyntax
+
+\texttt{(create-timer)}
+
+\lispFunctionSubsection{destroy-timer}
+
+Destroys a timer.
+
+\lispFunctionSubsection{start-timer}
+
+Records the start event.
+
+\lispFunctionSubsection{stop-timer}
+
+Records the stop event.
+
+\lispFunctionSubsection{synchronize-timer}
+
+Waits for the timer's events.
+
+\lispFunctionSubsection{elapsed-time}
+
+\lispSyntax
+
+\texttt{(elapsed-time \lispVar{timer})}
+
+\lispMacroSubsection{with-timer}
+
+\lispSyntax
+
+\texttt{(with-timer (\lispVar{var}) \&body \lispVar{body})}
+
+Binds \texttt{var} to a new timer and destroys it on the way out.

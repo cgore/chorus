@@ -28,5 +28,5 @@
                    (:file "api")))
                  (:file "chorus-interop"))))
   :description "Chorus with OpenGL interoperability."
-  ;; :long-description #.(read-file-string (subpathname *load-pathname* "README.markdown"))
+  ;; :long-description #.(read-file-string (subpathname *load-pathname* "README.md"))
   :in-order-to ((test-op (test-op "chorus-interop-test"))))

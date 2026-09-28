@@ -1,0 +1,37 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/macro}
+
+These are kernel macros, defined with \texttt{defkernelmacro}.
+\texttt{chorus/api} reexports them. A kernel that uses them should import or
+use this package. The test \texttt{chorus/test/api/smoke} shadowing-imports
+\texttt{let*}, \texttt{when}, and \texttt{unless} from here so that the kernel
+body sees the kernel versions.
+
+\lispMacroSubsection{let*}
+
+Binds sequentially. An empty binding list expands to \texttt{progn}.
+
+\lispSyntax
+
+\texttt{(let* \lispVar{bindings} \&body \lispVar{body})}
+
+\lispMacroSubsection{when}
+
+\lispSyntax
+
+\texttt{(when \lispVar{test} \&body \lispVar{body})}
+
+Expands to \texttt{(if \lispVar{test} (progn \lispVar{body}))}.
+
+\lispMacroSubsection{unless}
+
+\lispSyntax
+
+\texttt{(unless \lispVar{test} \&body \lispVar{body})}
+
+Expands to \texttt{(if (not \lispVar{test}) (progn \lispVar{body}))}.

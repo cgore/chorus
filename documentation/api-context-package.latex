@@ -1,0 +1,58 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/context}
+
+This package initializes CUDA, selects a device, and keeps a context.
+\texttt{chorus/api} reexports it.
+
+\lispMacroSubsection{with-cuda}
+
+\lispSyntax
+
+\texttt{(with-cuda (\lispVar{dev-id}) \&body \lispVar{body})}
+
+The macro calls \texttt{init-cuda}, binds \texttt{*cuda-device*} from
+\texttt{dev-id}, binds \texttt{*cuda-context*}, and runs \texttt{body}. If
+\texttt{*nvcc-options*} does not already name an architecture, the macro adds
+the \texttt{nvcc -arch=sm\_XY} option for that device's compute capability.
+On the way out it unloads \texttt{*kernel-manager*} and destroys the context.
+
+\lispVariableSubsection{*cuda-device*}
+
+The device selected by \texttt{with-cuda}.
+
+\lispVariableSubsection{*cuda-context*}
+
+The context created by \texttt{with-cuda}.
+
+\lispVariableSubsection{*cuda-stream*}
+
+The stream passed to kernel launches. Its initial value is a null pointer.
+
+\lispFunctionSubsection{init-cuda}
+
+Calls \texttt{cu-init} with flags $0$.
+
+\lispFunctionSubsection{get-cuda-device}
+
+Returns the device for an ordinal.
+
+\lispFunctionSubsection{device-compute-capability}
+
+Returns the compute capability of a device.
+
+\lispFunctionSubsection{create-cuda-context}
+
+Creates a context on a device.
+
+\lispFunctionSubsection{destroy-cuda-context}
+
+Destroys a context.
+
+\lispFunctionSubsection{synchronize-context}
+
+Waits until the work in the context has finished.

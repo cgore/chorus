@@ -1,3 +1,12 @@
+# Ignore emacs swap and temp files.
+\#*\#
+.#*
+
+# Ignore vim swap and temp files.
+*~
+*.sw[nop]
+
+# Ignore SBCL compiled code.
 *.fasl
 *.dx32fsl
 *.dx64fsl
@@ -8,3 +17,12 @@ work
 src/drvapi_error_string.h
 *.pgm
 *~
+
+
+# Ignore some LaTeX stuff.
+documentation/*.aux
+documentation/*.log
+documentation/*.toc
+documentation/*.bbl
+documentation/*.blg
+documentation/*.out

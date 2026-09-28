@@ -1,0 +1,19 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus}
+
+Load this package with \texttt{(ql:quickload :chorus)}. It reexports the
+kernel language from \texttt{chorus/lang}, the high-level API from
+\texttt{chorus/api}, and two driver variables from \texttt{chorus/driver-api}:
+\texttt{*show-messages*} and \texttt{*sdk-not-found*}.
+
+\texttt{*sdk-not-found*} is true when the CUDA driver library does not load.
+Driver calls then signal \texttt{sdk-not-found-error}. On a current Mac the
+driver does not load, so this is the state of a Chorus image there.
+
+The packages below are the ones \texttt{chorus} is built from. Use them when
+you want a narrower set of symbols than the reexport.

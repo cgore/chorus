@@ -67,5 +67,5 @@
                                    (:file "api")))
                          (:file "chorus"))))
   :description "Chorus is a library to use NVIDIA CUDA in Common Lisp programs."
-  :long-description #.(read-file-string (subpathname *load-pathname* "README.markdown"))
+  :long-description #.(read-file-string (subpathname *load-pathname* "README.md"))
   :in-order-to ((test-op (test-op "chorus-test"))))

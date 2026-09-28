@@ -1,0 +1,80 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/memory}
+
+This package allocates device memory, host memory, and memory blocks that
+pair the two. \texttt{chorus/api} reexports it.
+
+\section{Memory blocks}
+
+\lispFunctionSubsection{alloc-memory-block}
+
+\lispSyntax
+
+\texttt{(alloc-memory-block \lispVar{type} \lispVar{size})}
+
+Allocates a block of \texttt{size} elements of \texttt{type}.
+
+\lispFunctionSubsection{free-memory-block}
+
+Frees both the device pointer and the host pointer of a block.
+
+\lispMacroSubsection{with-memory-block}
+
+\lispSyntax
+
+\texttt{(with-memory-block (\lispVar{var} \lispVar{type} \lispVar{size})
+  \&body \lispVar{body})}
+
+Binds \texttt{var} to a new block and frees it on the way out.
+
+\lispMacroSubsection{with-memory-blocks}
+
+\lispSyntax
+
+\texttt{(with-memory-blocks \lispVar{bindings} \&body \lispVar{body})}
+
+Each binding has the form \texttt{(\lispVar{var} \lispVar{type} \lispVar{size})}.
+The macro nests \texttt{with-memory-block}.
+
+\lispFunctionSubsection{sync-memory-block}
+
+\lispSyntax
+
+\texttt{(sync-memory-block \lispVar{memory-block} \lispVar{direction})}
+
+\texttt{direction} is \texttt{:host-to-device} or \texttt{:device-to-host}.
+
+\lispFunctionSubsection{memory-block-aref}
+
+\lispSyntax
+
+\texttt{(memory-block-aref \lispVar{memory-block} \lispVar{index})}
+
+Reads the host side of the block. \texttt{setf} writes it. A copy to or from
+the device is a separate \texttt{sync-memory-block} call.
+
+The package also exports \texttt{memory-block-p},
+\texttt{memory-block-device-ptr}, \texttt{memory-block-host-ptr},
+\texttt{memory-block-type}, and \texttt{memory-block-size}.
+
+\section{Separate host and device memory}
+
+\texttt{alloc-device-memory} takes a type and a count.
+\texttt{free-device-memory} frees that pointer.
+\texttt{with-device-memory} has the form
+\texttt{(with-device-memory (\lispVar{var} \lispVar{type} \lispVar{n}) \&body \lispVar{body})}.
+
+\texttt{alloc-host-memory}, \texttt{free-host-memory}, and
+\texttt{host-memory-aref} are the host-side counterparts.
+\texttt{with-host-memory} has the same form as \texttt{with-device-memory}.
+
+\texttt{memcpy-host-to-device} and \texttt{memcpy-device-to-host} copy a
+region. \texttt{device-total-bytes}, \texttt{device-total-kbytes},
+\texttt{device-total-mbytes}, and \texttt{device-total-gbytes} report the
+memory on a device. \texttt{device-total-bytes} takes the device as its
+argument.

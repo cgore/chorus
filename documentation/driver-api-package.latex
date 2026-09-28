@@ -1,0 +1,62 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/driver-api}
+
+This package is the foreign binding to the CUDA driver API. Names follow the
+driver entry points with a \texttt{cu-} prefix and Lisp hyphens. When the
+driver library is absent, a call signals \texttt{sdk-not-found-error}.
+
+\section{Variables}
+
+\lispVariableSubsection{*sdk-not-found*}
+
+True when the driver library did not load.
+
+\lispVariableSubsection{*show-messages*}
+
+Controls driver-API diagnostic messages. \texttt{chorus} reexports both
+variables.
+
+\section{Types}
+
+\texttt{cu-result}, \texttt{cu-device}, \texttt{cu-context},
+\texttt{cu-module}, \texttt{cu-function}, \texttt{cu-stream},
+\texttt{cu-event}, \texttt{cu-device-ptr}, and \texttt{size-t}.
+
+\section{Event flags}
+
+\texttt{cu-event-default}, \texttt{cu-event-blocking-sync},
+\texttt{cu-event-disable-timing}, and \texttt{cu-event-interprocess}.
+
+\section{Functions}
+
+Device and context: \texttt{cu-init}, \texttt{cu-device-get},
+\texttt{cu-device-get-count}, \texttt{cu-device-compute-capability},
+\texttt{cu-device-get-attribute},
+\texttt{cu-device-attribute-compute-capability-major},
+\texttt{cu-device-attribute-compute-capability-minor},
+\texttt{cu-device-get-name}, \texttt{cu-ctx-create},
+\texttt{cu-ctx-destroy}, \texttt{cu-ctx-synchronize}, and
+\texttt{cu-device-total-mem}.
+
+Memory: \texttt{cu-mem-alloc}, \texttt{cu-mem-free},
+\texttt{cu-mem-host-register}, \texttt{cu-mem-host-unregister},
+\texttt{cu-memcpy-host-to-device}, \texttt{cu-memcpy-host-to-device-async},
+\texttt{cu-memcpy-device-to-host}, and
+\texttt{cu-memcpy-device-to-host-async}.
+
+Modules and launch: \texttt{cu-module-load}, \texttt{cu-module-unload},
+\texttt{cu-module-get-function}, \texttt{cu-module-get-global}, and
+\texttt{cu-launch-kernel}.
+
+Events: \texttt{cu-event-create}, \texttt{cu-event-destroy},
+\texttt{cu-event-elapsed-time}, \texttt{cu-event-record}, and
+\texttt{cu-event-synchronize}.
+
+Streams: \texttt{cu-stream-create}, \texttt{cu-stream-destroy},
+\texttt{cu-stream-query}, \texttt{cu-stream-synchronize}, and
+\texttt{cu-stream-wait-event}.

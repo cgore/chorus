@@ -1,0 +1,121 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\documentclass{book}
+
+\usepackage{amsmath}
+\usepackage{bookman}
+\usepackage{amsfonts}
+\usepackage{calc}
+\usepackage{cite}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
+\usepackage{ifthen}
+\usepackage{datetime}
+\usepackage{listings}
+
+\bibliographystyle{acm}
+
+\newdateformat{cgoredate}
+{\dayofweekname{\day}{\month}{\year},~\monthname~\ordinaldate{\day},~\textsc{ad}~\THEYEAR}
+
+\newcommand{\TODO}{{\centering \color{red}
+    \textsc{\ldots TO DO \ldots}\par}}
+
+\newcommand{\mailto}[1]{\href{mailto:#1}{#1}}
+
+\newcommand{\lispPackageChapter}[1]{\chapter{The \texttt{#1} Package}}
+\newcommand{\lispFunctionSubsection}[1]{\subsection{The \texttt{#1} Function}}
+\newcommand{\lispMacroSubsection}[1]{\subsection{The \texttt{#1} Macro}}
+\newcommand{\lispGenericSubsection}[1]{\subsection{The \texttt{#1} Generic}}
+\newcommand{\lispMethodsSubsection}[1]{\subsection{The \texttt{#1} Methods}}
+\newcommand{\lispTypeSubsection}[1]{\subsection{The \texttt{#1} Type}}
+\newcommand{\lispParameterSubsection}[1]{\subsection{The \texttt{#1} Parameter}}
+\newcommand{\lispVariableSubsection}[1]{\subsection{The \texttt{#1} Variable}}
+
+\newcommand{\lispArgs}[1]{\subsubsection*{Arguments and Values}}
+\newcommand{\lispReturns}[1]{\subsubsection*{Returns}}
+\newcommand{\lispSyntax}[1]{\subsubsection*{Syntax}}
+\newcommand{\lispExamples}[1]{\subsubsection*{Examples}}
+\newcommand{\lispAffectedBy}[1]{\subsubsection*{Affected By}}
+\newcommand{\knownIssues}[1]{\subsubsection*{Known Issues}}
+
+\definecolor{commentcolor}{rgb}{0.1,0.1,0.4}
+\definecolor{identifiercolor}{rgb}{0.2,0.2,0.2}
+\definecolor{keywordcolor}{rgb}{0.1,0.3,0.1}
+\definecolor{cexcolor}{rgb}{0.25,0.25,0.4}
+\lstset{
+  basicstyle=\tt\small,
+  language=Lisp,
+  morekeywords={defkernel,defkernelmacro,defglobal,with-cuda,with-memory-blocks,with-timer},
+  escapeinside={\%*}{*)},
+  commentstyle=\itshape\color{commentcolor},
+  identifierstyle=\color{identifiercolor},
+  keywordstyle=\color{keywordcolor}
+}
+\newcommand{\cex}[1]{\textcolor{cexcolor}{\textit{#1}}}
+
+\newcommand{\lispCode}[1]{\texttt{#1}}
+\newcommand{\lispCodeArrow}{$\Longrightarrow$}
+\newcommand{\lispExample}[2]{
+  \noindent
+  \texttt{#1} $\Longrightarrow$ \texttt{#2}
+}
+\newcommand{\lispVar}[1]{\texttt{\textit{#1}}}
+
+\newcommand{\GithubIssue}[1]{\href{https://github.com/cgore/chorus/issues/#1}{{\color{red}[Issue \##1]}}}
+
+\title{Chorus\\
+  NVIDIA CUDA for \textsc{Ansi} Common Lisp\\
+  \url{https://github.com/cgore/chorus/}}
+\author{Masayuki Takagi\\
+  and Christopher Mark Gore\\
+  \url{http://www.cgore.com}\\
+  \mailto{cgore@cgore.com}}
+\date{\cgoredate\today}
+
+\begin{document}
+
+\frontmatter
+
+\maketitle
+
+\tableofcontents
+
+\input{copyright.latex}
+
+\input{introduction.latex}
+
+\mainmatter
+
+\input{chorus-package.latex}
+
+\input{api-context-package.latex}
+
+\input{api-memory-package.latex}
+
+\input{api-defkernel-package.latex}
+
+\input{api-macro-package.latex}
+
+\input{api-nvcc-package.latex}
+
+\input{api-timer-package.latex}
+
+\input{lang-package.latex}
+
+\input{driver-api-package.latex}
+
+\input{interop-package.latex}
+
+\backmatter
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{\bibname}
+\bibliography{chorus}
+
+\end{document}

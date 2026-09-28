@@ -1,0 +1,59 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/nvcc}
+
+This package finds \texttt{nvcc} and invokes it.
+\texttt{chorus/api} reexports \texttt{*tmp-path*}, \texttt{*nvcc-options*},
+\texttt{*nvcc-binary*}, \texttt{find-nvcc}, \texttt{nvcc-available-p}, and
+\texttt{nvcc-arch-option}. \texttt{nvcc-compile}, \texttt{find-msvc-cl}, and
+\texttt{arch-option-p} stay in this package.
+
+\lispVariableSubsection{*tmp-path*}
+
+Directory for temporary \texttt{.cu} and \texttt{.ptx} files. \texttt{nil}
+means \texttt{uiop:temporary-directory}.
+
+\lispVariableSubsection{*nvcc-options*}
+
+Extra command-line options passed to \texttt{nvcc}.
+
+\lispVariableSubsection{*nvcc-binary*}
+
+Path to \texttt{nvcc}. \texttt{nil} or the string \texttt{nvcc} means
+auto-detect, using \texttt{PATH}, \texttt{CUDA\_PATH}, and the usual toolkit
+locations on Windows and Unix.
+
+\lispFunctionSubsection{nvcc-arch-option}
+
+\lispSyntax
+
+\texttt{(nvcc-arch-option \lispVar{major} \lispVar{minor})}
+
+Returns an \texttt{-arch=sm\_XY} option. Compute capability 12.0 becomes
+\texttt{sm\_120}. \texttt{major} is a nonnegative integer. \texttt{minor} is
+an integer from 0 through 9.
+
+\lispFunctionSubsection{nvcc-available-p}
+
+True when an \texttt{nvcc} binary can be found.
+
+\lispFunctionSubsection{find-nvcc}
+
+Returns the \texttt{nvcc} pathname that auto-detect selected.
+
+\lispFunctionSubsection{find-msvc-cl}
+
+Returns the Windows host compiler \texttt{cl.exe} when one is found.
+
+\lispFunctionSubsection{nvcc-compile}
+
+Compiles a CUDA C string to PTX. The include path passed to \texttt{nvcc} is
+the \texttt{include/} directory of the \texttt{chorus} system.
+
+\lispFunctionSubsection{arch-option-p}
+
+True when an option list already contains an architecture selector.

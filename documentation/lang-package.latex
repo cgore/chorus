@@ -1,0 +1,58 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/lang}
+
+This is the kernel language. \texttt{chorus} reexports it. Every generated
+\texttt{.cu} file includes \texttt{int.h}, \texttt{float.h},
+\texttt{float3.h}, \texttt{float4.h}, \texttt{double.h}, \texttt{double3.h},
+\texttt{double4.h}, and \texttt{curand.h} from the \texttt{include/}
+directory.
+
+\section{Index variables}
+
+\texttt{grid-dim-x}, \texttt{grid-dim-y}, \texttt{grid-dim-z},
+\texttt{block-dim-x}, \texttt{block-dim-y}, \texttt{block-dim-z},
+\texttt{block-idx-x}, \texttt{block-idx-y}, \texttt{block-idx-z},
+\texttt{thread-idx-x}, \texttt{thread-idx-y}, and \texttt{thread-idx-z}.
+
+\section{Statements}
+
+\texttt{set} stores a value. \texttt{with-shared-memory} declares shared
+memory for the block.
+
+\section{Types}
+
+Scalar types: \texttt{void}, \texttt{bool}, \texttt{int}, \texttt{float},
+\texttt{double}, and \texttt{curand-state-xorwow}.
+
+Vector types, also available as Lisp structures: \texttt{float3},
+\texttt{float4}, \texttt{double3}, and \texttt{double4}. Each has a
+constructor \texttt{make-float3} (and the same pattern for the others), slot
+readers, a predicate, an equality test, and a \texttt{with-float3} macro.
+
+Pointer types: \texttt{bool*}, \texttt{int*}, \texttt{float*},
+\texttt{double*}, \texttt{float3*}, \texttt{float4*}, \texttt{double3*},
+\texttt{double4*}, and \texttt{curand-state-xorwow*}.
+
+\texttt{cffi-type} maps a Chorus type to the CFFI type used at a launch.
+
+\section{Built-in operations}
+
+\texttt{xor}, \texttt{shl}, \texttt{shr}, \texttt{rsqrt}, \texttt{\_\_exp},
+\texttt{\_\_divide}, \texttt{atomic-add}, \texttt{pointer},
+\texttt{syncthreads}, \texttt{double-to-int-rn}, \texttt{dot},
+\texttt{curand-init-xorwow}, \texttt{curand-uniform-float-xorwow},
+\texttt{curand-uniform-double-xorwow}, \texttt{curand-normal-float-xorwow},
+and \texttt{curand-normal-double-xorwow}.
+
+\section{Compiler entry points}
+
+The compiler packages export one operation each:
+\texttt{compile-symbol}, \texttt{compile-type},
+\texttt{type-of-expression}, \texttt{compile-expression},
+\texttt{compile-statement}, and \texttt{compile-kernel}.
+\texttt{compile-kernel} is what the kernel manager calls.

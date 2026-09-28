@@ -1,0 +1,76 @@
+%%%% Copyright (c) 2012--2021 Masayuki Takagi.
+%%%% Copyright (c) 2026 Christopher Mark Gore.
+%%%%
+%%%% This file is part of Chorus, licensed under the MIT License.
+%%%% See the LICENSE file at the root of the repository.
+
+\lispPackageChapter{chorus/api/defkernel}
+
+This package defines kernels and launches them. \texttt{chorus/api} reexports
+it. It does not reexport \texttt{chorus/api/kernel-manager}. A kernel defined
+here is registered on \texttt{*kernel-manager*} and compiled the first time it
+is launched.
+
+\lispMacroSubsection{defkernel}
+
+\lispSyntax
+
+\texttt{(defkernel \lispVar{name} (\lispVar{return-type} \lispVar{arguments})
+  \&body \lispVar{body})}
+
+Each argument has the form \texttt{(\lispVar{var} \lispVar{type})}. The macro
+defines a Lisp function of those variables with keyword arguments
+\texttt{grid-dim} and \texttt{block-dim}. Both default to \texttt{(1 1 1)}.
+The launch uses \texttt{cu-launch-kernel} and the stream in
+\texttt{chorus/api/context:*cuda-stream*}.
+
+\lispMacroSubsection{defkernelmacro}
+
+\lispSyntax
+
+\texttt{(defkernelmacro \lispVar{name} \lispVar{arguments} \&body \lispVar{body})}
+
+Defines a macro in the kernel language.
+
+\lispMacroSubsection{defkernel-symbol-macro}
+
+\lispSyntax
+
+\texttt{(defkernel-symbol-macro \lispVar{name} \lispVar{expansion})}
+
+Defines a symbol macro in the kernel language.
+
+\lispMacroSubsection{defglobal}
+
+\lispSyntax
+
+\texttt{(defglobal \lispVar{name} \lispVar{expression} \&optional \lispVar{qualifiers})}
+
+Defines a kernel global. When \texttt{qualifiers} is omitted, the qualifier is
+\texttt{:device}.
+
+\lispFunctionSubsection{global-ref}
+
+Returns the device pointer of a global after ensuring it is loaded.
+
+\lispFunctionSubsection{expand-macro-1}
+
+Expands one kernel-macro call.
+
+\lispFunctionSubsection{expand-macro}
+
+Expands kernel macros in a form.
+
+\section{The kernel manager}
+
+\texttt{chorus/api/kernel-manager} holds the definitions and the loaded CUDA
+module. \texttt{*kernel-manager*} is that object. \texttt{defkernel} calls
+\texttt{kernel-manager-define-function}. A launch calls
+\texttt{ensure-kernel-function-loaded}. \texttt{with-cuda} calls
+\texttt{kernel-manager-unload} when the context ends.
+
+The package also exports \texttt{make-kernel-manager}, the
+\texttt{kernel-manager-*} readers, \texttt{kernel-manager-compile-module},
+\texttt{kernel-manager-load-module}, \texttt{kernel-manager-load-function},
+\texttt{kernel-manager-load-global}, and the other \texttt{ensure-kernel-*}
+operations.
