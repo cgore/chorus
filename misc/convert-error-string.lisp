@@ -39,7 +39,7 @@
                                                   :error-strings ,error-strings)))))
 
 (defun convert-error-string ()
-  (let ((path (asdf:system-relative-pathname :chorus #P"src/driver-api/get-error-string.lisp")))
+  (let ((path (asdf:system-relative-pathname :chorus #P"source/driver-api/get-error-string.lisp")))
     (with-open-file (out path :direction :output :if-exists :supersede)
       (unless out
         (error "cannot open file: ~A" path))

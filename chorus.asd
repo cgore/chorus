@@ -24,7 +24,7 @@
   :license "MIT"
   :depends-on ("cffi" "alexandria"
                       "cl-pattern" "split-sequence" "cl-reexport" "cl-ppcre")
-  :components ((:module "src"
+  :components ((:module "source"
                         :serial t
                         :components
                         ((:module "driver-api"
