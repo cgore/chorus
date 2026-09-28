@@ -22,7 +22,7 @@
         (list (parse-integer (aref xs 1)) (aref xs 0))))))   
 
 (defun read-error-strings ()
-  (let ((path (asdf:system-relative-pathname :chorus #P"misc/drvapi_error_string.h")))
+  (let ((path (asdf:system-relative-pathname :chorus #P"tools/drvapi_error_string.h")))
     (remove nil (mapcar #'scan-error-string (read-lines path)))))
 
 (defun list->plist (num-and-str)
@@ -30,7 +30,7 @@
     `(:num ,num :str ,str)))
 
 (defun output-template (out)
-  (let ((path (asdf:system-relative-pathname :chorus #P"misc/get-error-string.template"))
+  (let ((path (asdf:system-relative-pathname :chorus #P"tools/get-error-string.template"))
         (timestamp (local-time:format-timestring nil (local-time:now)
                                                  :format '(:short-month ". " :day " " :year)))
         (error-strings (mapcar #'list->plist (read-error-strings))))

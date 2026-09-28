@@ -546,4 +546,4 @@ Copyright (c) 2026 Christopher Mark Gore (cgore@cgore.com)
 
 ## License
 
-Licensed under the MIT License. `misc/drvapi_error_string.h` remains under the terms stated in that file.
+Licensed under the MIT License. `tools/drvapi_error_string.h` remains under the terms stated in that file.

@@ -28,7 +28,7 @@ Use this header, with `<years>` taken from the log above:
 
 Keep the sentence `This file is a part of the Chorus project.` The system name is chorus.
 
-`LICENSE` lists both copyright lines, then the MIT permission text. `misc/drvapi_error_string.h` is Copyright 1993-2010 NVIDIA Corporation and stays under the terms stated in that file. Leave that file's notice as NVIDIA wrote it.
+`LICENSE` lists both copyright lines, then the MIT permission text. `tools/drvapi_error_string.h` is Copyright 1993-2010 NVIDIA Corporation and stays under the terms stated in that file. Leave that file's notice as NVIDIA wrote it.
 
 Other contributors stay in the git history. `LICENSE` and the file headers name Takagi and Gore.
 

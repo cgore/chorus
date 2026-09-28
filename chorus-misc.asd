@@ -8,7 +8,7 @@
   :author "Masayuki Takagi, Christopher Mark Gore"
   :license "MIT"
   :depends-on ("local-time" "cl-emb")
-  :components ((:module "misc"
+  :components ((:module "tools"
                 :serial t
                 :components
                 ((:file "package")
