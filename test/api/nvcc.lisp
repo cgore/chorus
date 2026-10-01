@@ -53,17 +53,48 @@
         (ok (search "nvcc" (string-downcase (namestring nvcc)))))
       (skip 3 "nvcc not installed")))
 
-(subtest "nvcc-compile produces sm_120-capable PTX"
+(defun module-file-ok (path)
+  (if (string-equal (pathname-type path) "cubin")
+      (with-open-file (in path :element-type '(unsigned-byte 8))
+        (plusp (file-length in)))
+      (let ((text (uiop:read-file-string path)))
+        (and (search ".version" text)
+             (or (search ".target sm_" text)
+                 (search ".target compute_" text))))))
+
+(subtest "nvcc-compile produces a loadable module"
   (if (nvcc-available-p)
-      (let ((ptx (nvcc-compile
-                  "extern \"C\" __global__ void chorus_probe(void) { return; }")))
-        (ok (probe-file ptx) "ptx file written")
-        (let ((text (uiop:read-file-string ptx)))
-          (ok (search ".version" text) "PTX has .version")
-          (ok (or (search ".target sm_" text)
-                  (search ".target compute_" text))
-              "PTX has a .target")))
-      (skip 3 "nvcc not installed")))
+      (let ((module (nvcc-compile
+                     "extern \"C\" __global__ void chorus_probe(void) { return; }")))
+        (ok (probe-file module) "module file written")
+        (ok (module-file-ok module) "module is PTX text or cubin"))
+      (skip 2 "nvcc not installed")))
+
+(subtest "toolkit newer than the driver emits cubin"
+  (is (chorus/api/nvcc::cuda-version-from-code 13030) '(13 3))
+  (is (chorus/api/nvcc::cuda-version-from-code 13040) '(13 4))
+  (is (chorus/api/nvcc::cuda-version-from-code 12080) '(12 8))
+  (ok (chorus/api/nvcc::emit-cubin-p '(13 4) '(13 3))
+      "Toolkit 13.4 on a CUDA 13.3 driver")
+  (ok (not (chorus/api/nvcc::emit-cubin-p '(13 4) '(13 4))))
+  (ok (not (chorus/api/nvcc::emit-cubin-p '(13 3) '(13 4))))
+  (ok (not (chorus/api/nvcc::emit-cubin-p nil '(13 3))))
+  (ok (not (chorus/api/nvcc::emit-cubin-p '(13 4) nil)))
+  (is (chorus/api/nvcc::directory-component-version "v13.4") '(13 4))
+  (ok (null (chorus/api/nvcc::directory-component-version "bin")))
+  (is (chorus/api/nvcc::version-from-directory
+       (make-pathname :directory '(:absolute "CUDA" "v13.4" "bin")
+                      :name "nvcc" :type "exe"))
+      '(13 4))
+  (is (chorus/api/nvcc::version-from-release-text
+       "Cuda compilation tools, release 13.4, V13.4.59")
+      '(13 4))
+  (let ((driver (chorus/api/nvcc::driver-cuda-version))
+        (toolkit (chorus/api/nvcc::active-toolkit-version)))
+    (when (and driver toolkit)
+      (is (chorus/api/nvcc::module-output-flag)
+          (if (chorus/api/nvcc::emit-cubin-p toolkit driver) "-cubin" "-ptx")
+          "live toolkit and driver pick one module format"))))
 
 (subtest "option predicates"
   (ok (chorus/api/nvcc::ccbin-option-p '("-ccbin" "cl.exe")))
@@ -88,7 +119,8 @@
   (let* ((cu (make-pathname :name "foo" :type "cu" :defaults (uiop:temporary-directory)))
          (ptx (make-pathname :type "ptx" :defaults cu))
          (opts (chorus/api/nvcc::get-nvcc-options cu ptx)))
-    (ok (member "-ptx" opts :test #'string=) "asks for PTX")
+    (ok (member (chorus/api/nvcc::module-output-flag) opts :test #'string=)
+        "asks for PTX, or cubin when the toolkit is newer than the driver")
     (ok (member "-I" opts :test #'string=) "passes include path")
     (ok (member "-o" opts :test #'string=) "passes output path")
     (ok (arch-option-p opts) "architecture is present")
@@ -128,7 +160,8 @@
         "stems differ")
   (let ((cu (chorus/api/nvcc::get-cu-path)))
     (is (pathname-type cu) "cu")
-    (is (pathname-type (chorus/api/nvcc::get-ptx-path cu)) "ptx")
+    (is (pathname-type (chorus/api/nvcc::get-ptx-path cu))
+        (chorus/api/nvcc::module-extension))
     (is (pathname-name (chorus/api/nvcc::get-ptx-path cu))
         (pathname-name cu))))
 
@@ -170,9 +203,9 @@
         (kernel-define-function
          kernel 'chorus-roundtrip 'void '((x int*))
          '((set (aref x 0) 1) (return)))
-        (let ((ptx (nvcc-compile (compile-kernel kernel))))
-          (ok (probe-file ptx) "compiler output is accepted by nvcc")
-          (ok (search ".version" (uiop:read-file-string ptx)))))
+        (let ((module (nvcc-compile (compile-kernel kernel))))
+          (ok (probe-file module) "compiler output is accepted by nvcc")
+          (ok (module-file-ok module) "module is PTX text or cubin")))
       (skip 2 "nvcc not installed")))
 
 (subtest "find-msvc-cl"

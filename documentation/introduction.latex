@@ -24,6 +24,8 @@ implementation: the kernel language, the driver API, and \texttt{with-cuda}.
 The kernel language expresses kernel functions, kernel macros, and kernel
 symbol macros as S-expressions. On the CUDA backend, a kernel is compiled to
 CUDA C, then to PTX by \texttt{nvcc}, then loaded through the CUDA driver API.
+When the toolkit is newer than the CUDA version the driver reports, that PTX
+is rejected and Chorus emits cubin for the selected architecture instead.
 The kernel manager does this the first time the kernel is launched. A launch
 looks like an ordinary function call. It takes \texttt{:grid-dim} and
 \texttt{:block-dim}, and on the CUDA backend it runs inside a CUDA context.

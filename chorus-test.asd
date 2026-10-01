@@ -44,5 +44,5 @@
                    (:file "timer")
                    (:file "smoke")))
                  (:file "backend")
-                 (:file "apple-silicon")))))
+                 (:file "apple-silicon"))))
   :perform (test-op (o c) (symbol-call :asdf :load-system c)))

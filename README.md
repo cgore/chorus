@@ -14,7 +14,7 @@ Most programs use the `chorus` package. `*backend*` and `list-devices` select th
 
 The kernel language defines kernel functions, kernel macros, and kernel symbol macros as S-expressions. Kernel macros and kernel symbol macros give abstractions that CUDA C does not have. That matters in GPU programming, where resources are tight.
 
-On the CUDA backend, a kernel launches much as an ordinary Common Lisp function does. The launch runs in a CUDA context and takes grid and block sizes. The kernel manager compiles and loads the kernel the first time it is launched. Chorus compiles the kernel to CUDA C (a `.cu` file). NVCC, the NVIDIA CUDA compiler driver, compiles that file to PTX. The CUDA driver API loads the module and launches the kernel. See [Kernel manager](#kernel-manager).
+On the CUDA backend, a kernel launches much as an ordinary Common Lisp function does. The launch runs in a CUDA context and takes grid and block sizes. The kernel manager compiles and loads the kernel the first time it is launched. Chorus compiles the kernel to CUDA C (a `.cu` file). NVCC, the NVIDIA CUDA compiler driver, compiles that file to PTX, and the CUDA driver API loads the module. When the toolkit is newer than the CUDA version the driver reports, the driver rejects that PTX (`CUDA_ERROR_UNSUPPORTED_PTX_VERSION`). Chorus compiles to cubin for the selected architecture instead, and the driver loads that. See [Kernel manager](#kernel-manager).
 
 A memory block allocates the host side and the device side together. `sync-memory-block` copies between them. The same layer also exposes CFFI host pointers and CUDA device pointers.
 
@@ -88,6 +88,8 @@ The CUDA backend runs on Windows and Linux.
 
 Kernel files are written to the OS temporary directory unless you set `*tmp-path*`. `nvcc` is found on `PATH`, via `CUDA_PATH` / `CUDA_HOME`, or in the usual toolkit install locations (`C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\` on Windows, `/usr/local/cuda` on Unix).
 
+The module is PTX when the toolkit is at or below the driver's CUDA version. A newer toolkit still runs `nvcc`, but its PTX ISA will not load. Chorus passes `-cubin` in that case. CUDA Toolkit 13.4 emits PTX ISA 9.4. Driver 610 (CUDA 13.3) returns `CUDA_ERROR_UNSUPPORTED_PTX_VERSION` for that PTX and loads the cubin. A driver that reports CUDA 13.4 or newer JITs the PTX.
+
 ## Verification environments
 
 ### CUDA on Windows
@@ -96,11 +98,13 @@ Verified on this configuration; the full test suite passes:
 
 * Windows 11 x86_64
 * GeForce RTX 5090 (Blackwell, sm_120)
-* NVIDIA driver 610.88, CUDA 13.3
+* NVIDIA driver 610.88 (CUDA 13.3), CUDA Toolkit 13.4
 * Visual Studio 2022 Community (MSVC)
 * SBCL 2.6.8 64-bit
 
 Architecture is taken from the live device (`-arch=sm_XY`), so other Turing-and-newer GPUs with a matching toolkit are expected to work the same way. They have not all been re-run here.
+
+Toolkit 13.4 is newer than this driver, so the suite loads cubin rather than PTX. PTX ISA 9.4 from that toolkit does not load on driver 610.
 
 ### Apple silicon
 
@@ -229,7 +233,7 @@ Accesses a global variable's value on device from host with automatically copyin
 
 ### [Special Variable] \*tmp-path\*
 
-Specifies the temporary directory in which Chorus generates files such as `.cu` file and `.ptx` file. The default is `nil`, which uses the OS temporary directory (`UIOP:TEMPORARY-DIRECTORY`).
+Specifies the temporary directory in which Chorus generates files such as `.cu`, `.ptx`, and `.cubin` files. The default is `nil`, which uses the OS temporary directory (`UIOP:TEMPORARY-DIRECTORY`).
 
     (setf *tmp-path* "/path/to/tmp/")   ; Unix
     (setf *tmp-path* #P"C:/Temp/chorus/")
@@ -245,7 +249,7 @@ Specifies additional command line options passed to `nvcc` command that Chorus c
 Specifies the path to `nvcc` so that Chorus can call it internally. The default is `nil`, which auto-detects `nvcc` on `PATH` and in standard CUDA Toolkit locations. The strings `"nvcc"` and `"nvcc.exe"` also mean auto-detect.
 
     (setf *nvcc-binary* "/usr/local/cuda/bin/nvcc")
-    (setf *nvcc-binary* #P"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3/bin/nvcc.exe")
+    (setf *nvcc-binary* #P"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.4/bin/nvcc.exe")
 
 ### [Function] find-nvcc
 
@@ -485,7 +489,7 @@ To begin with, the kernel manager has four states.
     III module-loaded state
     IV  function-loaded state
 
-The initial state is its entry point. The compiled state is a state where kernel functions defined with the kernel description language have been compiled into a CUDA kernel module (.ptx file). The obtained kernel module has been loaded in the module-loaded state. In the function-loaded state, each kernel function in the kernel module has been loaded.
+The initial state is its entry point. The compiled state is a state where kernel functions defined with the kernel description language have been compiled into a CUDA kernel module (a `.ptx` file, or a `.cubin` file when the toolkit is newer than the driver). The obtained kernel module has been loaded in the module-loaded state. In the function-loaded state, each kernel function in the kernel module has been loaded.
 
 Following illustrates the kernel manager's state transfer.
 

@@ -47,6 +47,10 @@
 (defcufun (cu-init "cuInit") cu-result
   (flags :unsigned-int))
 
+;; cuDriverGetVersion — 1000 * major + 10 * minor. CUDA 13.3 is 13030.
+(defcufun (cu-driver-get-version "cuDriverGetVersion") cu-result
+  (driver-version (:pointer :int)))
+
 ;; cuDeviceGet
 (defcufun (cu-device-get "cuDeviceGet") cu-result
   (device (:pointer cu-device))

@@ -54,6 +54,13 @@ __device__ int a = 0;
 (diag "test cuInit")
 (cu-init 0)
 
+(diag "test cuDriverGetVersion")
+(cffi:with-foreign-object (version :int)
+  (cu-driver-get-version version)
+  (let ((code (cffi:mem-ref version :int)))
+    (format t "CUDA driver version code: ~A~%" code)
+    (ok (>= code 10000) "cuDriverGetVersion is major*1000 + minor*10")))
+
 (diag "test cuDeviceGet")
 (let ((dev-id 0))
   (cffi:with-foreign-object (device 'cu-device)

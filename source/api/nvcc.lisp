@@ -53,7 +53,7 @@
                  :defaults (get-tmp-path)))
 
 (defun get-ptx-path (cu-path)
-  (make-pathname :type "ptx" :defaults cu-path))
+  (make-pathname :type (module-extension) :defaults cu-path))
 
 (defun get-include-path ()
   (asdf:system-relative-pathname :chorus #P"include/"))
@@ -188,6 +188,113 @@
     ((< (car a) (car b)) nil)
     (t (version-list> (cdr a) (cdr b)))))
 
+(defun cuda-version-from-code (code)
+  "Decode cuDriverGetVersion. 13030 is CUDA 13.3 and 13040 is CUDA 13.4."
+  (check-type code (integer 0))
+  (list (floor code 1000)
+        (floor (mod code 1000) 10)))
+
+(defvar *driver-cuda-version* nil)
+(defvar *driver-cuda-version-known-p* nil)
+
+(defun query-driver-cuda-version ()
+  (when (not chorus/driver-api:*sdk-not-found*)
+    (handler-case
+        (progn
+          (chorus/driver-api:cu-init 0)
+          (cffi:with-foreign-object (code :int)
+            (chorus/driver-api:cu-driver-get-version code)
+            (cuda-version-from-code (cffi:mem-ref code :int))))
+      (error ()
+        nil))))
+
+(defun driver-cuda-version ()
+  "Return (MAJOR MINOR) for the CUDA version the driver can JIT, or NIL."
+  (unless *driver-cuda-version-known-p*
+    (setf *driver-cuda-version* (query-driver-cuda-version)
+          *driver-cuda-version-known-p* t))
+  *driver-cuda-version*)
+
+(defun directory-component-version (component)
+  (when (stringp component)
+    (let ((key (version-key
+                (make-pathname :directory (list :absolute component)))))
+      (when (and (consp key)
+                 (integerp (first key))
+                 (plusp (first key)))
+        (list (first key) (or (second key) 0))))))
+
+(defun version-from-directory (path)
+  (let ((found nil))
+    (dolist (part (pathname-directory (pathname path)) found)
+      (let ((ver (directory-component-version part)))
+        (when ver
+          (setf found ver))))))
+
+(defun version-from-release-text (text)
+  "Parse nvcc --version. \"release 13.4, V13.4.59\" is (13 4)."
+  (let ((start (and (stringp text) (search "release " text))))
+    (when start
+      (let* ((rest (subseq text (+ start (length "release "))))
+             (dot (position #\. rest)))
+        (when (and dot (plusp dot)
+                   (every #'digit-char-p (subseq rest 0 dot)))
+          (let ((end (or (position-if-not #'digit-char-p rest :start (1+ dot))
+                         (length rest))))
+            (when (> end (1+ dot))
+              (list (parse-integer rest :end dot)
+                    (parse-integer rest :start (1+ dot) :end end)))))))))
+
+(defvar *nvcc-version-cache* (make-hash-table :test #'equal))
+
+(defun version-from-nvcc-output (nvcc)
+  (handler-case
+      (multiple-value-bind (output error-output exit-code)
+          (uiop:run-program (list (pathname-string nvcc) "--version")
+                            :output :string
+                            :error-output :string
+                            :ignore-error-status t)
+        (declare (ignore error-output))
+        (when (and (integerp exit-code) (zerop exit-code))
+          (version-from-release-text output)))
+    (error ()
+      nil)))
+
+(defun nvcc-toolkit-version (nvcc)
+  "Return (MAJOR MINOR) for NVCC, from its install path or --version."
+  (let ((key (namestring (pathname nvcc))))
+    (multiple-value-bind (cached present) (gethash key *nvcc-version-cache*)
+      (if present
+          cached
+          (setf (gethash key *nvcc-version-cache*)
+                (or (version-from-directory nvcc)
+                    (version-from-nvcc-output nvcc)))))))
+
+(defun active-toolkit-version ()
+  (let ((nvcc (find-nvcc)))
+    (when nvcc
+      (nvcc-toolkit-version nvcc))))
+
+(defun emit-cubin-p (toolkit-version driver-version)
+  "True when the toolkit is newer than the driver.
+   nvcc then emits cubin instead of PTX. The driver rejects a newer PTX
+   ISA with CUDA_ERROR_UNSUPPORTED_PTX_VERSION. Toolkit 13.4 emits PTX
+   9.4, which driver 610 (CUDA 13.3) rejects; that driver loads the
+   sm_120 cubin from the same toolkit."
+  (and (consp toolkit-version)
+       (consp driver-version)
+       (version-list> toolkit-version driver-version)))
+
+(defun module-output-flag ()
+  (if (emit-cubin-p (active-toolkit-version) (driver-cuda-version))
+      "-cubin"
+      "-ptx"))
+
+(defun module-extension ()
+  (if (string= (module-output-flag) "-cubin")
+      "cubin"
+      "ptx"))
+
 (defun find-nvcc ()
   "Return the absolute path of nvcc, or NIL if it cannot be found."
   (let ((override *nvcc-binary*))
@@ -300,7 +407,7 @@
             (machine-options)
             (windows-compat-options)
             (list "-I" (pathname-string include-path)
-                  "-ptx"
+                  (module-output-flag)
                   "-o" (pathname-string ptx-path)
                   (pathname-string cu-path)))))
 

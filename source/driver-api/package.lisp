@@ -24,6 +24,7 @@
            :cu-event-interprocess
            ;; Functions
            :cu-init
+           :cu-driver-get-version
            :cu-device-get
            :cu-device-get-count
            :cu-device-compute-capability
