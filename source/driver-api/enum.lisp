@@ -46,7 +46,4 @@
   (:cu-mem-host-register-portable  #X1)
   (:cu-mem-host-register-devicemap #X2))
 
-;; From CUdevice_attribute. Only the compute-capability queries are bound;
-;; the rest of the enum is large and unused by chorus.
-(defconstant cu-device-attribute-compute-capability-major 75)
-(defconstant cu-device-attribute-compute-capability-minor 76)
+;; CUdevice_attribute lives in device-attribute.lisp.

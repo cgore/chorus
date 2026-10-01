@@ -107,7 +107,16 @@
     (block-dim-z "blockDim.z")
     (thread-idx-x "threadIdx.x")
     (thread-idx-y "threadIdx.y")
-    (thread-idx-z "threadIdx.z")))
+    (thread-idx-z "threadIdx.z")
+    (cluster-dim-x "__clusterDim().x")
+    (cluster-dim-y "__clusterDim().y")
+    (cluster-dim-z "__clusterDim().z")
+    (cluster-idx-x "__clusterIdx().x")
+    (cluster-idx-y "__clusterIdx().y")
+    (cluster-idx-z "__clusterIdx().z")
+    (block-in-cluster-x "__clusterRelativeBlockIdx().x")
+    (block-in-cluster-y "__clusterRelativeBlockIdx().y")
+    (block-in-cluster-z "__clusterRelativeBlockIdx().z")))
 
 
 ;;;

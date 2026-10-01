@@ -87,8 +87,53 @@
 ;;; Compile kernel
 ;;;
 
-(defun compile-includes ()
-  "#include \"int.h\"
+(defun tree-mentions-extended-float-p (tree)
+  (cond ((extended-float-type-name-p tree) t)
+        ((consp tree)
+         (or (tree-mentions-extended-float-p (car tree))
+             (tree-mentions-extended-float-p (cdr tree))))
+        (t nil)))
+
+(defun user-structures-need-extended-types-p ()
+  (some (lambda (entry)
+          (some (lambda (accessor)
+                  (extended-float-type-name-p (third accessor)))
+                (third entry)))
+        (user-structures)))
+
+(defun kernel-needs-extended-types-p (kernel)
+  (or (user-structures-need-extended-types-p)
+      (some (lambda (name)
+              (or (tree-mentions-extended-float-p
+                   (kernel-function-return-type kernel name))
+                  (tree-mentions-extended-float-p
+                   (kernel-function-arguments kernel name))
+                  (tree-mentions-extended-float-p
+                   (kernel-function-body kernel name))))
+            (kernel-function-names kernel))
+      (some (lambda (name)
+              (tree-mentions-extended-float-p
+               (kernel-global-initializer kernel name)))
+            (kernel-global-names kernel))))
+
+(defun compile-user-structure (entry)
+  (format nil "struct ~A {~%~{~A~}};~%~%"
+          (second entry)
+          (mapcar (lambda (accessor)
+                    (format nil "  ~A ~A;~%"
+                            (cuda-type (third accessor))
+                            (second accessor)))
+                  (third entry))))
+
+(defun compile-user-structures ()
+  (let ((entries (user-structures)))
+    (if entries
+        (format nil "~%~{~A~}" (mapcar #'compile-user-structure entries))
+        "")))
+
+(defun compile-includes (&optional kernel)
+  (concatenate 'string
+               "#include \"int.h\"
 #include \"float.h\"
 #include \"float3.h\"
 #include \"float4.h\"
@@ -96,7 +141,13 @@
 #include \"double3.h\"
 #include \"double4.h\"
 #include \"curand.h\"
-")
+#include \"chorus-cluster.h\"
+"
+               (if (and kernel (kernel-needs-extended-types-p kernel))
+                   "#include \"chorus-types.h\"
+"
+                   "")
+               (compile-user-structures)))
 
 (defun compile-variable-qualifier (qualifier)
   (format nil "__~A__" (string-downcase (princ-to-string qualifier))))
@@ -135,9 +186,10 @@
 (defun compile-argument (argument)
   (let ((var (argument-var argument))
         (type (argument-type argument)))
-    (let ((var1 (compile-symbol var))
-          (type1 (compile-type type)))
-      (format nil "~A ~A" type1 var1))))
+    (format nil "~A~:[~; __restrict__~] ~A"
+            (compile-type type)
+            (argument-restrict-p argument)
+            (compile-symbol var))))
 
 (defun compile-arguments (arguments)
   (let ((arguments1 (mapcar #'compile-argument arguments)))
@@ -148,11 +200,15 @@
 (defun compile-declaration (kernel name)
   (let ((c-name (kernel-function-c-name kernel name))
         (return-type (kernel-function-return-type kernel name))
-        (arguments (kernel-function-arguments kernel name)))
+        (arguments (kernel-function-arguments kernel name))
+        (bounds (launch-bounds-values (kernel-function-body kernel name))))
+    (when (and bounds (not (eq return-type 'void)))
+      (error "launch-bounds applies to kernels only: ~S." name))
     (let ((specifier (compile-specifier return-type))
           (return-type1 (compile-type return-type))
           (arguments1 (compile-arguments arguments)))
-      (format nil "~A ~A ~A(~A)" specifier return-type1 c-name arguments1))))
+      (format nil "~A ~A~@[ __launch_bounds__(~{~A~^, ~})~] ~A(~A)"
+              specifier return-type1 bounds c-name arguments1))))
 
 (defun compile-prototype (kernel name)
   (let ((declaration (compile-declaration kernel name)))
@@ -168,12 +224,18 @@
 
 ~{~A~}" prototypes))))
 
+(defun body-without-declares (body)
+  (loop for rest on body
+        while (declare-p (first rest))
+        finally (return rest)))
+
 (defun compile-statements (kernel name)
   (let ((var-env (kernel->variable-environment kernel name))
         (func-env (kernel->function-environment kernel)))
     (flet ((aux (statement)
              (compile-statement statement var-env func-env)))
-      (let ((statements (kernel-function-body kernel name)))
+      (let ((statements (body-without-declares
+                         (kernel-function-body kernel name))))
         (format nil "~{~A~}" (mapcar #'aux statements))))))
 
 (defun compile-definition (kernel name)
@@ -193,7 +255,7 @@
 ~{~A~^~%~}" definitions))))
 
 (defun compile-kernel (kernel)
-  (let ((includes (compile-includes))
+  (let ((includes (compile-includes kernel))
         (globals (compile-globals kernel))
         (prototypes (compile-prototypes kernel))
         (definitions (compile-definitions kernel)))

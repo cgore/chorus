@@ -44,7 +44,11 @@
 (defun compile-int (expr)
   (unless (chorus-int-p expr)
     (error "The value ~S is an invalid expression." expr))
-  (princ-to-string expr))
+  ;; Values outside signed 32-bit int need a long-long suffix so nvcc
+  ;; does not truncate them.
+  (if (<= (- (expt 2 31)) expr (1- (expt 2 31)))
+      (princ-to-string expr)
+      (format nil "~Dll" expr)))
 
 
 ;;;

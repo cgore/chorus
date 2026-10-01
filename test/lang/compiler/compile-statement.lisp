@@ -293,6 +293,81 @@
 ;;;
 
 
+(diag "COMPILE-WHILE")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(while t (return)) var-env func-env)
+      (unlines "while (true) {"
+               "  return;"
+               "}")
+      "while"))
+
+(diag "COMPILE-FOR")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(for (i 0 (< i 10) (+ i 1))
+                            (return))
+                         var-env func-env)
+      (unlines "for ( int i = 0; (i < 10); i = (i + 1) )"
+               "{"
+               "  return;"
+               "}")
+      "for"))
+
+(diag "COMPILE-BREAK")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(break) var-env func-env)
+      (unlines "break;")
+      "break")
+  (is (compile-statement '(continue) var-env func-env)
+      (unlines "continue;")
+      "continue"))
+
+(diag "COMPILE-SWITCH")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(switch 1
+                            (0 (return))
+                            (t (return 1)))
+                         var-env func-env)
+      (unlines "switch (1) {"
+               "  case 0: {"
+               "    return;"
+               "    break;"
+               "  }"
+               "  default: {"
+               "    return 1;"
+               "    break;"
+               "  }"
+               "}")
+      "switch"))
+
+(diag "COMPILE-PRINTF")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(printf "hi %d" 1) var-env func-env)
+      (unlines "printf(\"hi %d\", 1);")
+      "printf"))
+
+(diag "COMPILE-DYNAMIC-SHARED")
+
+(let ((var-env (empty-variable-environment))
+      (func-env (empty-function-environment)))
+  (is (compile-statement '(with-dynamic-shared-memory ((a int))
+                            (return))
+                         var-env func-env)
+      (unlines "{"
+               "  extern __shared__ unsigned char chorus_dyn_a[];"
+               "  int *a = (int *)chorus_dyn_a;"
+               "  return;"
+               "}")
+      "dynamic shared memory"))
 
 
 (finalize)

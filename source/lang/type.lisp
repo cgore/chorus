@@ -29,12 +29,50 @@
            :float4*
            :double3*
            :double4*
+           :int8
+           :uint8
+           :int16
+           :uint16
+           :uint
+           :int64
+           :uint64
+           :size-t
+           :half
+           :bfloat16
+           :fp8
+           :fp4
+           :int2
+           :int4
+           :uint2
+           :uint4
+           :half2
+           :int8*
+           :uint8*
+           :int16*
+           :uint16*
+           :uint*
+           :int64*
+           :uint64*
+           :size-t*
+           :half*
+           :bfloat16*
+           :fp8*
+           :fp4*
+           :int2*
+           :int4*
+           :uint2*
+           :uint4*
+           :half2*
+           :register-structure-type
+           :user-structures
+           :extended-float-type-name-p
            ;; Type
            :chorus-type
            :chorus-type-p
            :cffi-type
            :cffi-type-size
            :cuda-type
+           :scalar-cuda-type
            ;; Scalar type
            :scalar-type-p
            ;; Structure type
@@ -96,8 +134,21 @@
   '((void :void "void")
     (bool (:boolean :int8) "bool")
     (int :int "int")
+    (int8 :int8 "signed char")
+    (uint8 :uint8 "unsigned char")
+    (int16 :int16 "short")
+    (uint16 :uint16 "unsigned short")
+    (uint :unsigned-int "unsigned int")
+    (int64 :int64 "long long")
+    (uint64 :uint64 "unsigned long long")
+    (size-t size-t "size_t")
     (float :float "float")
     (double :double "double")
+    ;; Host storage is the raw bit pattern. Device code uses the CUDA type.
+    (half :uint16 "__half")
+    (bfloat16 :uint16 "__nv_bfloat16")
+    (fp8 :uint8 "__nv_fp8_e4m3")
+    (fp4 :uint8 "__nv_fp4_e2m1")
     (curand-state-xorwow (:struct curand-state-xorwow)
                          "curandStateXORWOW_t")))
 
@@ -123,7 +174,7 @@
 ;;; Structure type
 ;;;
 
-(defparameter +structure-table+
+(defparameter +builtin-structures+
   '((float3 "float3" ((float3-x "x" float)
                       (float3-y "y" float)
                       (float3-z "z" float)))
@@ -137,10 +188,27 @@
     (double4 "double4" ((double4-x "x" double)
                         (double4-y "y" double)
                         (double4-z "z" double)
-                        (double4-w "w" double)))))
+                        (double4-w "w" double)))
+    (int2 "int2" ((int2-x "x" int)
+                  (int2-y "y" int)))
+    (int4 "int4" ((int4-x "x" int)
+                  (int4-y "y" int)
+                  (int4-z "z" int)
+                  (int4-w "w" int)))
+    (uint2 "uint2" ((uint2-x "x" uint)
+                    (uint2-y "y" uint)))
+    (uint4 "uint4" ((uint4-x "x" uint)
+                    (uint4-y "y" uint)
+                    (uint4-z "z" uint)
+                    (uint4-w "w" uint)))
+    (half2 "__half2" ((half2-x "x" half)
+                      (half2-y "y" half)))))
 
-(defparameter +structure-types+
-  (mapcar #'car +structure-table+))
+(defparameter +user-structures+ nil)
+
+(defparameter +structure-table+ nil)
+
+(defparameter +structure-types+ nil)
 
 (defun structure-type-p (object)
   (and (member object +structure-types+)
@@ -169,10 +237,54 @@
 ;;; Structure type - accessor
 ;;;
 
-(defparameter +accessor->structure+
-  (loop for structure in +structure-types+
-     append (loop for (accessor nil nil) in (structure-accessors structure)
-               collect (list accessor structure))))
+(defparameter +accessor->structure+ nil)
+
+(defun user-structures ()
+  +user-structures+)
+
+(defun rebuild-structure-indexes ()
+  (setf +structure-table+ (append +builtin-structures+ +user-structures+))
+  (setf +structure-types+ (mapcar #'car +structure-table+))
+  (setf +accessor->structure+
+        (loop for structure in +structure-types+
+              append (loop for (accessor nil nil)
+                             in (structure-accessors structure)
+                           collect (list accessor structure))))
+  nil)
+
+(defun register-structure-type (name accessors &key cuda-name builtin)
+  "Register a kernel structure. ACCESSORS are (ACCESSOR C-FIELD ELEMENT-TYPE)."
+  (unless (and (symbolp name) (every #'consp accessors))
+    (error "The value ~S is an invalid structure type." name))
+  (let ((cuda (or cuda-name
+                  (substitute #\_ #\- (string-downcase (symbol-name name)))))
+        (entry nil))
+    (setf entry (list name cuda accessors))
+    (if builtin
+        (setf +builtin-structures+
+              (append (remove name +builtin-structures+ :key #'car)
+                      (list entry)))
+        (setf +user-structures+
+              (append (remove name +user-structures+ :key #'car)
+                      (list entry))))
+    (rebuild-structure-indexes)
+    name))
+
+(defparameter +extended-float-type-names+
+  '("HALF2" "BFLOAT16" "FP8" "FP4" "HALF"))
+
+(defun extended-float-type-name-p (type)
+  (and (symbolp type)
+       (let ((name (symbol-name type)))
+         (some (lambda (base)
+                 (or (string= name base)
+                     (and (> (length name) (length base))
+                          (string= (subseq name 0 (length base)) base)
+                          (every (lambda (char) (char= char #\*))
+                                 (subseq name (length base))))))
+               +extended-float-type-names+))))
+
+(rebuild-structure-indexes)
 
 (defun %structure-from-accessor (accessor)
   (cadr (assoc accessor +accessor->structure+)))
@@ -204,7 +316,7 @@
 (defun array-type-p (object)
   (when (symbolp object)
     (let ((package (symbol-package object))
-          (object-string (princ-to-string object)))
+          (object-string (symbol-name object)))
       (cl-ppcre:register-groups-bind (base-string nil)
           (+array-type-regex+ object-string)
         (let ((base (intern (string base-string) package)))
@@ -213,15 +325,21 @@
 (defun array-type-base (type)
   (unless (array-type-p type)
     (error "The value ~S is an invalid type." type))
-  (let ((type-string (princ-to-string type)))
+  ;; The pointer symbol may live in the user's package. Resolve the base
+  ;; there so a registered structure is the same symbol the kernel names.
+  (let ((type-string (symbol-name type))
+        (package (symbol-package type)))
     (cl-ppcre:register-groups-bind (base-string nil)
         (+array-type-regex+ type-string)
-      (intern (string base-string) 'chorus/lang/type))))
+      (let ((base (intern (string base-string) package)))
+        (if (chorus-type-p base)
+            base
+            (intern (string base-string) 'chorus/lang/type))))))
 
 (defun array-type-stars (type)
   (unless (array-type-p type)
     (error "The value ~S is an invalid type." type))
-  (let ((type-string (princ-to-string type)))
+  (let ((type-string (symbol-name type)))
     (cl-ppcre:register-groups-bind (_ stars-string)
         (+array-type-regex+ type-string)
       (declare (ignore _))

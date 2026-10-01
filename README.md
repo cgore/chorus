@@ -14,7 +14,7 @@ Most programs use the `chorus` package. `*backend*` and `list-devices` select th
 
 The kernel language defines kernel functions, kernel macros, and kernel symbol macros as S-expressions. Kernel macros and kernel symbol macros give abstractions that CUDA C does not have. That matters in GPU programming, where resources are tight.
 
-On the CUDA backend, a kernel launches much as an ordinary Common Lisp function does. The launch runs in a CUDA context and takes grid and block sizes. The kernel manager compiles and loads the kernel the first time it is launched. Chorus compiles the kernel to CUDA C (a `.cu` file). NVCC, the NVIDIA CUDA compiler driver, compiles that file to PTX, and the CUDA driver API loads the module. When the toolkit is newer than the CUDA version the driver reports, the driver rejects that PTX (`CUDA_ERROR_UNSUPPORTED_PTX_VERSION`). Chorus compiles to cubin for the selected architecture instead, and the driver loads that. See [Kernel manager](#kernel-manager).
+On the CUDA backend, a kernel launches much as an ordinary Common Lisp function does. The launch runs in a CUDA context and takes grid and block sizes, and optional dynamic shared-memory size and stream. The kernel manager compiles and loads the kernel the first time it is launched. Chorus compiles the kernel to CUDA C (a `.cu` file). NVCC, the NVIDIA CUDA compiler driver, compiles that file to PTX, and the CUDA driver API loads the module. When the toolkit is newer than the CUDA version the driver reports, the driver rejects that PTX (`CUDA_ERROR_UNSUPPORTED_PTX_VERSION`). Chorus compiles to cubin for the selected architecture instead, and the driver loads that. See [Kernel manager](#kernel-manager).
 
 A memory block allocates the host side and the device side together. `sync-memory-block` copies between them. The same layer also exposes CFFI host pointers and CUDA device pointers.
 
@@ -451,6 +451,81 @@ Compiled:
 
     return 0;
 
+### Scalar and vector types
+
+The kernel language has `int8`, `uint8`, `int16`, `uint16`, `uint`, `int64`, `uint64`, and `size-t` in addition to `int`, `float`, and `double`. `half`, `bfloat16`, `fp8`, and `fp4` are the CUDA types `__half`, `__nv_bfloat16`, `__nv_fp8_e4m3`, and `__nv_fp4_e2m1`. On the host those four are raw bit patterns (`:uint16` or `:uint8`). Vector types are `int2`, `int4`, `uint2`, `uint4`, and `half2`, plus the existing `float3`, `float4`, `double3`, and `double4`.
+
+A kernel argument may be marked `__restrict__`:
+
+    (defkernel store (void ((x int* :restrict)))
+      (set (aref x 0) 1))
+
+`defkernel-struct` defines a structure the kernel and the host share. Slot types are Chorus types. The host constructor is `make-` plus the structure name.
+
+    (defkernel-struct pair
+      (x int)
+      (y int))
+
+### WHILE, FOR, BREAK, CONTINUE, SWITCH
+
+`while` repeats while its test is true. `for` is `(for (var init test step) statement*)`. `test` is the C continuation test, so the loop runs while `test` is true. `break` and `continue` are the C statements. `break` is the Common Lisp symbol; the compiler matches it by name. `switch` takes clauses `(value statement*)`. `t`, `otherwise`, and `default` are the default clause. The compiler inserts a `break` at the end of each clause.
+
+    (for (i 0 (< i n) (+ i 1))
+      (set (aref a i) i)
+      (if (= i 2)
+          (break)))
+
+    (switch (aref a 0)
+      (1 (set (aref b 0) 10))
+      (t (set (aref b 0) 30)))
+
+### Dynamic shared memory and launch bounds
+
+`with-dynamic-shared-memory` overlays one `extern __shared__` array. Every spec is a pointer to that base. Pass the byte size with `:shared-mem` on the launch. A leading `(declare (launch-bounds n ...))` on a kernel is emitted as `__launch_bounds__`.
+
+    (defkernel fill (void ((a int*)))
+      (declare (launch-bounds 32))
+      (with-dynamic-shared-memory ((s int))
+        (set (aref s thread-idx-x) thread-idx-x)
+        (syncthreads)
+        (set (aref a thread-idx-x) (aref s thread-idx-x))))
+
+    (fill a :block-dim '(32 1 1) :shared-mem (* 32 4))
+
+### Warp, atomics, and math
+
+Warp collectives take the mask first: `shfl-sync`, `shfl-up-sync`, `shfl-down-sync`, `shfl-xor-sync`, `ballot-sync`, `all-sync`, `any-sync`, `match-any-sync`, `match-all-sync`, `syncwarp`, and `reduce-add-sync`, `reduce-min-sync`, `reduce-max-sync`, `reduce-and-sync`, `reduce-or-sync`, `reduce-xor-sync`. `activemask` takes no arguments. `(uint -1)` is the full 32-lane mask.
+
+`atomic-add`, `atomic-cas`, `atomic-exch`, `atomic-min`, and `atomic-max` cover 32-bit integers. `uint64` has the same five. `int64` has `atomic-min` and `atomic-max`. `atomic-exch` and `atomic-add` also cover `float`, and `atomic-add` covers `double`.
+
+`fma`, `erf`, `erfc`, `clz`, `popc`, `brev`, `ffs`, `__sin`, `__cos`, `__log2`, and `__saturate` call the matching CUDA device functions. `float-to-half`, `half-to-float`, `float-to-bfloat16`, and `bfloat16-to-float` convert the extended float types. `+` on `half` and `bfloat16` is `__hadd` and the other `__h*` operators.
+
+`printf` is a statement: `(printf "chorus %d" 1)`. `cuda-asm` emits one CUDA C string, which is how device code reaches inline PTX such as `tcgen05` and `mma` without a built-in for each instruction.
+
+`cluster-dim-x`, `cluster-idx-x`, and `block-in-cluster-x` (and the y and z forms) read the cluster indexes. `cluster-rank`, `cluster-barrier`, and `threadfence-cluster` are the matching device calls. They are meaningful on compute capability 9.0 and newer.
+
+## Driver surface
+
+The driver bindings live in `chorus/driver-api` and follow the versioned `_v2` exports. Large descriptor structs are opaque pointers. The Lisp wrappers in `chorus/api` add:
+
+* `memset-device`, `memcpy-device-to-device`, and `memcpy-device-to-device-2d`
+* `with-pinned-memory` (`cuMemAllocHost`) and `alloc-managed-memory` (`cuMemAllocManaged`)
+* `with-primary-cuda`, `retain-primary-context`, and `device-attribute`
+* `defkernel` keywords `:shared-mem` and `:stream` (`*cuda-stream*` when omitted)
+
+The same package also binds module load from a memory image (`cuModuleLoadData`), the linker, `cuLaunchKernelEx`, occupancy, graphs, green contexts, checkpoints, virtual memory, peer access, texture and surface objects, `cuTensorMapEncodeTiled`, D3D11 registration, and `cuImportExternalMemory` / `cuImportExternalSemaphore`. CUDA has no `cuda_d3d12.h` or `cuda_vulkan.h` in this toolkit. Vulkan and D3D12 resources go through those external-memory entry points. Deprecated texture references are not bound.
+
+`CUdevice_attribute` is the set of constants `cu-device-attribute-*` in `chorus/driver-api`. Warp size on the RTX 5090 is `cu-device-attribute-warp-size`.
+
+## CUDA libraries
+
+`chorus-cuda-libs` is a separate system. It loads the toolkit DLLs from `CUDA_PATH/bin/x64` (then `bin`, then `PATH`) and binds cuBLAS, cuBLASLt, cuFFT, cuRAND, cuSOLVER, cuSPARSE, NPP, and nvJPEG. A missing DLL sets the matching `*…-not-found*` flag and still lets the system load. Calling a function whose library did not load signals an error.
+
+NCCL and cuDNN are bound the same way and are not part of the CUDA toolkit install. On this machine those two flags stay true. NPP functions that pass `NppiSize` or `NppStreamContext` by value are omitted. cuSPARSE uses the generic SpMV and SpMM entry points. CUB and Thrust are C++ headers, not driver libraries, so they are not FFI bindings.
+
+    (ql:quickload :chorus-cuda-libs)
+    (asdf:test-system :chorus-cuda-libs)
+
 ## Architecture
 
 The following figure illustrates the CUDA backend in this tree.
@@ -522,7 +597,7 @@ The CUDA backend decides the driver is present when `cffi:use-foreign-library` s
 
 ## Streams
 
-The low level interface works with multiple streams. With the async stuff it's possible to overlap copy and computation with two streams. Chorus provides `*cuda-stream*` special variable, to which bound stream is used in kernel function calls.
+The low level interface works with multiple streams. With the async stuff it's possible to overlap copy and computation with two streams. Chorus provides `*cuda-stream*` special variable. A `defkernel` launch uses that stream unless the call passes `:stream`. `:shared-mem` is the dynamic shared-memory size in bytes and defaults to 0.
 
 The following is for working with streams in [mgl-mat](https://github.com/melisgl/mgl-mat):
 

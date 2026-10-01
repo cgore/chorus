@@ -36,7 +36,9 @@
                                    (:file "library")
                                    (:file "type")
                                    (:file "enum")
-                                   (:file "function")))
+                                   (:file "function")
+                                   (:file "device-attribute")
+                                   (:file "extended")))
                          (:module "lang"
                                   :serial t
                                   :components

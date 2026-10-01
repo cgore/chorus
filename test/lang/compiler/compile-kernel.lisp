@@ -38,6 +38,7 @@
 #include \"double3.h\"
 #include \"double4.h\"
 #include \"curand.h\"
+#include \"chorus-cluster.h\"
 
 
 /**
@@ -78,6 +79,14 @@ __global__ void chorus_test_lang_compiler_compile_kernel_baz()
 }
 "
       "basic case 1"))
+
+(let ((kernel (make-kernel)))
+  (kernel-define-function kernel 'bounded 'void '((x int* :restrict))
+                          '((declare (launch-bounds 256 4))
+                            (return)))
+  (let ((code (compile-kernel kernel)))
+    (ok (search "__restrict__" code) "restrict argument")
+    (ok (search "__launch_bounds__(256, 4)" code) "launch bounds")))
 
 
 (finalize)

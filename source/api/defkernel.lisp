@@ -18,7 +18,8 @@
            :expand-macro
            :defkernel-symbol-macro
            :defglobal
-           :global-ref)
+           :global-ref
+           :defkernel-struct)
   (:shadow :expand-macro-1
            :expand-macro)
   (:import-from :alexandria
@@ -111,7 +112,10 @@
   (with-gensyms (hfunc kargs)
     `(progn
        (kernel-manager-define-function *kernel-manager* ',name ',return-type ',arguments ',body)
-       (defun ,name (,@(argument-vars arguments) &key (grid-dim '(1 1 1)) (block-dim '(1 1 1)))
+       (defun ,name (,@(argument-vars arguments)
+                     &key (grid-dim '(1 1 1)) (block-dim '(1 1 1))
+                          (shared-mem 0)
+                          (stream chorus/api/context:*cuda-stream*))
          (let ((,hfunc (ensure-kernel-function-loaded *kernel-manager* ',name)))
            (with-launching-arguments (,kargs ,arguments)
              (destructuring-bind (grid-dim-x grid-dim-y grid-dim-z) grid-dim
@@ -119,7 +123,7 @@
                (cu-launch-kernel ,hfunc
                                  grid-dim-x  grid-dim-y  grid-dim-z
                                  block-dim-x block-dim-y block-dim-z
-                                 0 chorus/api/context:*cuda-stream*
+                                 shared-mem stream
                                  ,kargs (cffi:null-pointer))))))))))
 
 
@@ -170,3 +174,51 @@
     (cffi:with-foreign-object (host-ptr cffi-type)
       (setf (cffi:mem-ref host-ptr cffi-type) value)
       (cu-memcpy-host-to-device device-ptr host-ptr cffi-type-size))))
+
+
+;;;
+;;; DEFKERNEL-STRUCT
+;;;
+
+(defmacro defkernel-struct (name &body slots)
+  "Define a kernel structure, its host CFFI layout, and a Lisp constructor."
+  (unless (and (symbolp name)
+               (every (lambda (slot)
+                        (and (consp slot)
+                             (symbolp (car slot))
+                             (cadr slot)))
+                      slots))
+    (error "The structure ~S is invalid." name))
+  (let* ((package (symbol-package name))
+         (constructor (format-symbol package "MAKE-~A" name))
+         (class-name (format-symbol package "~A-CFFI" name))
+         (field-names (mapcar #'car slots))
+         (accessors (mapcar (lambda (slot)
+                              (list (format-symbol package "~A-~A"
+                                                   name (car slot))
+                                    (substitute #\_ #\-
+                                                (string-downcase
+                                                 (symbol-name (car slot))))
+                                    (cadr slot)))
+                            slots)))
+    `(progn
+       (defstruct (,name (:constructor ,constructor ,field-names))
+         ,@field-names)
+       (cffi:defcstruct (,name :class ,class-name)
+         ,@(mapcar (lambda (slot)
+                     `(,(car slot) ,(cffi-type (cadr slot))))
+                   slots))
+       (defmethod cffi:translate-into-foreign-memory
+           ((value ,name) (type ,class-name) ptr)
+         (cffi:with-foreign-slots (,field-names ptr (:struct ,name))
+           ,@(mapcar (lambda (field accessor)
+                       `(setf ,field (,accessor value)))
+                     field-names
+                     (mapcar #'car accessors))))
+       (defmethod cffi:translate-from-foreign (value (type ,class-name))
+         (,constructor ,@(mapcar (lambda (field)
+                                   `(cffi:foreign-slot-value
+                                     value '(:struct ,name) ',field))
+                                 field-names)))
+       (eval-when (:compile-toplevel :load-toplevel :execute)
+         (register-structure-type ',name ',accessors)))))

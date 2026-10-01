@@ -23,7 +23,11 @@
            :*cuda-device*
            :*cuda-context*
            :with-cuda
-           :*cuda-stream*))
+           :*cuda-stream*
+           :device-attribute
+           :retain-primary-context
+           :release-primary-context
+           :with-primary-cuda))
 (in-package :chorus/api/context)
 
 
@@ -116,3 +120,37 @@
          (destroy-cuda-context *cuda-context*)))))
 
 (defvar *cuda-stream* (cffi:null-pointer))
+
+
+;;;
+;;; Device attributes and the primary context
+;;;
+
+(defun device-attribute (device attribute)
+  (cffi:with-foreign-object (value :int)
+    (cu-device-get-attribute value attribute device)
+    (cffi:mem-ref value :int)))
+
+(defun retain-primary-context (device)
+  (cffi:with-foreign-object (context 'cu-context)
+    (cu-device-primary-ctx-retain context device)
+    (let ((ctx (cffi:mem-ref context 'cu-context)))
+      (cu-ctx-set-current ctx)
+      ctx)))
+
+(defun release-primary-context (device)
+  (cu-device-primary-ctx-release device))
+
+(defmacro with-primary-cuda ((dev-id) &body body)
+  "Run BODY on the device primary context. The context stays alive for
+   other users of the device; this form releases the retain it took."
+  `(progn
+     (init-cuda)
+     (let* ((*cuda-device* (get-cuda-device ,dev-id))
+            (*cuda-context* (retain-primary-context *cuda-device*))
+            (*nvcc-options* (if (arch-exists-p *nvcc-options*)
+                                *nvcc-options*
+                                (append-arch *nvcc-options* *cuda-device*))))
+       (unwind-protect (progn ,@body)
+         (kernel-manager-unload *kernel-manager*)
+         (release-primary-context *cuda-device*)))))

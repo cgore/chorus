@@ -36,7 +36,16 @@
            :with-memory-block
            :with-memory-blocks
            :sync-memory-block
-           :memory-block-aref))
+           :memory-block-aref
+           :memcpy-device-to-device
+           :memcpy-device-to-device-2d
+           :memset-device
+           :alloc-pinned-memory
+           :free-pinned-memory
+           :with-pinned-memory
+           :alloc-managed-memory
+           :free-managed-memory
+           :+cu-mem-attach-global+))
 (in-package :chorus/api/memory)
 
 
@@ -98,7 +107,7 @@
       ((:struct 'float4) (cffi:mem-aref host-ptr '(:struct float4) index))
       ((:struct 'double3) (cffi:mem-aref host-ptr '(:struct double3) index))
       ((:struct 'double4) (cffi:mem-aref host-ptr '(:struct double4) index))
-      (_ (error "The value ~S is an invalid CFFI type to access host memory." cffi-type)))))
+      (_ (cffi:mem-aref host-ptr cffi-type index)))))
 
 (defun (setf host-memory-aref) (new-value host-ptr type index)
   ;; give type as constant explicitly for performance reason
@@ -117,8 +126,7 @@
        (setf (cffi:mem-aref host-ptr '(:struct double3) index) new-value))
       ((:struct 'double4)
        (setf (cffi:mem-aref host-ptr '(:struct double4) index) new-value))
-      (_ (error "The value ~S is an invalid CFFI type to access host memory."
-                cffi-type)))))
+      (_ (setf (cffi:mem-aref host-ptr cffi-type index) new-value)))))
 
 
 ;;;
@@ -199,3 +207,44 @@
   (let ((host-ptr (memory-block-host-ptr memory-block))
         (type (memory-block-type memory-block)))
     (setf (host-memory-aref host-ptr type index) new-value)))
+
+
+;;;
+;;; Device to device, memset, pinned, and managed memory
+;;;
+
+(defun memcpy-device-to-device (dst src bytes)
+  (cu-memcpy-device-to-device dst src bytes))
+
+(defun memcpy-device-to-device-2d (dst dst-pitch src src-pitch
+                                   width-in-bytes height)
+  (memcpy-2d-device dst dst-pitch src src-pitch width-in-bytes height))
+
+(defun memset-device (device-ptr value count &key (width 8))
+  (ecase width
+    (8 (cu-memset-d8 device-ptr value count))
+    (16 (cu-memset-d16 device-ptr value count))
+    (32 (cu-memset-d32 device-ptr value count))))
+
+(defun alloc-pinned-memory (bytes)
+  (cffi:with-foreign-object (pp :pointer)
+    (cu-mem-alloc-host pp bytes)
+    (cffi:mem-ref pp :pointer)))
+
+(defun free-pinned-memory (ptr)
+  (cu-mem-free-host ptr))
+
+(defmacro with-pinned-memory ((var bytes) &body body)
+  `(let ((,var (alloc-pinned-memory ,bytes)))
+     (unwind-protect (progn ,@body)
+       (free-pinned-memory ,var))))
+
+(defconstant +cu-mem-attach-global+ 1)
+
+(defun alloc-managed-memory (type n &optional (flags +cu-mem-attach-global+))
+  (cffi:with-foreign-object (device-ptr 'cu-device-ptr)
+    (cu-mem-alloc-managed device-ptr (* n (cffi-type-size type)) flags)
+    (cffi:mem-ref device-ptr 'cu-device-ptr)))
+
+(defun free-managed-memory (device-ptr)
+  (cu-mem-free device-ptr))

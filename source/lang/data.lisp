@@ -55,7 +55,46 @@
            :double4-w
            :double4-p
            :double4-=
-           :with-double4)
+           :with-double4
+           :int2
+           :make-int2
+           :int2-x
+           :int2-y
+           :int2-p
+           :int2-=
+           :with-int2
+           :int4
+           :make-int4
+           :int4-x
+           :int4-y
+           :int4-z
+           :int4-w
+           :int4-p
+           :int4-=
+           :with-int4
+           :uint2
+           :make-uint2
+           :uint2-x
+           :uint2-y
+           :uint2-p
+           :uint2-=
+           :with-uint2
+           :uint4
+           :make-uint4
+           :uint4-x
+           :uint4-y
+           :uint4-z
+           :uint4-w
+           :uint4-p
+           :uint4-=
+           :with-uint4
+           :half2
+           :make-half2
+           :half2-x
+           :half2-y
+           :half2-p
+           :half2-=
+           :with-half2)
   (:import-from :alexandria
                 :once-only))
 (in-package :chorus/lang/data)
@@ -285,3 +324,188 @@
   (boxmuller-flag-double :int)
   (boxmuller-extra :float)
   (boxmuller-extra-double :double))
+
+
+;;;
+;;; Int2
+;;;
+
+(defstruct (int2 (:constructor make-int2 (x y)))
+  (x 0 :type integer)
+  (y 0 :type integer))
+
+(defun int2-= (a b)
+  (and (= (int2-x a) (int2-x b))
+       (= (int2-y a) (int2-y b))))
+
+(cffi:defcstruct (int2 :class int2-c)
+  (x :int)
+  (y :int))
+
+(defmacro with-int2 ((x y) value &body body)
+  (once-only (value)
+    `(let ((,x (int2-x ,value))
+           (,y (int2-y ,value)))
+       (declare (ignorable ,x ,y))
+       ,@body)))
+
+(defmethod cffi:translate-into-foreign-memory ((value int2) (type int2-c) ptr)
+  (cffi:with-foreign-slots ((x y) ptr (:struct int2))
+    (setf x (int2-x value)
+          y (int2-y value))))
+
+(defmethod cffi:translate-from-foreign (value (type int2-c))
+  (cffi:with-foreign-slots ((x y) value (:struct int2))
+    (make-int2 x y)))
+
+
+;;;
+;;; Int4
+;;;
+
+(defstruct (int4 (:constructor make-int4 (x y z w)))
+  (x 0 :type integer)
+  (y 0 :type integer)
+  (z 0 :type integer)
+  (w 0 :type integer))
+
+(defun int4-= (a b)
+  (and (= (int4-x a) (int4-x b))
+       (= (int4-y a) (int4-y b))
+       (= (int4-z a) (int4-z b))
+       (= (int4-w a) (int4-w b))))
+
+(cffi:defcstruct (int4 :class int4-c)
+  (x :int)
+  (y :int)
+  (z :int)
+  (w :int))
+
+(defmacro with-int4 ((x y z w) value &body body)
+  (once-only (value)
+    `(let ((,x (int4-x ,value))
+           (,y (int4-y ,value))
+           (,z (int4-z ,value))
+           (,w (int4-w ,value)))
+       (declare (ignorable ,x ,y ,z ,w))
+       ,@body)))
+
+(defmethod cffi:translate-into-foreign-memory ((value int4) (type int4-c) ptr)
+  (cffi:with-foreign-slots ((x y z w) ptr (:struct int4))
+    (setf x (int4-x value)
+          y (int4-y value)
+          z (int4-z value)
+          w (int4-w value))))
+
+(defmethod cffi:translate-from-foreign (value (type int4-c))
+  (cffi:with-foreign-slots ((x y z w) value (:struct int4))
+    (make-int4 x y z w)))
+
+
+;;;
+;;; Uint2
+;;;
+
+(defstruct (uint2 (:constructor make-uint2 (x y)))
+  (x 0 :type (unsigned-byte 32))
+  (y 0 :type (unsigned-byte 32)))
+
+(defun uint2-= (a b)
+  (and (= (uint2-x a) (uint2-x b))
+       (= (uint2-y a) (uint2-y b))))
+
+(cffi:defcstruct (uint2 :class uint2-c)
+  (x :unsigned-int)
+  (y :unsigned-int))
+
+(defmacro with-uint2 ((x y) value &body body)
+  (once-only (value)
+    `(let ((,x (uint2-x ,value))
+           (,y (uint2-y ,value)))
+       (declare (ignorable ,x ,y))
+       ,@body)))
+
+(defmethod cffi:translate-into-foreign-memory ((value uint2) (type uint2-c) ptr)
+  (cffi:with-foreign-slots ((x y) ptr (:struct uint2))
+    (setf x (uint2-x value)
+          y (uint2-y value))))
+
+(defmethod cffi:translate-from-foreign (value (type uint2-c))
+  (cffi:with-foreign-slots ((x y) value (:struct uint2))
+    (make-uint2 x y)))
+
+
+;;;
+;;; Uint4
+;;;
+
+(defstruct (uint4 (:constructor make-uint4 (x y z w)))
+  (x 0 :type (unsigned-byte 32))
+  (y 0 :type (unsigned-byte 32))
+  (z 0 :type (unsigned-byte 32))
+  (w 0 :type (unsigned-byte 32)))
+
+(defun uint4-= (a b)
+  (and (= (uint4-x a) (uint4-x b))
+       (= (uint4-y a) (uint4-y b))
+       (= (uint4-z a) (uint4-z b))
+       (= (uint4-w a) (uint4-w b))))
+
+(cffi:defcstruct (uint4 :class uint4-c)
+  (x :unsigned-int)
+  (y :unsigned-int)
+  (z :unsigned-int)
+  (w :unsigned-int))
+
+(defmacro with-uint4 ((x y z w) value &body body)
+  (once-only (value)
+    `(let ((,x (uint4-x ,value))
+           (,y (uint4-y ,value))
+           (,z (uint4-z ,value))
+           (,w (uint4-w ,value)))
+       (declare (ignorable ,x ,y ,z ,w))
+       ,@body)))
+
+(defmethod cffi:translate-into-foreign-memory ((value uint4) (type uint4-c) ptr)
+  (cffi:with-foreign-slots ((x y z w) ptr (:struct uint4))
+    (setf x (uint4-x value)
+          y (uint4-y value)
+          z (uint4-z value)
+          w (uint4-w value))))
+
+(defmethod cffi:translate-from-foreign (value (type uint4-c))
+  (cffi:with-foreign-slots ((x y z w) value (:struct uint4))
+    (make-uint4 x y z w)))
+
+
+;;;
+;;; Half2 — two raw IEEE half bit patterns
+;;;
+
+(defstruct (half2 (:constructor make-half2 (x y)))
+  (x 0 :type (unsigned-byte 16))
+  (y 0 :type (unsigned-byte 16)))
+
+(defun half2-= (a b)
+  (and (= (half2-x a) (half2-x b))
+       (= (half2-y a) (half2-y b))))
+
+(cffi:defcstruct (half2 :class half2-c)
+  (x :uint16)
+  (y :uint16))
+
+(defmacro with-half2 ((x y) value &body body)
+  (once-only (value)
+    `(let ((,x (half2-x ,value))
+           (,y (half2-y ,value)))
+       (declare (ignorable ,x ,y))
+       ,@body)))
+
+(defmethod cffi:translate-into-foreign-memory ((value half2) (type half2-c) ptr)
+  (cffi:with-foreign-slots ((x y) ptr (:struct half2))
+    (setf x (half2-x value)
+          y (half2-y value))))
+
+(defmethod cffi:translate-from-foreign (value (type half2-c))
+  (cffi:with-foreign-slots ((x y) value (:struct half2))
+    (make-half2 x y)))

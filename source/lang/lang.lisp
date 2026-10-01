@@ -56,7 +56,17 @@
                           :double4-w
                           :double4-p
                           :double4-=
-                          :with-double4))
+                          :with-double4
+                          :int2 :make-int2 :int2-x :int2-y :int2-p :int2-=
+                          :with-int2
+                          :int4 :make-int4 :int4-x :int4-y :int4-z :int4-w
+                          :int4-p :int4-= :with-int4
+                          :uint2 :make-uint2 :uint2-x :uint2-y :uint2-p
+                          :uint2-= :with-uint2
+                          :uint4 :make-uint4 :uint4-x :uint4-y :uint4-z
+                          :uint4-w :uint4-p :uint4-= :with-uint4
+                          :half2 :make-half2 :half2-x :half2-y :half2-p
+                          :half2-= :with-half2))
 
 ;; reexport symbols of chorus types
 (reexport-from :chorus/lang/type
@@ -79,6 +89,12 @@
                           :double3*
                           :double4*
                           :curand-state-xorwow*
+                          :int8 :uint8 :int16 :uint16 :uint :int64 :uint64
+                          :size-t :half :bfloat16 :fp8 :fp4
+                          :int2 :int4 :uint2 :uint4 :half2
+                          :int8* :uint8* :int16* :uint16* :uint* :int64*
+                          :uint64* :size-t* :half* :bfloat16* :fp8* :fp4*
+                          :int2* :int4* :uint2* :uint4* :half2*
                           :cffi-type))
 
 ;; reexport symbols of chorus syntax except the ones exported
@@ -89,7 +105,14 @@
                           :block-idx-x :block-idx-y :block-idx-z
                           :thread-idx-x :thread-idx-y :thread-idx-z
                           :with-shared-memory
-                          :set))
+                          :set
+                          :cluster-dim-x :cluster-dim-y :cluster-dim-z
+                          :cluster-idx-x :cluster-idx-y :cluster-idx-z
+                          :block-in-cluster-x :block-in-cluster-y
+                          :block-in-cluster-z
+                          :while :for :continue :switch :printf :cuda-asm
+                          :with-dynamic-shared-memory
+                          :launch-bounds))
 
 ;; reexport symbols of chorus built-in functions except the ones
 ;; exported from COMMON-LISP package
@@ -109,4 +132,18 @@
                           :curand-uniform-float-xorwow
                           :curand-uniform-double-xorwow
                           :curand-normal-float-xorwow
-                          :curand-normal-double-xorwow))
+                          :curand-normal-double-xorwow
+                          :shfl-sync :shfl-up-sync :shfl-down-sync
+                          :shfl-xor-sync
+                          :ballot-sync :all-sync :any-sync :activemask
+                          :match-any-sync :match-all-sync :syncwarp
+                          :reduce-add-sync :reduce-min-sync :reduce-max-sync
+                          :reduce-and-sync :reduce-or-sync :reduce-xor-sync
+                          :atomic-cas :atomic-exch :atomic-min :atomic-max
+                          :fma :erf :erfc :clz :popc :brev :ffs
+                          :__sin :__cos :__log2 :__saturate
+                          :float-to-half :half-to-float
+                          :float-to-bfloat16 :bfloat16-to-float
+                          :cluster-barrier :threadfence-cluster :cluster-rank
+                          :uint :int8 :uint8 :int16 :uint16 :int64 :uint64
+                          :size-t :half :bfloat16))

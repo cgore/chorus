@@ -22,6 +22,10 @@
 (diag "CHORUS-TYPE-P")
 
 (is (chorus-type-p 'int) t "basic case 1")
+(is (chorus-type-p 'int8) t "sized integer")
+(is (chorus-type-p 'half) t "half")
+(is (chorus-type-p 'int2) t "int2")
+(is (cuda-type 'uint64) "unsigned long long" "uint64 cuda name")
 (is (chorus-type-p 'float3) t "basic case 2")
 (is (chorus-type-p 'float3*) t "basic case 3")
 (is (chorus-type-p '*float*) nil "basic case 4")

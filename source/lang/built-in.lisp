@@ -27,6 +27,60 @@
            :curand-uniform-double-xorwow
            :curand-normal-float-xorwow
            :curand-normal-double-xorwow
+           :shfl-sync
+           :shfl-up-sync
+           :shfl-down-sync
+           :shfl-xor-sync
+           :ballot-sync
+           :all-sync
+           :any-sync
+           :activemask
+           :match-any-sync
+           :match-all-sync
+           :syncwarp
+           :reduce-add-sync
+           :reduce-min-sync
+           :reduce-max-sync
+           :reduce-and-sync
+           :reduce-or-sync
+           :reduce-xor-sync
+           :atomic-cas
+           :atomic-exch
+           :atomic-min
+           :atomic-max
+           :fma
+           :erf
+           :erfc
+           :clz
+           :popc
+           :brev
+           :ffs
+           :__sin
+           :__cos
+           :__log2
+           :__saturate
+           :float-to-half
+           :half-to-float
+           :float-to-bfloat16
+           :bfloat16-to-float
+           :cluster-barrier
+           :threadfence-cluster
+           :cluster-rank
+           :uint
+           :int8
+           :uint8
+           :int16
+           :uint16
+           :int64
+           :uint64
+           :size-t
+           :half
+           :bfloat16
+           :int2
+           :int4
+           :uint2
+           :uint4
+           :half2
            ;; Interfaces
            :built-in-function-return-type
            :built-in-function-infix-p
@@ -215,3 +269,132 @@
 
 (defun built-in-function-c-name (name argument-types)
   (cadddr (inferred-function name argument-types)))
+
+(defun register-built-in (name signature)
+  "SIGNATURE is ((ARGUMENT-TYPES) RETURN-TYPE INFIX-P C-NAME)."
+  (let ((existing (getf +built-in-functions+ name)))
+    (setf (getf +built-in-functions+ name)
+          (append existing (list signature)))))
+
+(defun register-integer-family ()
+  (dolist (type '(uint int8 uint8 int16 uint16 int64 uint64 size-t))
+    (dolist (op '(+ - * /))
+      (register-built-in op `((,type ,type) ,type t ,(string op)))
+      (register-built-in op `((,type int) ,type t ,(string op)))
+      (register-built-in op `((int ,type) ,type t ,(string op))))
+    (register-built-in 'mod `((,type ,type) ,type t "%"))
+    (dolist (op '(= /= < > <= >=))
+      (let ((c-name (ecase op
+                      (= "==") (/= "!=") (< "<") (> ">")
+                      (<= "<=") (>= ">="))))
+        (register-built-in op `((,type ,type) bool t ,c-name))
+        (register-built-in op `((,type int) bool t ,c-name))))
+    (register-built-in 'pointer
+                       `((,type) ,(array-type type 1) nil "&"))
+    (register-built-in type `((int) ,type nil ,(scalar-cuda-type type)))))
+
+(defun register-vector-and-half-ops ()
+  (register-built-in 'int2 '((int int) int2 nil "make_int2"))
+  (register-built-in 'int4 '((int int int int) int4 nil "make_int4"))
+  (register-built-in 'uint2 '((uint uint) uint2 nil "make_uint2"))
+  (register-built-in 'uint4 '((uint uint uint uint) uint4 nil "make_uint4"))
+  (register-built-in 'half2 '((half half) half2 nil "__halves2half2"))
+  (dolist (pair '((+ "__hadd") (- "__hsub") (* "__hmul") (/ "__hdiv")))
+    (register-built-in (first pair)
+                       `((half half) half nil ,(second pair)))
+    (register-built-in (first pair)
+                       `((bfloat16 bfloat16) bfloat16 nil ,(second pair))))
+  (dolist (pair '((= "__heq") (/= "__hne") (< "__hlt")
+                  (> "__hgt") (<= "__hle") (>= "__hge")))
+    (register-built-in (first pair)
+                       `((half half) bool nil ,(second pair))))
+  (register-built-in 'float-to-half '((float) half nil "__float2half"))
+  (register-built-in 'half-to-float '((half) float nil "__half2float"))
+  (register-built-in 'half '((float) half nil "__float2half"))
+  (register-built-in 'float-to-bfloat16
+                     '((float) bfloat16 nil "__float2bfloat16"))
+  (register-built-in 'bfloat16-to-float
+                     '((bfloat16) float nil "__bfloat162float"))
+  (register-built-in 'bfloat16 '((float) bfloat16 nil "__float2bfloat16"))
+  (dolist (type '(half bfloat16 fp8 fp4 int2 int4 uint2 uint4 half2
+                  float3 float4 double3 double4))
+    (register-built-in 'pointer
+                       `((,type) ,(array-type type 1) nil "&"))))
+
+(defun register-warp-atomics-and-math ()
+  (dolist (entry '((shfl-sync "__shfl_sync")
+                   (shfl-up-sync "__shfl_up_sync")
+                   (shfl-down-sync "__shfl_down_sync")
+                   (shfl-xor-sync "__shfl_xor_sync")))
+    (register-built-in (first entry)
+                       `((uint int int int) int nil ,(second entry)))
+    (register-built-in (first entry)
+                       `((uint uint int int) uint nil ,(second entry)))
+    (register-built-in (first entry)
+                       `((uint float int int) float nil ,(second entry))))
+  (register-built-in 'ballot-sync '((uint bool) uint nil "__ballot_sync"))
+  (register-built-in 'all-sync '((uint bool) int nil "__all_sync"))
+  (register-built-in 'any-sync '((uint bool) int nil "__any_sync"))
+  (register-built-in 'activemask '(() uint nil "__activemask"))
+  (register-built-in 'match-any-sync
+                     '((uint int) uint nil "__match_any_sync"))
+  (register-built-in 'match-all-sync
+                     `((uint int ,(array-type 'int 1)) uint nil
+                       "__match_all_sync"))
+  (register-built-in 'syncwarp '((uint) void nil "__syncwarp"))
+  (dolist (entry '((reduce-add-sync "__reduce_add_sync")
+                   (reduce-min-sync "__reduce_min_sync")
+                   (reduce-max-sync "__reduce_max_sync")
+                   (reduce-and-sync "__reduce_and_sync")
+                   (reduce-or-sync "__reduce_or_sync")
+                   (reduce-xor-sync "__reduce_xor_sync")))
+    (register-built-in (first entry)
+                       `((uint int) int nil ,(second entry)))
+    (register-built-in (first entry)
+                       `((uint uint) uint nil ,(second entry))))
+  ;; Signed 64-bit values have atomicMin and atomicMax only. atomicCAS
+  ;; and atomicExch for 64 bits take unsigned long long.
+  (dolist (type '(int uint uint64))
+    (let ((ptr (array-type type 1)))
+      (register-built-in 'atomic-cas
+                         `((,ptr ,type ,type) ,type nil "atomicCAS"))
+      (register-built-in 'atomic-exch
+                         `((,ptr ,type) ,type nil "atomicExch"))
+      (register-built-in 'atomic-min
+                         `((,ptr ,type) ,type nil "atomicMin"))
+      (register-built-in 'atomic-max
+                         `((,ptr ,type) ,type nil "atomicMax"))))
+  (let ((ptr (array-type 'int64 1)))
+    (register-built-in 'atomic-min
+                       `((,ptr int64) int64 nil "atomicMin"))
+    (register-built-in 'atomic-max
+                       `((,ptr int64) int64 nil "atomicMax")))
+  (register-built-in 'atomic-exch '((float* float) float nil "atomicExch"))
+  (register-built-in 'atomic-add '((uint* uint) uint nil "atomicAdd"))
+  (register-built-in 'atomic-add '((uint64* uint64) uint64 nil "atomicAdd"))
+  (register-built-in 'atomic-add '((float* float) float nil "atomicAdd"))
+  (register-built-in 'atomic-add '((double* double) double nil "atomicAdd"))
+  (register-built-in 'fma '((float float float) float nil "fmaf"))
+  (register-built-in 'fma '((double double double) double nil "fma"))
+  (register-built-in 'erf '((float) float nil "erff"))
+  (register-built-in 'erf '((double) double nil "erf"))
+  (register-built-in 'erfc '((float) float nil "erfcf"))
+  (register-built-in 'erfc '((double) double nil "erfc"))
+  (register-built-in 'clz '((int) int nil "__clz"))
+  (register-built-in 'popc '((int) int nil "__popc"))
+  (register-built-in 'brev '((int) int nil "__brev"))
+  (register-built-in 'ffs '((int) int nil "__ffs"))
+  (register-built-in '__sin '((float) float nil "__sinf"))
+  (register-built-in '__cos '((float) float nil "__cosf"))
+  (register-built-in '__log2 '((float) float nil "__log2f"))
+  (register-built-in '__saturate '((float) float nil "__saturatef"))
+  (register-built-in 'cluster-barrier
+                     '(() void nil "chorus_cluster_barrier"))
+  (register-built-in 'threadfence-cluster
+                     '(() void nil "__threadfence_cluster"))
+  (register-built-in 'cluster-rank
+                     '(() uint nil "__clusterRelativeBlockRank")))
+
+(register-integer-family)
+(register-vector-and-half-ops)
+(register-warp-atomics-and-math)

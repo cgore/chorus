@@ -31,6 +31,12 @@
            :block-dim-x :block-dim-y :block-dim-z
            :block-idx-x :block-idx-y :block-idx-z
            :thread-idx-x :thread-idx-y :thread-idx-z
+           :cluster-dim-x :cluster-dim-y :cluster-dim-z
+           :cluster-idx-x :cluster-idx-y :cluster-idx-z
+           :block-in-cluster-x :block-in-cluster-y :block-in-cluster-z
+           :cluster-dim-p
+           :cluster-idx-p
+           :block-in-cluster-p
            ;; Reference
            :reference-p
            ;; Reference - Variable
@@ -125,8 +131,49 @@
            :argument
            :argument-p
            :argument-var
-           :argument-type))
+           :argument-type
+           :argument-restrict-p
+           ;; Control and launch
+           :while
+           :while-p
+           :while-test-expression
+           :while-statements
+           :for
+           :for-p
+           :for-var
+           :for-init
+           :for-test
+           :for-step
+           :for-statements
+           :continue
+           :continue-p
+           :break-p
+           :switch
+           :switch-p
+           :switch-expression
+           :switch-clauses
+           :printf
+           :printf-p
+           :cuda-asm
+           :cuda-asm-p
+           :with-dynamic-shared-memory
+           :with-dynamic-shared-memory-p
+           :with-dynamic-shared-memory-specs
+           :with-dynamic-shared-memory-statements
+           :declare-p
+           :launch-bounds
+           :launch-bounds-values
+           :symbol-named-p))
 (in-package :chorus/lang/syntax)
+
+
+(defun symbol-named-p (object name)
+  (and (symbolp object)
+       (string= (symbol-name object) name)))
+
+(defun operator-named-p (form name)
+  (and (consp form)
+       (symbol-named-p (car form) name)))
 
 
 ;;;
@@ -188,7 +235,10 @@
   (or (grid-dim-p form)
       (block-dim-p form)
       (block-idx-p form)
-      (thread-idx-p form)))
+      (thread-idx-p form)
+      (cluster-dim-p form)
+      (cluster-idx-p form)
+      (block-in-cluster-p form)))
 
 (defun grid-dim-p (form)
   (and (member form '(grid-dim-x grid-dim-y grid-dim-z))
@@ -204,6 +254,19 @@
 
 (defun thread-idx-p (form)
   (and (member form '(thread-idx-x thread-idx-y thread-idx-z))
+       t))
+
+(defun cluster-dim-p (form)
+  (and (member form '(cluster-dim-x cluster-dim-y cluster-dim-z))
+       t))
+
+(defun cluster-idx-p (form)
+  (and (member form '(cluster-idx-x cluster-idx-y cluster-idx-z))
+       t))
+
+(defun block-in-cluster-p (form)
+  (and (member form '(block-in-cluster-x block-in-cluster-y
+                      block-in-cluster-z))
        t))
 
 
@@ -301,7 +364,7 @@
 ;;;
 
 (defparameter +constructor-operators+
-  '(float3 float4 double3 double4))
+  '(float3 float4 double3 double4 int2 int4 uint2 uint4 half2))
 
 (defun constructor-p (form)
   (cl-pattern:match form
@@ -699,6 +762,154 @@
 
 
 ;;;
+;;; While statement
+;;;
+
+(defun while-p (form)
+  (operator-named-p form "WHILE"))
+
+(defun while-test-expression (form)
+  (unless (and (while-p form) (cdr form))
+    (error "The statement ~S is malformed." form))
+  (cadr form))
+
+(defun while-statements (form)
+  (unless (while-p form)
+    (error "The statement ~S is malformed." form))
+  (cddr form))
+
+
+;;;
+;;; For statement
+;;;
+;;; (for (var init test step) body...)
+;;; test is the C continuation test, unlike do's end test.
+
+(defun for-p (form)
+  (operator-named-p form "FOR"))
+
+(defun for-binding (form)
+  (unless (and (for-p form)
+               (consp (cadr form))
+               (= (length (cadr form)) 4)
+               (chorus-symbol-p (caadr form)))
+    (error "The statement ~S is malformed." form))
+  (cadr form))
+
+(defun for-var (form)
+  (first (for-binding form)))
+
+(defun for-init (form)
+  (second (for-binding form)))
+
+(defun for-test (form)
+  (third (for-binding form)))
+
+(defun for-step (form)
+  (fourth (for-binding form)))
+
+(defun for-statements (form)
+  (unless (for-p form)
+    (error "The statement ~S is malformed." form))
+  (cddr form))
+
+
+;;;
+;;; Break and continue
+;;;
+
+(defun break-p (form)
+  (and (operator-named-p form "BREAK")
+       (null (cdr form))))
+
+(defun continue-p (form)
+  (and (operator-named-p form "CONTINUE")
+       (null (cdr form))))
+
+
+;;;
+;;; Switch statement
+;;;
+;;; Each clause is (value body...). T, otherwise, and default are the
+;;; default clause. The compiler inserts a break, so clauses do not fall
+;;; through.
+
+(defun switch-p (form)
+  (operator-named-p form "SWITCH"))
+
+(defun switch-expression (form)
+  (unless (and (switch-p form) (cdr form))
+    (error "The statement ~S is malformed." form))
+  (cadr form))
+
+(defun switch-clauses (form)
+  (unless (switch-p form)
+    (error "The statement ~S is malformed." form))
+  (cddr form))
+
+
+;;;
+;;; Printf and inline PTX
+;;;
+
+(defun printf-p (form)
+  (and (operator-named-p form "PRINTF")
+       (stringp (cadr form))))
+
+(defun cuda-asm-p (form)
+  (and (operator-named-p form "CUDA-ASM")
+       (stringp (cadr form))
+       (null (cddr form))))
+
+
+;;;
+;;; Dynamic shared memory
+;;;
+;;; Specs are (var element-type). Every spec is a pointer to the same
+;;; extern __shared__ base. CUDA aliases those declarations.
+
+(defun dynamic-shared-spec-p (object)
+  (and (consp object)
+       (null (cddr object))
+       (chorus-symbol-p (car object))
+       (chorus-type-p (cadr object))))
+
+(defun with-dynamic-shared-memory-p (object)
+  (operator-named-p object "WITH-DYNAMIC-SHARED-MEMORY"))
+
+(defun with-dynamic-shared-memory-specs (form)
+  (unless (with-dynamic-shared-memory-p form)
+    (error "The statement ~S is malformed." form))
+  (let ((specs (cadr form)))
+    (unless (and (consp specs) (every #'dynamic-shared-spec-p specs))
+      (error "The statement ~S is malformed." form))
+    specs))
+
+(defun with-dynamic-shared-memory-statements (form)
+  (unless (with-dynamic-shared-memory-p form)
+    (error "The statement ~S is malformed." form))
+  (cddr form))
+
+
+;;;
+;;; Launch bounds
+;;;
+;;; A leading (declare (launch-bounds n ...)) is stripped from the kernel
+;;; body and emitted as __launch_bounds__.
+
+(defun declare-p (form)
+  (operator-named-p form "DECLARE"))
+
+(defun launch-bounds-values (body)
+  (loop for statement in body
+        while (declare-p statement)
+        append (loop for clause in (rest statement)
+                     when (and (consp clause)
+                               (symbol-named-p (car clause) "LAUNCH-BOUNDS"))
+                       append (rest clause))))
+
+
+;;;
 ;;; Argument
 ;;;
 
@@ -709,7 +920,15 @@
   (cl-pattern:match object
     ((var type) (and (chorus-symbol-p var)
                      (chorus-type-p type)))
+    ((var type restrict)
+     (and (chorus-symbol-p var)
+          (chorus-type-p type)
+          (symbol-named-p restrict "RESTRICT")))
     (_ nil)))
+
+(defun argument-restrict-p (argument)
+  (and (argument-p argument)
+       (not (null (cddr argument)))))
 
 (defun argument-var (argument)
   (unless (argument-p argument)

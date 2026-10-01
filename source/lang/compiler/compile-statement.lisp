@@ -36,6 +36,17 @@
     ((set-p form) (compile-set form var-env func-env))
     ((progn-p form) (compile-progn form var-env func-env))
     ((return-p form) (compile-return form var-env func-env))
+    ((while-p form) (compile-while form var-env func-env))
+    ((for-p form) (compile-for form var-env func-env))
+    ((break-p form) (compile-break form var-env func-env))
+    ((continue-p form) (compile-continue form var-env func-env))
+    ((switch-p form) (compile-switch form var-env func-env))
+    ((printf-p form) (compile-printf form var-env func-env))
+    ((cuda-asm-p form) (compile-cuda-asm form var-env func-env))
+    ((with-dynamic-shared-memory-p form)
+     (compile-with-dynamic-shared-memory form var-env func-env))
+    ((declare-p form)
+     (error "The value ~S is an invalid statement." form))
     ((function-p form) (compile-function form var-env func-env))
     (t (error "The value ~S is an invalid statement." form))))
 
@@ -321,3 +332,144 @@
   (let ((code (chorus/lang/compiler/compile-expression::compile-function
                 form var-env func-env)))
     (format nil "~A;~%" code)))
+
+
+;;;
+;;; While, for, break, continue
+;;;
+
+(defun compile-while (form var-env func-env)
+  (let ((test (while-test-expression form))
+        (statements (while-statements form)))
+    (unless (eq (type-of-expression test var-env func-env) 'bool)
+      (error "The type of statement ~S is invalid." form))
+    (let ((test1 (compile-expression test var-env func-env))
+          (body (indent 2 (compile-statement `(progn ,@statements)
+                                             var-env func-env))))
+      (format nil "while (~A) {~%~A}~%" test1 body))))
+
+(defun compile-for (form var-env func-env)
+  (let* ((var (for-var form))
+         (init (for-init form))
+         (test (for-test form))
+         (step (for-step form))
+         (statements (for-statements form))
+         (var-type (type-of-expression init var-env func-env))
+         (var-env1 (variable-environment-add-variable var var-type var-env)))
+    (unless (eq (type-of-expression test var-env1 func-env) 'bool)
+      (error "The type of statement ~S is invalid." form))
+    (unless (eq (type-of-expression step var-env1 func-env) var-type)
+      (error "The type of statement ~S is invalid." form))
+    (let ((body (indent 2 (compile-statement `(progn ,@statements)
+                                             var-env1 func-env))))
+      (format nil "for ( ~A ~A = ~A; ~A; ~A = ~A )~%{~%~A}~%"
+              (compile-type var-type)
+              (compile-symbol var)
+              (compile-expression init var-env func-env)
+              (compile-expression test var-env1 func-env)
+              (compile-symbol var)
+              (compile-expression step var-env1 func-env)
+              body))))
+
+(defun compile-break (form var-env func-env)
+  (declare (ignore form var-env func-env))
+  (format nil "break;~%"))
+
+(defun compile-continue (form var-env func-env)
+  (declare (ignore form var-env func-env))
+  (format nil "continue;~%"))
+
+
+;;;
+;;; Switch
+;;;
+
+(defun switch-default-p (value)
+  (and (symbolp value)
+       (member (symbol-name value) '("T" "OTHERWISE" "DEFAULT")
+               :test #'string=)))
+
+(defun compile-switch-clause (clause form var-env func-env)
+  (unless (consp clause)
+    (error "The statement ~S is malformed." form))
+  (let ((value (car clause))
+        (body (cdr clause)))
+    (let ((body1 (indent 4 (compile-statement `(progn ,@body)
+                                              var-env func-env))))
+      (if (switch-default-p value)
+          (format nil "  default: {~%~A    break;~%  }~%" body1)
+          (format nil "  case ~A: {~%~A    break;~%  }~%"
+                  (compile-expression value var-env func-env)
+                  body1)))))
+
+(defun compile-switch (form var-env func-env)
+  (let ((expr (switch-expression form))
+        (clauses (switch-clauses form)))
+    (when (null clauses)
+      (error "The statement ~S is malformed." form))
+    (format nil "switch (~A) {~%~{~A~}}~%"
+            (compile-expression expr var-env func-env)
+            (mapcar (lambda (clause)
+                      (compile-switch-clause clause form var-env func-env))
+                    clauses))))
+
+
+;;;
+;;; Printf and inline PTX
+;;;
+
+(defun c-string-literal (string)
+  (with-output-to-string (out)
+    (write-char #\" out)
+    (loop for char across string do
+      (case char
+        (#\\ (write-string "\\\\" out))
+        (#\" (write-string "\\\"" out))
+        (#\Newline (write-string "\\n" out))
+        (#\Return (write-string "\\r" out))
+        (#\Tab (write-string "\\t" out))
+        (otherwise (write-char char out))))
+    (write-char #\" out)))
+
+(defun compile-printf (form var-env func-env)
+  (let ((format-string (cadr form))
+        (args (cddr form)))
+    (format nil "printf(~A~{, ~A~});~%"
+            (c-string-literal format-string)
+            (mapcar (lambda (arg)
+                      (compile-expression arg var-env func-env))
+                    args))))
+
+(defun compile-cuda-asm (form var-env func-env)
+  (declare (ignore var-env func-env))
+  (format nil "~A~%" (cadr form)))
+
+
+;;;
+;;; Dynamic shared memory
+;;;
+
+(defun compile-with-dynamic-shared-memory (form var-env func-env)
+  (let* ((specs (with-dynamic-shared-memory-specs form))
+         (statements (with-dynamic-shared-memory-statements form))
+         (base (format nil "chorus_dyn_~A"
+                       (compile-symbol (car (first specs)))))
+         (var-env1
+           (reduce (lambda (env spec)
+                     (variable-environment-add-variable
+                      (car spec)
+                      (array-type (cadr spec) 1)
+                      env))
+                   specs
+                   :initial-value var-env))
+         (body (indent 2 (compile-statement `(progn ,@statements)
+                                            var-env1 func-env))))
+    (format nil "{~%  extern __shared__ unsigned char ~A[];~%~{~A~}~A}~%"
+            base
+            (mapcar (lambda (spec)
+                      (let ((type (compile-type (cadr spec)))
+                            (var (compile-symbol (car spec))))
+                        (format nil "  ~A *~A = (~A *)~A;~%"
+                                type var type base)))
+                    specs)
+            body)))
