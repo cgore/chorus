@@ -45,5 +45,6 @@
                    (:file "smoke")
                    (:file "extended")))
                  (:file "backend")
-                 (:file "apple-silicon"))))
+                 (:file "apple-silicon")
+                 (:file "apple-silicon-coverage"))))
   :perform (test-op (o c) (symbol-call :asdf :load-system c)))

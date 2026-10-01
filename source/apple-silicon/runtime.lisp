@@ -32,8 +32,9 @@
    (max-threads :initarg :max-threads :reader pipeline-max-threads)
    (library :initarg :library :reader pipeline-library)))
 
-(defun shim-source ()
-  (asdf:system-relative-pathname :chorus "source/apple-silicon/chorus-metal.m"))
+(defun shim-sources ()
+  (list (asdf:system-relative-pathname :chorus "source/apple-silicon/chorus-metal.m")
+        (asdf:system-relative-pathname :chorus "source/apple-silicon/chorus-metal-api.m")))
 
 (defun shim-library ()
   (let ((directory (merge-pathnames ".cache/chorus/"
@@ -42,11 +43,13 @@
     (merge-pathnames "libchorus-metal.dylib" directory)))
 
 (defun compile-shim ()
-  (let* ((source (shim-source))
+  (let* ((sources (shim-sources))
          (library (shim-library))
-         (command (list "xcrun" "clang" "-fobjc-arc" "-dynamiclib"
-                        "-framework" "Foundation" "-framework" "Metal"
-                        "-o" (namestring library) (namestring source))))
+         (command (append (list "xcrun" "clang" "-fobjc-arc" "-dynamiclib"
+                                "-framework" "Foundation" "-framework" "Metal"
+                                "-framework" "QuartzCore" "-framework" "AppKit"
+                                "-o" (namestring library))
+                          (mapcar #'namestring sources))))
     (multiple-value-bind (output error-output code)
         (uiop:run-program command
                           :output :string
@@ -62,10 +65,13 @@
 
 (defun ensure-shim ()
   (unless *shim-loaded*
-    (let ((library (shim-library)))
+    (let ((library (shim-library))
+          (sources (shim-sources)))
       (when (or (not (probe-file library))
-                (> (file-write-date (shim-source))
-                   (file-write-date library)))
+                (some (lambda (source)
+                        (> (file-write-date source)
+                           (file-write-date library)))
+                      sources))
         (compile-shim))
       (cffi:load-foreign-library library)
       (setf *shim-loaded* t)))

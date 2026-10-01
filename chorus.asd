@@ -72,7 +72,8 @@
                                   :components
                                   ((:file "metal")
                                    (:file "runtime")
-                                   (:file "kernel")))
+                                   (:file "kernel")
+                                   (:file "coverage")))
                          (:module "cuda"
                                   :serial t
                                   :components

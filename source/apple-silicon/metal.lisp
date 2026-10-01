@@ -25,7 +25,61 @@
            :library-function
            :make-pipeline
            :launch
-           :defkernel))
+           :defkernel
+           :+gpu-family-apple1+
+           :+gpu-family-apple11+
+           :+gpu-family-metal3+
+           :+gpu-family-metal4+
+           :+storage-mode-shared+
+           :+storage-mode-managed+
+           :+storage-mode-private+
+           :+storage-mode-memoryless+
+           :+resource-storage-shared+
+           :+resource-storage-managed+
+           :+resource-storage-private+
+           :+resource-storage-memoryless+
+           :+command-buffer-status-completed+
+           :protocol-names
+           :device-info
+           :default-device-registry-id
+           :supports-family
+           :command-queue-label
+           :buffer-with-options
+           :buffer-storage-mode
+           :buffer-contents-p
+           :buffer-byte
+           :blit-fill
+           :blit-copy
+           :private-roundtrip
+           :managed-roundtrip
+           :texture-roundtrip
+           :heap-used-size
+           :sampler-and-depth-states
+           :render-triangle
+           :timed-dispatch
+           :fence-order
+           :shared-event-order
+           :indirect-dispatch
+           :indirect-commands
+           :argument-buffer
+           :function-constant
+           :threadgroup-sum
+           :sample-texture
+           :mipmap-pixel
+           :trace-ray
+           :metal4-compute
+           :residency-count
+           :tensor-extents
+           :shader-log
+           :capture-trace
+           :counter-sample
+           :io-load
+           :binary-archive
+           :compile-async
+           :drawable-pixel
+           :tile-pixel
+           :mesh-pixel
+           :memoryless-storage-mode))
 (in-package :chorus/apple-silicon)
 
 (define-condition metal-unavailable (error) ()
