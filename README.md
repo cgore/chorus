@@ -1,5 +1,7 @@
 # Chorus
 
+[![Gustave Doré, "Westminster Abbey - The Choir", 1872](Westminster_Abbey_The_Choir.jpg)](https://gallica.bnf.fr/ark:/12148/bpt6k10470488/f223.item)
+
 Chorus is a Common Lisp library for programming GPUs. It targets NVIDIA GPUs through CUDA, Apple silicon, and AMD GPUs.
 
 Chorus began as a fork of [CL-Cuda](https://github.com/takagi/cl-cuda), Masayuki Takagi's Common Lisp library for NVIDIA CUDA. The manual sources are in [documentation/](documentation/). From that directory, `make` builds `chorus.pdf`.
