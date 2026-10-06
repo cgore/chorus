@@ -9,6 +9,5 @@
   :license "MIT"
   :depends-on ("chorus-interop")
   :components ((:module "interop/examples"
-                :serial t
                 :components
                 ((:file "nbody")))))

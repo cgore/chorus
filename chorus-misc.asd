@@ -9,7 +9,7 @@
   :license "MIT"
   :depends-on ("local-time" "cl-emb")
   :components ((:module "tools"
-                :serial t
                 :components
                 ((:file "package")
-                 (:file "convert-error-string")))))
+                 (:file "convert-error-string"
+                  :depends-on ("package"))))))

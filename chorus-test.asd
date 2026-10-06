@@ -10,15 +10,12 @@
   :depends-on ("chorus"
                "prove")
   :components ((:module "test"
-                :serial t
                 :components
                 ((:file "platform")
                  (:module "driver-api"
-                  :serial t
                   :components
                   ((:file "driver-api")))
                  (:module "lang"
-                  :serial t
                   :components
                   ((:file "util")
                    (:file "data")
@@ -34,7 +31,6 @@
                    (:file "compiler/compile-statement")
                    (:file "compiler/compile-kernel")))
                  (:module "api"
-                  :serial t
                   :components
                   ((:file "nvcc")
                    (:file "context")

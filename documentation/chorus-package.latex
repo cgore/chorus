@@ -22,3 +22,437 @@ Apple silicon and AMD GPUs.
 
 The packages below are the ones \texttt{chorus} is built from. Use them when
 you want a narrower set of symbols than the reexport.
+
+\section{Components}
+
+The system file \texttt{chorus.asd} defines one module, named
+\texttt{source}. Each Lisp file in that module is a component. The
+component's name is its path under \texttt{source}, without the type.
+ASDF resolves a \texttt{:depends-on} name among those components.
+
+A component depends on another when its file uses a definition from that
+file. The use may be a package the file enters or reexports, a macro the
+file expands, a foreign type the file names, or a function, variable, or
+constant the file refers to. The figures draw those dependencies as trees.
+A file stands to the left of the files it depends on. An arrow points at
+the file loaded first. A file that several others depend on appears once
+beside each of them. A shaded box is a file of the group in the caption.
+A white box is a file from another directory, included so the arrow has
+a target.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize\ttfamily,
+  box/.style={draw=black!75, rounded corners=1.5pt, outer sep=0pt,
+    inner xsep=3.5pt, inner ysep=2.2pt, align=center},
+  here/.style={box, fill=black!14},
+  else/.style={box, fill=white},
+  edge/.style={draw=black!78, line width=0.45pt, line join=round},
+  arr/.style={edge, -{Stealth[length=1.25mm]}}
+]
+  \node[here, minimum height=10.14pt] (n0) at (-123.70pt,-5.07pt) {sdk-not-found};
+  \node[here, minimum height=10.14pt] (n1) at (-58.70pt,-5.07pt) {package};
+  \node[here, minimum height=10.14pt] (n2) at (-111.10pt,-38.78pt) {library};
+  \node[here, minimum height=10.14pt] (n3) at (-58.70pt,-31.21pt) {package};
+  \node[here, minimum height=10.14pt] (n4) at (-46.10pt,-46.35pt) {sdk-not-found};
+  \node[here, minimum height=10.14pt] (n5) at (-130.00pt,-72.49pt) {get-error-string};
+  \node[here, minimum height=10.14pt] (n6) at (-58.70pt,-72.49pt) {package};
+  \node[here, minimum height=10.14pt] (n7) at (-104.80pt,-98.63pt) {type};
+  \node[here, minimum height=10.14pt] (n8) at (-58.70pt,-98.63pt) {package};
+  \node[here, minimum height=10.14pt] (n9) at (-104.80pt,-124.77pt) {enum};
+  \node[here, minimum height=10.14pt] (n10) at (-58.70pt,-124.77pt) {package};
+  \node[here, minimum height=10.14pt] (n11) at (39.80pt,-5.07pt) {device-attribute};
+  \node[here, minimum height=10.14pt] (n12) at (111.10pt,-5.07pt) {package};
+  \node[here, minimum height=10.14pt] (n13) at (56.60pt,-61.49pt) {function};
+  \node[here, minimum height=10.14pt] (n14) at (130.00pt,-31.21pt) {get-error-string};
+  \node[here, minimum height=10.14pt] (n15) at (111.10pt,-46.35pt) {library};
+  \node[here, minimum height=10.14pt] (n16) at (111.10pt,-61.49pt) {package};
+  \node[here, minimum height=10.14pt] (n17) at (123.70pt,-76.63pt) {sdk-not-found};
+  \node[here, minimum height=10.14pt] (n18) at (104.80pt,-91.77pt) {type};
+  \node[here, minimum height=10.14pt] (n19) at (56.60pt,-133.05pt) {extended};
+  \node[here, minimum height=10.14pt] (n20) at (113.20pt,-117.91pt) {function};
+  \node[here, minimum height=10.14pt] (n21) at (111.10pt,-133.05pt) {package};
+  \node[here, minimum height=10.14pt] (n22) at (104.80pt,-148.19pt) {type};
+  \draw[arr] (-92.90pt,-5.07pt) -- (-76.90pt,-5.07pt);
+  \draw[edge] (-92.90pt,-38.78pt) -- (-84.90pt,-38.78pt);
+  \draw[edge] (-84.90pt,-31.21pt) -- (-84.90pt,-46.35pt);
+  \draw[arr] (-84.90pt,-31.21pt) -- (-76.90pt,-31.21pt);
+  \draw[arr] (-84.90pt,-46.35pt) -- (-76.90pt,-46.35pt);
+  \draw[arr] (-92.90pt,-72.49pt) -- (-76.90pt,-72.49pt);
+  \draw[arr] (-92.90pt,-98.63pt) -- (-76.90pt,-98.63pt);
+  \draw[arr] (-92.90pt,-124.77pt) -- (-76.90pt,-124.77pt);
+  \draw[arr] (76.90pt,-5.07pt) -- (92.90pt,-5.07pt);
+  \draw[edge] (76.90pt,-61.49pt) -- (84.90pt,-61.49pt);
+  \draw[edge] (84.90pt,-31.21pt) -- (84.90pt,-91.77pt);
+  \draw[arr] (84.90pt,-31.21pt) -- (92.90pt,-31.21pt);
+  \draw[arr] (84.90pt,-46.35pt) -- (92.90pt,-46.35pt);
+  \draw[arr] (84.90pt,-61.49pt) -- (92.90pt,-61.49pt);
+  \draw[arr] (84.90pt,-76.63pt) -- (92.90pt,-76.63pt);
+  \draw[arr] (84.90pt,-91.77pt) -- (92.90pt,-91.77pt);
+  \draw[edge] (76.90pt,-133.05pt) -- (84.90pt,-133.05pt);
+  \draw[edge] (84.90pt,-117.91pt) -- (84.90pt,-148.19pt);
+  \draw[arr] (84.90pt,-117.91pt) -- (92.90pt,-117.91pt);
+  \draw[arr] (84.90pt,-133.05pt) -- (92.90pt,-133.05pt);
+  \draw[arr] (84.90pt,-148.19pt) -- (92.90pt,-148.19pt);
+\end{tikzpicture}
+
+\caption{Driver API components, the files under
+\texttt{source}\slash\texttt{driver-api}\slash.
+\texttt{function} depends on \texttt{library} because \texttt{defcufun}
+reads \texttt{*sdk-not-found*} when it expands, and \texttt{library} sets
+that variable.}
+\label{fig:chorus-driver-components}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize\ttfamily,
+  box/.style={draw=black!75, rounded corners=1.5pt, outer sep=0pt,
+    inner xsep=3.5pt, inner ysep=2.2pt, align=center},
+  here/.style={box, fill=black!14},
+  else/.style={box, fill=white},
+  edge/.style={draw=black!78, line width=0.45pt, line join=round},
+  arr/.style={edge, -{Stealth[length=1.25mm]}}
+]
+  \node[here, minimum height=10.14pt] (n0) at (-92.20pt,-20.21pt) {type};
+  \node[else, minimum height=10.14pt] (n1) at (-23.00pt,-5.07pt) {driver-api/package};
+  \node[else, minimum height=10.14pt] (n2) at (-29.30pt,-20.21pt) {driver-api/type};
+  \node[here, minimum height=10.14pt] (n3) at (-52.40pt,-35.35pt) {data};
+  \node[here, minimum height=10.14pt] (n4) at (-96.40pt,-69.06pt) {syntax};
+  \node[here, minimum height=10.14pt] (n5) at (-52.40pt,-61.49pt) {data};
+  \node[here, minimum height=10.14pt] (n6) at (-52.40pt,-76.63pt) {type};
+  \node[here, minimum height=10.14pt] (n7) at (-106.90pt,-117.91pt) {environment};
+  \node[here, minimum height=10.14pt] (n8) at (-52.40pt,-102.77pt) {data};
+  \node[here, minimum height=10.14pt] (n9) at (-52.40pt,-117.91pt) {type};
+  \node[here, minimum height=10.14pt] (n10) at (-52.40pt,-133.05pt) {util};
+  \node[here, minimum height=10.14pt] (n11) at (56.60pt,-5.07pt) {built-in};
+  \node[here, minimum height=10.14pt] (n12) at (104.80pt,-5.07pt) {type};
+  \node[here, minimum height=10.14pt] (n13) at (60.80pt,-53.92pt) {kernel};
+  \node[here, minimum height=10.14pt] (n14) at (104.80pt,-31.21pt) {data};
+  \node[here, minimum height=10.14pt] (n15) at (109.00pt,-46.35pt) {syntax};
+  \node[here, minimum height=10.14pt] (n16) at (104.80pt,-61.49pt) {type};
+  \node[here, minimum height=10.14pt] (n17) at (104.80pt,-76.63pt) {util};
+  \node[here, minimum height=10.14pt] (n18) at (65.00pt,-125.48pt) {lang};
+  \node[here, minimum height=10.14pt] (n19) at (113.20pt,-102.77pt) {built-in};
+  \node[here, minimum height=10.14pt] (n20) at (104.80pt,-117.91pt) {data};
+  \node[here, minimum height=10.14pt] (n21) at (109.00pt,-133.05pt) {syntax};
+  \node[here, minimum height=10.14pt] (n22) at (104.80pt,-148.19pt) {type};
+  \draw[edge] (-80.30pt,-20.21pt) -- (-72.30pt,-20.21pt);
+  \draw[edge] (-72.30pt,-5.07pt) -- (-72.30pt,-35.35pt);
+  \draw[arr] (-72.30pt,-5.07pt) -- (-64.30pt,-5.07pt);
+  \draw[arr] (-72.30pt,-20.21pt) -- (-64.30pt,-20.21pt);
+  \draw[arr] (-72.30pt,-35.35pt) -- (-64.30pt,-35.35pt);
+  \draw[edge] (-80.30pt,-69.06pt) -- (-72.30pt,-69.06pt);
+  \draw[edge] (-72.30pt,-61.49pt) -- (-72.30pt,-76.63pt);
+  \draw[arr] (-72.30pt,-61.49pt) -- (-64.30pt,-61.49pt);
+  \draw[arr] (-72.30pt,-76.63pt) -- (-64.30pt,-76.63pt);
+  \draw[edge] (-80.30pt,-117.91pt) -- (-72.30pt,-117.91pt);
+  \draw[edge] (-72.30pt,-102.77pt) -- (-72.30pt,-133.05pt);
+  \draw[arr] (-72.30pt,-102.77pt) -- (-64.30pt,-102.77pt);
+  \draw[arr] (-72.30pt,-117.91pt) -- (-64.30pt,-117.91pt);
+  \draw[arr] (-72.30pt,-133.05pt) -- (-64.30pt,-133.05pt);
+  \draw[arr] (76.90pt,-5.07pt) -- (92.90pt,-5.07pt);
+  \draw[edge] (76.90pt,-53.92pt) -- (84.90pt,-53.92pt);
+  \draw[edge] (84.90pt,-31.21pt) -- (84.90pt,-76.63pt);
+  \draw[arr] (84.90pt,-31.21pt) -- (92.90pt,-31.21pt);
+  \draw[arr] (84.90pt,-46.35pt) -- (92.90pt,-46.35pt);
+  \draw[arr] (84.90pt,-61.49pt) -- (92.90pt,-61.49pt);
+  \draw[arr] (84.90pt,-76.63pt) -- (92.90pt,-76.63pt);
+  \draw[edge] (76.90pt,-125.48pt) -- (84.90pt,-125.48pt);
+  \draw[edge] (84.90pt,-102.77pt) -- (84.90pt,-148.19pt);
+  \draw[arr] (84.90pt,-102.77pt) -- (92.90pt,-102.77pt);
+  \draw[arr] (84.90pt,-117.91pt) -- (92.90pt,-117.91pt);
+  \draw[arr] (84.90pt,-133.05pt) -- (92.90pt,-133.05pt);
+  \draw[arr] (84.90pt,-148.19pt) -- (92.90pt,-148.19pt);
+\end{tikzpicture}
+
+\caption{Kernel language components, the files under
+\texttt{source}\slash\texttt{lang}\slash other than the compiler.
+The white boxes are the driver files that \texttt{type} uses.}
+\label{fig:chorus-lang-components}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize\ttfamily,
+  box/.style={draw=black!75, rounded corners=1.5pt, outer sep=0pt,
+    inner xsep=3.5pt, inner ysep=2.2pt, align=center},
+  here/.style={box, fill=black!14},
+  else/.style={box, fill=white},
+  edge/.style={draw=black!78, line width=0.45pt, line join=round},
+  arr/.style={edge, -{Stealth[length=1.25mm]}}
+]
+  \node[here, minimum height=10.14pt] (n0) at (-36.70pt,-12.14pt) {compile-data};
+  \node[else, minimum height=10.14pt] (n1) at (30.40pt,-5.07pt) {lang/data};
+  \node[else, minimum height=10.14pt] (n2) at (30.40pt,-19.21pt) {lang/util};
+  \node[here, minimum height=10.14pt] (n3) at (-36.70pt,-41.35pt) {compile-type};
+  \node[else, minimum height=10.14pt] (n4) at (30.40pt,-41.35pt) {lang/type};
+  \node[here, minimum height=10.14pt] (n5) at (-49.30pt,-84.70pt) {type-of-expression};
+  \node[else, minimum height=10.14pt] (n6) at (38.80pt,-63.49pt) {lang/built-in};
+  \node[else, minimum height=10.14pt] (n7) at (45.10pt,-77.63pt) {lang/environment};
+  \node[else, minimum height=10.14pt] (n8) at (34.60pt,-91.77pt) {lang/syntax};
+  \node[else, minimum height=10.14pt] (n9) at (30.40pt,-105.91pt) {lang/type};
+  \node[here, minimum height=10.14pt] (n10) at (-49.30pt,-163.40pt) {compile-expression};
+  \node[else, minimum height=10.14pt] (n11) at (38.80pt,-128.05pt) {lang/built-in};
+  \node[here, minimum height=10.14pt] (n12) at (36.70pt,-142.19pt) {compile-data};
+  \node[here, minimum height=10.14pt] (n13) at (49.30pt,-156.33pt) {type-of-expression};
+  \node[else, minimum height=10.14pt] (n14) at (45.10pt,-170.47pt) {lang/environment};
+  \node[else, minimum height=10.14pt] (n15) at (34.60pt,-184.61pt) {lang/syntax};
+  \node[else, minimum height=10.14pt] (n16) at (30.40pt,-198.75pt) {lang/type};
+  \node[here, minimum height=10.14pt] (n17) at (-47.20pt,-270.38pt) {compile-statement};
+  \node[here, minimum height=10.14pt] (n18) at (36.70pt,-220.89pt) {compile-data};
+  \node[here, minimum height=10.14pt] (n19) at (49.30pt,-235.03pt) {compile-expression};
+  \node[here, minimum height=10.14pt] (n20) at (36.70pt,-249.17pt) {compile-type};
+  \node[here, minimum height=10.14pt] (n21) at (49.30pt,-263.31pt) {type-of-expression};
+  \node[else, minimum height=10.14pt] (n22) at (45.10pt,-277.45pt) {lang/environment};
+  \node[else, minimum height=10.14pt] (n23) at (34.60pt,-291.59pt) {lang/syntax};
+  \node[else, minimum height=10.14pt] (n24) at (30.40pt,-305.73pt) {lang/type};
+  \node[else, minimum height=10.14pt] (n25) at (30.40pt,-319.87pt) {lang/util};
+  \node[here, minimum height=10.14pt] (n26) at (-40.90pt,-405.64pt) {compile-kernel};
+  \node[here, minimum height=10.14pt] (n27) at (36.70pt,-342.01pt) {compile-data};
+  \node[here, minimum height=10.14pt] (n28) at (49.30pt,-356.15pt) {compile-expression};
+  \node[here, minimum height=10.14pt] (n29) at (47.20pt,-370.29pt) {compile-statement};
+  \node[here, minimum height=10.14pt] (n30) at (36.70pt,-384.43pt) {compile-type};
+  \node[here, minimum height=10.14pt] (n31) at (49.30pt,-398.57pt) {type-of-expression};
+  \node[else, minimum height=10.14pt] (n32) at (45.10pt,-412.71pt) {lang/environment};
+  \node[else, minimum height=10.14pt] (n33) at (34.60pt,-426.85pt) {lang/kernel};
+  \node[else, minimum height=10.14pt] (n34) at (34.60pt,-440.99pt) {lang/syntax};
+  \node[else, minimum height=10.14pt] (n35) at (30.40pt,-455.13pt) {lang/type};
+  \node[else, minimum height=10.14pt] (n36) at (30.40pt,-469.27pt) {lang/util};
+  \draw[edge] (-8.00pt,-12.14pt) -- (0.00pt,-12.14pt);
+  \draw[edge] (0.00pt,-5.07pt) -- (0.00pt,-19.21pt);
+  \draw[arr] (0.00pt,-5.07pt) -- (8.00pt,-5.07pt);
+  \draw[arr] (0.00pt,-19.21pt) -- (8.00pt,-19.21pt);
+  \draw[arr] (-8.00pt,-41.35pt) -- (8.00pt,-41.35pt);
+  \draw[edge] (-8.00pt,-84.70pt) -- (0.00pt,-84.70pt);
+  \draw[edge] (0.00pt,-63.49pt) -- (0.00pt,-105.91pt);
+  \draw[arr] (0.00pt,-63.49pt) -- (8.00pt,-63.49pt);
+  \draw[arr] (0.00pt,-77.63pt) -- (8.00pt,-77.63pt);
+  \draw[arr] (0.00pt,-91.77pt) -- (8.00pt,-91.77pt);
+  \draw[arr] (0.00pt,-105.91pt) -- (8.00pt,-105.91pt);
+  \draw[edge] (-8.00pt,-163.40pt) -- (0.00pt,-163.40pt);
+  \draw[edge] (0.00pt,-128.05pt) -- (0.00pt,-198.75pt);
+  \draw[arr] (0.00pt,-128.05pt) -- (8.00pt,-128.05pt);
+  \draw[arr] (0.00pt,-142.19pt) -- (8.00pt,-142.19pt);
+  \draw[arr] (0.00pt,-156.33pt) -- (8.00pt,-156.33pt);
+  \draw[arr] (0.00pt,-170.47pt) -- (8.00pt,-170.47pt);
+  \draw[arr] (0.00pt,-184.61pt) -- (8.00pt,-184.61pt);
+  \draw[arr] (0.00pt,-198.75pt) -- (8.00pt,-198.75pt);
+  \draw[edge] (-8.00pt,-270.38pt) -- (0.00pt,-270.38pt);
+  \draw[edge] (0.00pt,-220.89pt) -- (0.00pt,-319.87pt);
+  \draw[arr] (0.00pt,-220.89pt) -- (8.00pt,-220.89pt);
+  \draw[arr] (0.00pt,-235.03pt) -- (8.00pt,-235.03pt);
+  \draw[arr] (0.00pt,-249.17pt) -- (8.00pt,-249.17pt);
+  \draw[arr] (0.00pt,-263.31pt) -- (8.00pt,-263.31pt);
+  \draw[arr] (0.00pt,-277.45pt) -- (8.00pt,-277.45pt);
+  \draw[arr] (0.00pt,-291.59pt) -- (8.00pt,-291.59pt);
+  \draw[arr] (0.00pt,-305.73pt) -- (8.00pt,-305.73pt);
+  \draw[arr] (0.00pt,-319.87pt) -- (8.00pt,-319.87pt);
+  \draw[edge] (-8.00pt,-405.64pt) -- (0.00pt,-405.64pt);
+  \draw[edge] (0.00pt,-342.01pt) -- (0.00pt,-469.27pt);
+  \draw[arr] (0.00pt,-342.01pt) -- (8.00pt,-342.01pt);
+  \draw[arr] (0.00pt,-356.15pt) -- (8.00pt,-356.15pt);
+  \draw[arr] (0.00pt,-370.29pt) -- (8.00pt,-370.29pt);
+  \draw[arr] (0.00pt,-384.43pt) -- (8.00pt,-384.43pt);
+  \draw[arr] (0.00pt,-398.57pt) -- (8.00pt,-398.57pt);
+  \draw[arr] (0.00pt,-412.71pt) -- (8.00pt,-412.71pt);
+  \draw[arr] (0.00pt,-426.85pt) -- (8.00pt,-426.85pt);
+  \draw[arr] (0.00pt,-440.99pt) -- (8.00pt,-440.99pt);
+  \draw[arr] (0.00pt,-455.13pt) -- (8.00pt,-455.13pt);
+  \draw[arr] (0.00pt,-469.27pt) -- (8.00pt,-469.27pt);
+\end{tikzpicture}
+
+\caption{Compiler components, the files under
+\texttt{source}\slash\texttt{lang}\slash\texttt{compiler}\slash.
+The white boxes are the language files the compiler uses.}
+\label{fig:chorus-compiler-components}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize\ttfamily,
+  box/.style={draw=black!75, rounded corners=1.5pt, outer sep=0pt,
+    inner xsep=3.5pt, inner ysep=2.2pt, align=center},
+  here/.style={box, fill=black!14},
+  else/.style={box, fill=white},
+  edge/.style={draw=black!78, line width=0.45pt, line join=round},
+  arr/.style={edge, -{Stealth[length=1.25mm]}}
+]
+  \node[here, minimum height=10.14pt] (n0) at (-98.50pt,-32.21pt) {nvcc};
+  \node[else, minimum height=18.14pt] (n1) at (-44.00pt,-9.07pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n2) at (-44.00pt,-32.21pt) {driver-api/\\package};
+  \node[else, minimum height=18.14pt] (n3) at (-39.80pt,-55.35pt) {driver-api/\\sdk-not-found};
+  \node[here, minimum height=10.14pt] (n4) at (-100.60pt,-116.20pt) {timer};
+  \node[else, minimum height=10.14pt] (n5) at (-35.60pt,-85.49pt) {driver-api/enum};
+  \node[else, minimum height=18.14pt] (n6) at (-44.00pt,-104.63pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n7) at (-44.00pt,-127.77pt) {driver-api/\\package};
+  \node[else, minimum height=10.14pt] (n8) at (-35.60pt,-146.91pt) {driver-api/type};
+  \node[here, minimum height=10.14pt] (n9) at (-102.70pt,-217.33pt) {memory};
+  \node[else, minimum height=18.14pt] (n10) at (-44.00pt,-177.05pt) {driver-api/\\extended};
+  \node[else, minimum height=18.14pt] (n11) at (-44.00pt,-200.19pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n12) at (-44.00pt,-223.33pt) {driver-api/\\package};
+  \node[else, minimum height=10.14pt] (n13) at (-35.60pt,-242.47pt) {driver-api/type};
+  \node[else, minimum height=10.14pt] (n14) at (-48.20pt,-257.61pt) {lang/type};
+  \node[here, minimum height=10.14pt] (n15) at (-119.50pt,-333.60pt) {kernel-manager};
+  \node[here, minimum height=10.14pt] (n16) at (-58.70pt,-283.75pt) {nvcc};
+  \node[else, minimum height=18.14pt] (n17) at (-44.00pt,-302.89pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n18) at (-44.00pt,-326.03pt) {driver-api/\\package};
+  \node[else, minimum height=10.14pt] (n19) at (-35.60pt,-345.17pt) {driver-api/type};
+  \node[else, minimum height=18.14pt] (n20) at (-37.70pt,-364.31pt) {lang/compiler/\\compile-kernel};
+  \node[else, minimum height=10.14pt] (n21) at (-44.00pt,-383.45pt) {lang/kernel};
+  \node[here, minimum height=10.14pt] (n22) at (44.00pt,-66.49pt) {context};
+  \node[here, minimum height=10.14pt] (n23) at (111.10pt,-5.07pt) {kernel-manager};
+  \node[here, minimum height=10.14pt] (n24) at (90.10pt,-20.21pt) {nvcc};
+  \node[else, minimum height=18.14pt] (n25) at (115.30pt,-39.35pt) {driver-api/\\device-attribute};
+  \node[else, minimum height=18.14pt] (n26) at (104.80pt,-62.49pt) {driver-api/\\extended};
+  \node[else, minimum height=18.14pt] (n27) at (104.80pt,-85.63pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n28) at (104.80pt,-108.77pt) {driver-api/\\package};
+  \node[else, minimum height=10.14pt] (n29) at (113.20pt,-127.91pt) {driver-api/type};
+  \node[here, minimum height=10.14pt] (n30) at (39.80pt,-207.47pt) {defkernel};
+  \node[here, minimum height=10.14pt] (n31) at (96.40pt,-154.05pt) {context};
+  \node[here, minimum height=10.14pt] (n32) at (111.10pt,-169.19pt) {kernel-manager};
+  \node[here, minimum height=10.14pt] (n33) at (94.30pt,-184.33pt) {memory};
+  \node[else, minimum height=18.14pt] (n34) at (104.80pt,-203.47pt) {driver-api/\\function};
+  \node[else, minimum height=18.14pt] (n35) at (104.80pt,-226.61pt) {driver-api/\\package};
+  \node[else, minimum height=10.14pt] (n36) at (104.80pt,-245.75pt) {lang/syntax};
+  \node[else, minimum height=10.14pt] (n37) at (100.60pt,-260.89pt) {lang/type};
+  \node[here, minimum height=10.14pt] (n38) at (48.20pt,-287.03pt) {macro};
+  \node[here, minimum height=10.14pt] (n39) at (100.60pt,-287.03pt) {defkernel};
+  \node[here, minimum height=10.14pt] (n40) at (52.40pt,-351.02pt) {api};
+  \node[here, minimum height=10.14pt] (n41) at (96.40pt,-313.17pt) {context};
+  \node[here, minimum height=10.14pt] (n42) at (100.60pt,-328.31pt) {defkernel};
+  \node[here, minimum height=10.14pt] (n43) at (92.20pt,-343.45pt) {macro};
+  \node[here, minimum height=10.14pt] (n44) at (94.30pt,-358.59pt) {memory};
+  \node[here, minimum height=10.14pt] (n45) at (90.10pt,-373.73pt) {nvcc};
+  \node[here, minimum height=10.14pt] (n46) at (92.20pt,-388.87pt) {timer};
+  \draw[edge] (-86.60pt,-32.21pt) -- (-78.60pt,-32.21pt);
+  \draw[edge] (-78.60pt,-9.07pt) -- (-78.60pt,-55.35pt);
+  \draw[arr] (-78.60pt,-9.07pt) -- (-70.60pt,-9.07pt);
+  \draw[arr] (-78.60pt,-32.21pt) -- (-70.60pt,-32.21pt);
+  \draw[arr] (-78.60pt,-55.35pt) -- (-70.60pt,-55.35pt);
+  \draw[edge] (-86.60pt,-116.20pt) -- (-78.60pt,-116.20pt);
+  \draw[edge] (-78.60pt,-85.49pt) -- (-78.60pt,-146.91pt);
+  \draw[arr] (-78.60pt,-85.49pt) -- (-70.60pt,-85.49pt);
+  \draw[arr] (-78.60pt,-104.63pt) -- (-70.60pt,-104.63pt);
+  \draw[arr] (-78.60pt,-127.77pt) -- (-70.60pt,-127.77pt);
+  \draw[arr] (-78.60pt,-146.91pt) -- (-70.60pt,-146.91pt);
+  \draw[edge] (-86.60pt,-217.33pt) -- (-78.60pt,-217.33pt);
+  \draw[edge] (-78.60pt,-177.05pt) -- (-78.60pt,-257.61pt);
+  \draw[arr] (-78.60pt,-177.05pt) -- (-70.60pt,-177.05pt);
+  \draw[arr] (-78.60pt,-200.19pt) -- (-70.60pt,-200.19pt);
+  \draw[arr] (-78.60pt,-223.33pt) -- (-70.60pt,-223.33pt);
+  \draw[arr] (-78.60pt,-242.47pt) -- (-70.60pt,-242.47pt);
+  \draw[arr] (-78.60pt,-257.61pt) -- (-70.60pt,-257.61pt);
+  \draw[edge] (-86.60pt,-333.60pt) -- (-78.60pt,-333.60pt);
+  \draw[edge] (-78.60pt,-283.75pt) -- (-78.60pt,-383.45pt);
+  \draw[arr] (-78.60pt,-283.75pt) -- (-70.60pt,-283.75pt);
+  \draw[arr] (-78.60pt,-302.89pt) -- (-70.60pt,-302.89pt);
+  \draw[arr] (-78.60pt,-326.03pt) -- (-70.60pt,-326.03pt);
+  \draw[arr] (-78.60pt,-345.17pt) -- (-70.60pt,-345.17pt);
+  \draw[arr] (-78.60pt,-364.31pt) -- (-70.60pt,-364.31pt);
+  \draw[arr] (-78.60pt,-383.45pt) -- (-70.60pt,-383.45pt);
+  \draw[edge] (62.20pt,-66.49pt) -- (70.20pt,-66.49pt);
+  \draw[edge] (70.20pt,-5.07pt) -- (70.20pt,-127.91pt);
+  \draw[arr] (70.20pt,-5.07pt) -- (78.20pt,-5.07pt);
+  \draw[arr] (70.20pt,-20.21pt) -- (78.20pt,-20.21pt);
+  \draw[arr] (70.20pt,-39.35pt) -- (78.20pt,-39.35pt);
+  \draw[arr] (70.20pt,-62.49pt) -- (78.20pt,-62.49pt);
+  \draw[arr] (70.20pt,-85.63pt) -- (78.20pt,-85.63pt);
+  \draw[arr] (70.20pt,-108.77pt) -- (78.20pt,-108.77pt);
+  \draw[arr] (70.20pt,-127.91pt) -- (78.20pt,-127.91pt);
+  \draw[edge] (62.20pt,-207.47pt) -- (70.20pt,-207.47pt);
+  \draw[edge] (70.20pt,-154.05pt) -- (70.20pt,-260.89pt);
+  \draw[arr] (70.20pt,-154.05pt) -- (78.20pt,-154.05pt);
+  \draw[arr] (70.20pt,-169.19pt) -- (78.20pt,-169.19pt);
+  \draw[arr] (70.20pt,-184.33pt) -- (78.20pt,-184.33pt);
+  \draw[arr] (70.20pt,-203.47pt) -- (78.20pt,-203.47pt);
+  \draw[arr] (70.20pt,-226.61pt) -- (78.20pt,-226.61pt);
+  \draw[arr] (70.20pt,-245.75pt) -- (78.20pt,-245.75pt);
+  \draw[arr] (70.20pt,-260.89pt) -- (78.20pt,-260.89pt);
+  \draw[arr] (62.20pt,-287.03pt) -- (78.20pt,-287.03pt);
+  \draw[edge] (62.20pt,-351.02pt) -- (70.20pt,-351.02pt);
+  \draw[edge] (70.20pt,-313.17pt) -- (70.20pt,-388.87pt);
+  \draw[arr] (70.20pt,-313.17pt) -- (78.20pt,-313.17pt);
+  \draw[arr] (70.20pt,-328.31pt) -- (78.20pt,-328.31pt);
+  \draw[arr] (70.20pt,-343.45pt) -- (78.20pt,-343.45pt);
+  \draw[arr] (70.20pt,-358.59pt) -- (78.20pt,-358.59pt);
+  \draw[arr] (70.20pt,-373.73pt) -- (78.20pt,-373.73pt);
+  \draw[arr] (70.20pt,-388.87pt) -- (78.20pt,-388.87pt);
+\end{tikzpicture}
+
+\caption{CUDA API components, the shaded boxes, under
+\texttt{source}\slash\texttt{api}\slash.
+A name that includes a directory is a file outside that directory.}
+\label{fig:chorus-api-components}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize\ttfamily,
+  box/.style={draw=black!75, rounded corners=1.5pt, outer sep=0pt,
+    inner xsep=3.5pt, inner ysep=2.2pt, align=center},
+  here/.style={box, fill=black!14},
+  else/.style={box, fill=white},
+  edge/.style={draw=black!78, line width=0.45pt, line join=round},
+  arr/.style={edge, -{Stealth[length=1.25mm]}}
+]
+  \node[here, minimum height=10.14pt] (n0) at (-59.80pt,-5.07pt) {runtime};
+  \node[here, minimum height=10.14pt] (n1) at (-11.60pt,-5.07pt) {metal};
+  \node[here, minimum height=10.14pt] (n2) at (-57.70pt,-38.78pt) {kernel};
+  \node[here, minimum height=10.14pt] (n3) at (-11.60pt,-31.21pt) {metal};
+  \node[here, minimum height=10.14pt] (n4) at (-7.40pt,-46.35pt) {runtime};
+  \node[here, minimum height=10.14pt] (n5) at (-61.90pt,-80.06pt) {coverage};
+  \node[here, minimum height=10.14pt] (n6) at (-11.60pt,-72.49pt) {metal};
+  \node[here, minimum height=10.14pt] (n7) at (-7.40pt,-87.63pt) {runtime};
+  \node[here, minimum height=10.14pt] (n8) at (-53.50pt,-144.05pt) {cuda};
+  \node[else, minimum height=10.14pt] (n9) at (-7.40pt,-113.77pt) {api/api};
+  \node[else, minimum height=10.14pt] (n10) at (1.00pt,-128.91pt) {api/context};
+  \node[else, minimum height=10.14pt] (n11) at (17.80pt,-144.05pt) {driver-api/function};
+  \node[else, minimum height=10.14pt] (n12) at (15.70pt,-159.19pt) {driver-api/package};
+  \node[else, minimum height=10.14pt] (n13) at (28.30pt,-174.33pt) {driver-api/sdk-not-found};
+  \node[here, minimum height=10.14pt] (n14) at (-59.80pt,-208.04pt) {backend};
+  \node[here, minimum height=10.14pt] (n15) at (-11.60pt,-200.47pt) {metal};
+  \node[here, minimum height=10.14pt] (n16) at (-13.70pt,-215.61pt) {cuda};
+  \node[here, minimum height=10.14pt] (n17) at (-57.70pt,-264.46pt) {chorus};
+  \node[else, minimum height=10.14pt] (n18) at (-7.40pt,-241.75pt) {api/api};
+  \node[here, minimum height=10.14pt] (n19) at (-7.40pt,-256.89pt) {backend};
+  \node[else, minimum height=10.14pt] (n20) at (15.70pt,-272.03pt) {driver-api/package};
+  \node[else, minimum height=10.14pt] (n21) at (-3.20pt,-287.17pt) {lang/lang};
+  \draw[arr] (-41.60pt,-5.07pt) -- (-25.60pt,-5.07pt);
+  \draw[edge] (-41.60pt,-38.78pt) -- (-33.60pt,-38.78pt);
+  \draw[edge] (-33.60pt,-31.21pt) -- (-33.60pt,-46.35pt);
+  \draw[arr] (-33.60pt,-31.21pt) -- (-25.60pt,-31.21pt);
+  \draw[arr] (-33.60pt,-46.35pt) -- (-25.60pt,-46.35pt);
+  \draw[edge] (-41.60pt,-80.06pt) -- (-33.60pt,-80.06pt);
+  \draw[edge] (-33.60pt,-72.49pt) -- (-33.60pt,-87.63pt);
+  \draw[arr] (-33.60pt,-72.49pt) -- (-25.60pt,-72.49pt);
+  \draw[arr] (-33.60pt,-87.63pt) -- (-25.60pt,-87.63pt);
+  \draw[edge] (-41.60pt,-144.05pt) -- (-33.60pt,-144.05pt);
+  \draw[edge] (-33.60pt,-113.77pt) -- (-33.60pt,-174.33pt);
+  \draw[arr] (-33.60pt,-113.77pt) -- (-25.60pt,-113.77pt);
+  \draw[arr] (-33.60pt,-128.91pt) -- (-25.60pt,-128.91pt);
+  \draw[arr] (-33.60pt,-144.05pt) -- (-25.60pt,-144.05pt);
+  \draw[arr] (-33.60pt,-159.19pt) -- (-25.60pt,-159.19pt);
+  \draw[arr] (-33.60pt,-174.33pt) -- (-25.60pt,-174.33pt);
+  \draw[edge] (-41.60pt,-208.04pt) -- (-33.60pt,-208.04pt);
+  \draw[edge] (-33.60pt,-200.47pt) -- (-33.60pt,-215.61pt);
+  \draw[arr] (-33.60pt,-200.47pt) -- (-25.60pt,-200.47pt);
+  \draw[arr] (-33.60pt,-215.61pt) -- (-25.60pt,-215.61pt);
+  \draw[edge] (-41.60pt,-264.46pt) -- (-33.60pt,-264.46pt);
+  \draw[edge] (-33.60pt,-241.75pt) -- (-33.60pt,-287.17pt);
+  \draw[arr] (-33.60pt,-241.75pt) -- (-25.60pt,-241.75pt);
+  \draw[arr] (-33.60pt,-256.89pt) -- (-25.60pt,-256.89pt);
+  \draw[arr] (-33.60pt,-272.03pt) -- (-25.60pt,-272.03pt);
+  \draw[arr] (-33.60pt,-287.17pt) -- (-25.60pt,-287.17pt);
+\end{tikzpicture}
+
+\caption{Apple silicon, \texttt{cuda}, \texttt{backend}, and \texttt{chorus}.
+\texttt{backend} depends on \texttt{apple-silicon}\slash\texttt{metal} and
+\texttt{cuda}.}
+\label{fig:chorus-top-components}
+\end{figure}

@@ -26,3 +26,6 @@ documentation/*.toc
 documentation/*.bbl
 documentation/*.blg
 documentation/*.out
+
+# Macs
+.DS_Store

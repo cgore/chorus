@@ -9,6 +9,5 @@
   :license "MIT"
   :depends-on ("chorus-interop" "prove")
   :components ((:module "interop/t"
-                :serial t
                 :components
                 ((:file "chorus-interop")))))
